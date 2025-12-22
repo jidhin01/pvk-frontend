@@ -1,70 +1,45 @@
 @import "tailwindcss";
 
 :root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --color-pvk-blue: #00AEEF;
+  --color-pvk-green: #009444;
+  --color-pvk-bg: #F8FAFC;
+  --color-pvk-text: #1E293B;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+@theme {
+  --color-pvk-blue: var(--color-pvk-blue);
+  --color-pvk-green: var(--color-pvk-green);
+  --color-pvk-bg: var(--color-pvk-bg);
+  --color-pvk-text: var(--color-pvk-text);
 }
 
-body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
-}
-
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+/* Custom Scrollbar */
+@layer utilities {
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
   }
-  a:hover {
-    color: #747bff;
+
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
   }
-  button {
-    background-color: #f9f9f9;
+
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--color-pvk-text);
+    /* Fallback or neutral */
+    border-radius: 9999px;
+    opacity: 0.2;
+  }
+
+  /* Make the thumb thinner/simpler as requested */
+  .scrollbar-simple::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .scrollbar-simple::-webkit-scrollbar-thumb {
+    background-color: #CBD5E1;
+    /* Slate-300 */
+    border-radius: 10px;
   }
 }
