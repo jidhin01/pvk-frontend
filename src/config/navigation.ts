@@ -25,7 +25,8 @@ import {
   BookOpen,
   AlertCircle,
   TrendingUp,
-  History
+  History,
+  Wallet
 } from 'lucide-react';
 import { UserRole } from '@/contexts/AuthContext';
 import { LucideIcon } from 'lucide-react';
@@ -93,10 +94,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Printer',
     icon: PrinterIcon,
     tabs: [
-      { id: 'print-queue', label: 'Print Queue', icon: FileText },
-      { id: 'completed', label: 'Completed', icon: CheckSquare },
-      { id: 'schedule', label: 'Schedule', icon: Calendar },
-      { id: 'settings', label: 'Settings', icon: Settings },
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'pending-jobs', label: 'Pending Jobs', icon: FileText },
+      { id: 'completed-jobs', label: 'Completed Jobs', icon: CheckSquare },
+      { id: 'rejected-jobs', label: 'Rejected Jobs', icon: AlertCircle },
     ],
   },
   {
@@ -126,10 +127,13 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Finance',
     icon: Coins,
     tabs: [
-      { id: 'invoices', label: 'Invoices', icon: Receipt },
-      { id: 'payments', label: 'Payments', icon: CreditCard },
-      { id: 'reports', label: 'Reports', icon: BarChart3 },
-      { id: 'ledger', label: 'Ledger', icon: BookOpen },
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'designer-earnings', label: 'Designer Earnings', icon: Palette },
+      { id: 'sales-revenue', label: 'Sales Revenue', icon: TrendingUp },
+      { id: 'credit-cash', label: 'Credit & Cash', icon: CreditCard },
+      { id: 'refunds', label: 'Refunds', icon: Receipt },
+      { id: 'expenses', label: 'Expenses', icon: Wallet },
+      { id: 'salary-reports', label: 'Salary Reports', icon: Users },
     ],
   },
   {

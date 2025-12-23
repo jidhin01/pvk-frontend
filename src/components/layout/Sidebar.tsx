@@ -38,9 +38,9 @@ export function Sidebar({
     navigate('/login');
   };
 
-  const isDesigner = user?.role === 'designer';
-  const navItems = isDesigner
-    ? getRoleConfig('designer')?.tabs || []
+  const isSpecialRole = user?.role === 'designer' || user?.role === 'printer' || user?.role === 'finance';
+  const navItems = isSpecialRole
+    ? getRoleConfig(user?.role as UserRole)?.tabs || []
     : ROLE_CONFIGS;
 
   return (
@@ -92,18 +92,18 @@ export function Sidebar({
         <div className={cn("mb-3 px-2", collapsed && "text-center")}>
           {!collapsed && (
             <span className="text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/50">
-              {isDesigner ? 'My Workspace' : 'Modules'}
+              {isSpecialRole ? 'My Workspace' : 'Modules'}
             </span>
           )}
         </div>
         <ul className="space-y-1">
           {navItems.map((item) => {
-            const isActive = isDesigner
+            const isActive = isSpecialRole
               ? activeTab === item.id
               : selectedRole === item.id;
 
             const handleClick = () => {
-              if (isDesigner && onTabChange) {
+              if (isSpecialRole && onTabChange) {
                 onTabChange(item.id);
               } else {
                 onRoleChange(item.id as UserRole);

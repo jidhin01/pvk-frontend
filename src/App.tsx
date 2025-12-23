@@ -12,6 +12,8 @@ import AdminDashboard from "./pages/admin/adminDashboard";
 import DealerLayout from "@/layouts/DealerLayout";
 import DealerDashboard from "@/pages/dealer/DashboardDealer";
 import DesignerDashboard from "@/pages/designer/designerDashboard";
+import PrinterDashboard from "@/pages/printer/printerDashboard";
+import FinanceDashboard from "@/pages/finance/financeDashboard";
 
 const queryClient = new QueryClient();
 
@@ -46,8 +48,8 @@ function AppRoutes() {
         <Route path="dashboard" element={<DealerDashboard />} />
       </Route>
       <Route path="/designer" element={<ProtectedRoute><DesignerDashboard /></ProtectedRoute>} />
-      <Route path="/finance" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/printer" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
+      <Route path="/printer" element={<ProtectedRoute><PrinterDashboard /></ProtectedRoute>} />
       <Route path="/sales" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
       <Route path="/stock" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
