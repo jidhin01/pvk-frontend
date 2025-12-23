@@ -7,6 +7,12 @@ import { UserRole } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface TopBarProps {
   selectedRole: UserRole;
@@ -15,18 +21,18 @@ interface TopBarProps {
   sidebarCollapsed: boolean;
 }
 
-export function TopBar({ 
-  selectedRole, 
-  activeTab, 
+export function TopBar({
+  selectedRole,
+  activeTab,
   onTabChange,
-  sidebarCollapsed 
+  sidebarCollapsed
 }: TopBarProps) {
-  const { theme, toggleTheme } = useTheme();
+  const { theme, setTheme } = useTheme();
   const roleConfig = getRoleConfig(selectedRole);
   const tabs = roleConfig?.tabs || [];
 
   return (
-    <header 
+    <header
       className={cn(
         "fixed top-0 right-0 z-30 h-16 bg-card/80 backdrop-blur-md border-b border-border transition-all duration-300",
         sidebarCollapsed ? "left-16" : "left-60"
@@ -57,8 +63,8 @@ export function TopBar({
           {/* Search */}
           <div className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search..." 
+            <Input
+              placeholder="Search..."
               className="w-56 pl-9 h-9 bg-muted/50 border-transparent focus:border-primary focus:bg-card"
             />
           </div>
@@ -75,25 +81,26 @@ export function TopBar({
           </Tooltip>
 
           {/* Theme Toggle */}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                onClick={toggleTheme}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                {theme === 'light' ? (
-                  <Moon className="h-5 w-5" />
-                ) : (
-                  <Sun className="h-5 w-5" />
-                )}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground">
+                <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+                <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+                <span className="sr-only">Toggle theme</span>
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              {theme === 'light' ? 'Dark mode' : 'Light mode'}
-            </TooltipContent>
-          </Tooltip>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setTheme("light")}>
+                Light
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("dark")}>
+                Dark
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setTheme("system")}>
+                System
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
     </header>
