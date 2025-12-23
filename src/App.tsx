@@ -8,7 +8,10 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { getDashboardPath } from "@/config/navigation";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
-import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminDashboard from "./pages/admin/adminDashboard";
+import DealerLayout from "@/layouts/DealerLayout";
+import DealerDashboard from "@/pages/dealer/DashboardDealer";
+import DesignerDashboard from "@/pages/designer/designerDashboard";
 
 const queryClient = new QueryClient();
 
@@ -36,8 +39,13 @@ function AppRoutes() {
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
       {/* Role-based Dashboards */}
       <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/dealer" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/designer" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+
+      {/* Dealer Routes */}
+      <Route path="/dealer" element={<ProtectedRoute><DealerLayout /></ProtectedRoute>}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<DealerDashboard />} />
+      </Route>
+      <Route path="/designer" element={<ProtectedRoute><DesignerDashboard /></ProtectedRoute>} />
       <Route path="/finance" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
       <Route path="/printer" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
       <Route path="/sales" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
