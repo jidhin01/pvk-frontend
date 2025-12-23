@@ -8,6 +8,7 @@ import Tracking from './Tracking';
 import Profile from './Profile';
 import DashboardHome from './DashboardHome';
 import OrdersPage from './OrdersPage';
+import PanCardForm from './services/PanCardForm';
 
 export default function DealerDashboard() {
     const isApproved = CURRENT_DEALER.isApproved;
@@ -54,9 +55,11 @@ export default function DealerDashboard() {
                     case 'orders':
                         return <OrdersPage />;
                     case 'new-order':
-                        return <NewOrder />;
+                        return <NewOrder onNavigate={onTabChange} />;
                     case 'tracking':
                         return <Tracking />;
+                    case 'pan-service':
+                        return <PanCardForm onBack={() => onTabChange('dashboard')} />;
                     case 'profile':
                         return <Profile />;
                     default:

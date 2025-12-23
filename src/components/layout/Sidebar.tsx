@@ -28,16 +28,17 @@ interface SidebarProps {
   onCollapsedChange: (collapsed: boolean) => void;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
+  mobile?: boolean; // New prop
 }
 
 export function Sidebar({
   selectedRole,
   onRoleChange,
   collapsed,
-
   onCollapsedChange,
   activeTab,
-  onTabChange
+  onTabChange,
+  mobile = false
 }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -56,8 +57,9 @@ export function Sidebar({
   return (
     <aside
       className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 ease-in-out flex flex-col",
-        collapsed ? "w-16" : "w-60"
+        "bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out flex flex-col h-full",
+        mobile ? "w-full" : "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border hidden md:flex",
+        !mobile && (collapsed ? "w-16" : "w-64")
       )}
     >
       {/* Logo Section */}

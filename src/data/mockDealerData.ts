@@ -4,9 +4,12 @@ export interface Dealer {
     gstNumber: string;
     creditLimit: number;
     currentBalance: number;
+    isApproved: boolean;
 }
 
 export type OrderStatus = 'printing' | 'pending' | 'delivered';
+export type GoodsType = 'finished' | 'unfinished';
+export type PrintType = 'pvc' | 'laser' | 'offset';
 
 export interface BaseOrder {
     jobName: string;
@@ -37,6 +40,7 @@ export const CURRENT_DEALER: Dealer = {
     gstNumber: "22AAAAA0000A1Z5",
     creditLimit: 50000,
     currentBalance: 42000,
+    isApproved: true
 };
 
 export const RECENT_ORDERS: Order[] = [

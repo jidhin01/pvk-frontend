@@ -50,12 +50,21 @@ export default function DashboardHome({ onNavigate }: DashboardHomeProps) {
                     <Button variant="ghost" className="text-primary hover:text-primary/80">View All <ArrowRight className="ml-2 h-4 w-4" /></Button>
                 </div>
 
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
                     {MARKETPLACE_PRODUCTS.map((product: Product) => (
                         <Card
                             key={product.id}
-                            className="group relative cursor-pointer overflow-hidden border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card/50 backdrop-blur-sm"
-                            onClick={() => console.log(`Navigating to ${product.slug}`)} // To be replaced with actual navigation
+                            className="group relative cursor-pointer overflow-hidden border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card/50 backdrop-blur-sm min-h-[160px] flex flex-col"
+                            onClick={() => {
+                                if (product.slug === 'pan-card') {
+                                    onNavigate('pan-service');
+                                } else {
+                                    // Fallback for general items to generic order form or toast
+                                    console.log(`Navigating to ${product.slug}`);
+                                    // Optional: Redirect all others to new-order for now
+                                    // onNavigate('new-order');
+                                }
+                            }}
                         >
                             {/* Offer Badge */}
                             {product.offerBadge && (
@@ -66,31 +75,31 @@ export default function DashboardHome({ onNavigate }: DashboardHomeProps) {
                                 </div>
                             )}
 
-                            <CardContent className="p-0">
+                            <CardContent className="p-0 flex flex-col h-full">
                                 {/* Product Image / Icon Area */}
                                 <div className="aspect-[4/3] bg-muted/30 flex items-center justify-center p-6 group-hover:bg-primary/5 transition-colors">
                                     <product.icon
-                                        className="h-16 w-16 text-muted-foreground group-hover:text-primary transition-all duration-300 group-hover:scale-110"
+                                        className="h-12 w-12 md:h-16 md:w-16 text-muted-foreground group-hover:text-primary transition-all duration-300 group-hover:scale-110"
                                         strokeWidth={1.5}
                                     />
                                 </div>
 
                                 {/* Product Details */}
-                                <div className="p-5 space-y-3">
+                                <div className="p-4 md:p-5 space-y-3 flex flex-col flex-grow justify-between">
                                     <div>
-                                        <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1">{product.category}</p>
-                                        <h3 className="font-semibold text-lg leading-tight group-hover:text-primary transition-colors">{product.name}</h3>
+                                        <p className="text-[10px] md:text-xs font-medium text-muted-foreground uppercase tracking-wider mb-1 line-clamp-1">{product.category}</p>
+                                        <h3 className="font-semibold text-base md:text-lg leading-tight group-hover:text-primary transition-colors truncate" title={product.name}>{product.name}</h3>
                                     </div>
 
                                     {/* Price Block */}
                                     <div className="flex items-end gap-2">
                                         <div className="flex flex-col">
-                                            <span className="text-2xl font-bold text-emerald-600">₹{product.dealerPrice}</span>
-                                            <span className="text-[10px] text-emerald-600/80 font-medium">Dealer Price</span>
+                                            <span className="text-xl md:text-2xl font-bold text-emerald-600">₹{product.dealerPrice}</span>
+                                            <span className="text-[10px] text-emerald-600/80 font-medium whitespace-nowrap">Dealer Price</span>
                                         </div>
                                         <div className="flex flex-col mb-1.5 pl-2 border-l border-border/60">
-                                            <span className="text-xs text-muted-foreground line-through decoration-muted-foreground/50">₹{product.retailPrice}</span>
-                                            <span className="text-[10px] text-muted-foreground">Market Rate</span>
+                                            <span className="text-[10px] md:text-xs text-gray-400 line-through decoration-gray-400/50">₹{product.retailPrice}</span>
+                                            <span className="text-[10px] text-muted-foreground">Retail</span>
                                         </div>
                                     </div>
                                 </div>

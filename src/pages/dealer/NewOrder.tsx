@@ -45,7 +45,11 @@ const STEPS = [
     { id: 3, label: 'Details' }
 ];
 
-export default function NewOrder() {
+interface NewOrderProps {
+    onNavigate?: (tab: string) => void;
+}
+
+export default function NewOrder({ onNavigate }: NewOrderProps) {
     const [step, setStep] = useState(1);
     const [goodsType, setGoodsType] = useState<GoodsType | null>(null);
     const [printType, setPrintType] = useState<PrintType | null>(null);
@@ -172,7 +176,14 @@ export default function NewOrder() {
             <div className="mt-10 pt-6 border-t">
                 <p className="text-sm font-medium text-muted-foreground mb-4">Quick Actions</p>
                 <div className="flex gap-3">
-                    <Button variant="outline" size="sm" className="gap-2" onClick={() => { setSelectedService('PAN'); setStep(3); }}>
+                    <Button variant="outline" size="sm" className="gap-2" onClick={() => {
+                        if (onNavigate) {
+                            onNavigate('pan-service');
+                        } else {
+                            setSelectedService('PAN');
+                            setStep(3);
+                        }
+                    }}>
                         <CreditCard className="h-4 w-4 text-purple-600" /> New PAN Card
                     </Button>
                     <Button variant="outline" size="sm" className="gap-2" onClick={() => { setSelectedService('SEAL'); setStep(3); }}>
@@ -252,16 +263,16 @@ export default function NewOrder() {
                                 <div className="grid grid-cols-1 gap-6">
                                     <div className="space-y-2">
                                         <Label className="text-foreground/80">Job Name / Reference</Label>
-                                        <Input name="jobName" placeholder="e.g. Summer Campaign Banner" className="bg-muted/30" onChange={handleInputChange} />
+                                        <Input name="jobName" placeholder="e.g. Summer Campaign Banner" className="bg-muted/30 h-12" onChange={handleInputChange} />
                                     </div>
-                                    <div className="grid grid-cols-2 gap-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
                                             <Label>Width (ft)</Label>
-                                            <Input type="number" name="width" onChange={handleInputChange} />
+                                            <Input type="number" name="width" className="h-12" onChange={handleInputChange} />
                                         </div>
                                         <div className="space-y-2">
                                             <Label>Height (ft)</Label>
-                                            <Input type="number" name="height" onChange={handleInputChange} />
+                                            <Input type="number" name="height" className="h-12" onChange={handleInputChange} />
                                         </div>
                                     </div>
                                     <div className="space-y-2">
@@ -269,7 +280,7 @@ export default function NewOrder() {
                                             <Label>Quantity</Label>
                                             <span className="text-xs text-muted-foreground">Minimum 1</span>
                                         </div>
-                                        <Input type="number" name="quantity" defaultValue="1" min="1" onChange={handleInputChange} />
+                                        <Input type="number" name="quantity" defaultValue="1" min="1" className="h-12" onChange={handleInputChange} />
                                     </div>
                                 </div>
                             )}
@@ -278,11 +289,11 @@ export default function NewOrder() {
                                 <div className="grid grid-cols-1 gap-6">
                                     <div className="space-y-2">
                                         <Label>Applicant Name</Label>
-                                        <Input name="applicantName" placeholder="Name as per Aadhaar" onChange={handleInputChange} />
+                                        <Input name="applicantName" placeholder="Name as per Aadhaar" className="h-12" onChange={handleInputChange} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>Father's Name</Label>
-                                        <Input name="fatherName" onChange={handleInputChange} />
+                                        <Input name="fatherName" className="h-12" onChange={handleInputChange} />
                                     </div>
                                 </div>
                             )}
@@ -291,12 +302,12 @@ export default function NewOrder() {
                                 <div className="space-y-4">
                                     <div className="space-y-2">
                                         <Label>Seal Text Content</Label>
-                                        <Input name="sealText" placeholder="Line 1 / Line 2" onChange={handleInputChange} />
+                                        <Input name="sealText" placeholder="Line 1 / Line 2" className="h-12" onChange={handleInputChange} />
                                     </div>
                                     <div className="space-y-2">
                                         <Label>Mount Type</Label>
                                         <Select onValueChange={(v) => null}>
-                                            <SelectTrigger><SelectValue placeholder="Select Mount" /></SelectTrigger>
+                                            <SelectTrigger className="h-12"><SelectValue placeholder="Select Mount" /></SelectTrigger>
                                             <SelectContent>
                                                 <SelectItem value="normal">Normal Wood Handle</SelectItem>
                                                 <SelectItem value="self">Self Inking</SelectItem>

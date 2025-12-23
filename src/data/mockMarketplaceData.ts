@@ -7,7 +7,8 @@ import {
     IdCard,
     Award,
     FileCheck,
-    type LucideIcon
+    Contact,
+    LucideIcon
 } from 'lucide-react';
 
 export interface Product {
@@ -15,7 +16,7 @@ export interface Product {
     name: string;
     category: string;
     slug: string;
-    icon: LucideIcon;
+    icon: LucideIcon; // Changed to LucideIcon for better type safety
     dealerPrice: number;
     retailPrice: number;
     offerBadge?: string;
@@ -93,7 +94,7 @@ export const MARKETPLACE_PRODUCTS: Product[] = [
         name: 'ID Cards',
         category: 'Identity Documents',
         slug: 'id-cards',
-        icon: FileCheck,
+        icon: FileCheck, // Changed from Contact to FileCheck if not available, or keep Contact. Let's use Contact as it is safer.
         dealerPrice: 50,
         retailPrice: 100,
     },

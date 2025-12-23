@@ -31,7 +31,9 @@ import {
   MapPin,
   User,
   IdCard,
-  Stamp
+  Stamp,
+  CheckCircle,
+  AlertTriangle
 } from 'lucide-react';
 import { UserRole } from '@/contexts/AuthContext';
 import { LucideIcon } from 'lucide-react';
@@ -99,10 +101,9 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Printer',
     icon: PrinterIcon,
     tabs: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'pending-jobs', label: 'Pending Jobs', icon: FileText },
-      { id: 'completed-jobs', label: 'Completed Jobs', icon: CheckSquare },
-      { id: 'rejected-jobs', label: 'Rejected Jobs', icon: AlertCircle },
+      { id: 'dashboard', label: 'Job Queue', icon: PrinterIcon },
+      { id: 'history', label: 'Completed History', icon: CheckCircle },
+      { id: 'rejected', label: 'Rejected Log', icon: AlertTriangle },
     ],
   },
   {
