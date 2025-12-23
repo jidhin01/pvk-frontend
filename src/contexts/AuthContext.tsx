@@ -9,7 +9,9 @@ export type UserRole =
   | 'dealer'
   | 'sales'
   | 'finance'
-  | 'stock_keeper';
+  | 'stock_keeper'
+  | 'pan_card_team'
+  | 'seal_team';
 
 export interface User {
   id: string;
@@ -84,6 +86,18 @@ const MOCK_USERS: Record<string, User> = {
     email: 'stockkeeper@pvk.com',
     name: 'Stock Keeper',
     role: 'stock_keeper',
+  },
+  'pancard@pvk.com': {
+    id: '10',
+    email: 'pancard@pvk.com',
+    name: 'PAN Card Operator',
+    role: 'pan_card_team',
+  },
+  'seal@pvk.com': {
+    id: '11',
+    email: 'seal@pvk.com',
+    name: 'Seal Operator',
+    role: 'seal_team',
   },
 };
 

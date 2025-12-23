@@ -48,7 +48,7 @@ export function Sidebar({
     navigate('/login');
   };
 
-  const isSpecialRole = user?.role === 'designer' || user?.role === 'printer' || user?.role === 'finance' || user?.role === 'dealer' || user?.role === 'sales' || user?.role === 'stock_keeper';
+  const isSpecialRole = user?.role === 'designer' || user?.role === 'printer' || user?.role === 'finance' || user?.role === 'dealer' || user?.role === 'sales' || user?.role === 'stock_keeper' || user?.role === 'pan_card_team' || user?.role === 'seal_team';
   const navItems = isSpecialRole
     ? getRoleConfig(user?.role as UserRole)?.tabs || []
     : ROLE_CONFIGS;

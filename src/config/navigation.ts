@@ -29,7 +29,9 @@ import {
   Wallet,
   PlusCircle,
   MapPin,
-  User
+  User,
+  IdCard,
+  Stamp
 } from 'lucide-react';
 import { UserRole } from '@/contexts/AuthContext';
 import { LucideIcon } from 'lucide-react';
@@ -152,6 +154,28 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       { id: 'alerts', label: 'Alerts', icon: Activity },
     ],
   },
+  {
+    id: 'pan_card_team',
+    label: 'PAN Card Team',
+    icon: IdCard,
+    tabs: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'normal-pan', label: 'Normal PAN', icon: FileText },
+      { id: 'emergency-pan', label: 'Emergency PAN', icon: AlertCircle },
+      { id: 'send-to-print', label: 'Send to Print', icon: PrinterIcon },
+    ],
+  },
+  {
+    id: 'seal_team',
+    label: 'Seal Team',
+    icon: Stamp,
+    tabs: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'new-orders', label: 'New Orders', icon: FileText },
+      { id: 'processing', label: 'Processing', icon: Activity },
+      { id: 'completed', label: 'Completed', icon: CheckSquare },
+    ],
+  },
 ];
 
 export function getRoleConfig(roleId: UserRole): RoleConfig | undefined {
@@ -180,6 +204,10 @@ export function getDashboardPath(role: UserRole): string {
       return '/sales';
     case 'stock_keeper':
       return '/stock';
+    case 'pan_card_team':
+      return '/pancard';
+    case 'seal_team':
+      return '/seal';
     default:
       return '/dashboard';
   }
