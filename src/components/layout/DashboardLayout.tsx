@@ -80,8 +80,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
           sidebarCollapsed ? "md:pl-16" : "md:pl-64"
         )}
       >
+
         <div className="p-4 md:p-8">
           {children({ selectedRole, activeTab, onTabChange: handleTabChange })}
+
         </div>
       </main>
     </div>

@@ -8,7 +8,7 @@ import {
     Award,
     FileCheck,
     Contact,
-    LucideIcon
+    type LucideIcon
 } from 'lucide-react';
 
 export interface Product {

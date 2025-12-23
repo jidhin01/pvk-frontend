@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { getDashboardPath } from "@/config/navigation";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
-import AdminDashboard from "./pages/admin/adminDashboard";
+import AdminDashboard from "./pages/admin/AdminDashboard";
 import DealerDashboard from "@/pages/dealer/DashboardDealer";
 import DesignerDashboard from "@/pages/designer/designerDashboard";
 import PrinterDashboard from "@/pages/printer/printerDashboard";
@@ -45,6 +45,7 @@ function AppRoutes() {
       {/* Role-based Dashboards */}
       <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
+      <Route path="/dealer" element={<ProtectedRoute><DealerDashboard /></ProtectedRoute>} />
       <Route path="/dealer" element={<ProtectedRoute><DealerDashboard /></ProtectedRoute>} />
       <Route path="/designer" element={<ProtectedRoute><DesignerDashboard /></ProtectedRoute>} />
       <Route path="/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />

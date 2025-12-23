@@ -93,13 +93,13 @@ export default function OrdersPage() {
                             <TabsTrigger value="delivered">Delivered</TabsTrigger>
                         </TabsList>
 
-                        <div className="rounded-md border overflow-x-auto">
+                        <div className="rounded-md border">
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead className="min-w-[150px]">Job Name</TableHead>
-                                        <TableHead className="hidden md:table-cell">Service</TableHead>
-                                        <TableHead className="hidden md:table-cell">Date</TableHead>
+                                        <TableHead>Job Name</TableHead>
+                                        <TableHead>Service</TableHead>
+                                        <TableHead>Date</TableHead>
                                         <TableHead>Status</TableHead>
                                         <TableHead className="text-right">Cost</TableHead>
                                         <TableHead className="text-right">Actions</TableHead>
@@ -111,11 +111,12 @@ export default function OrdersPage() {
                                             <TableRow key={index} className="hover:bg-muted/30 transition-colors">
                                                 <TableCell className="font-medium text-foreground">
                                                     {order.jobName}
+                                                    {order.goodsType && <div className="text-xs text-muted-foreground capitalize">{order.goodsType}</div>}
                                                 </TableCell>
-                                                <TableCell className="hidden md:table-cell">
+                                                <TableCell>
                                                     <Badge variant="secondary" className="font-normal">{order.type}</Badge>
                                                 </TableCell>
-                                                <TableCell className="text-muted-foreground text-sm hidden md:table-cell">{order.date}</TableCell>
+                                                <TableCell className="text-muted-foreground text-sm">{order.date}</TableCell>
                                                 <TableCell>{getStatusBadge(order.status)}</TableCell>
                                                 <TableCell className="text-right font-semibold">₹{order.cost}</TableCell>
                                                 <TableCell className="text-right">

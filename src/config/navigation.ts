@@ -33,10 +33,10 @@ import {
   IdCard,
   Stamp,
   CheckCircle,
-  AlertTriangle
+  AlertTriangle,
+  type LucideIcon
 } from 'lucide-react';
 import { UserRole } from '@/contexts/AuthContext';
-import { LucideIcon } from 'lucide-react';
 
 export interface NavTab {
   id: string;
@@ -111,11 +111,11 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Dealer',
     icon: Store,
     tabs: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'orders', label: 'Orders', icon: ShoppingCart },
-      { id: 'new-order', label: 'New Order', icon: PlusCircle },
+      { id: 'dashboard', label: 'Marketplace', icon: Store },
+      { id: 'orders', label: 'My Orders', icon: ShoppingCart },
+      { id: 'new-order', label: 'New Order', icon: Upload },
       { id: 'tracking', label: 'Tracking', icon: MapPin },
-      { id: 'profile', label: 'Profile', icon: User },
+      { id: 'profile', label: 'Profile', icon: Users },
     ],
   },
   {

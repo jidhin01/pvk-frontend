@@ -1,14 +1,13 @@
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DashboardLayout } from '@/components/layout';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { CURRENT_DEALER } from '@/data/mockDealerData';
 import NewOrder from './NewOrder';
 import Tracking from './Tracking';
 import Profile from './Profile';
 import DashboardHome from './DashboardHome';
 import OrdersPage from './OrdersPage';
-import PanCardForm from './services/PanCardForm';
 
 export default function DealerDashboard() {
     const isApproved = CURRENT_DEALER.isApproved;
@@ -55,11 +54,9 @@ export default function DealerDashboard() {
                     case 'orders':
                         return <OrdersPage />;
                     case 'new-order':
-                        return <NewOrder onNavigate={onTabChange} />;
+                        return <NewOrder />;
                     case 'tracking':
                         return <Tracking />;
-                    case 'pan-service':
-                        return <PanCardForm onBack={() => onTabChange('dashboard')} />;
                     case 'profile':
                         return <Profile />;
                     default:
