@@ -1,14 +1,14 @@
 import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
 
-export type UserRole = 
-  | 'super_admin' 
-  | 'admin' 
-  | 'manager' 
-  | 'designer' 
-  | 'printer' 
-  | 'dealer' 
-  | 'sales' 
-  | 'finance' 
+export type UserRole =
+  | 'super_admin'
+  | 'admin'
+  | 'manager'
+  | 'designer'
+  | 'printer'
+  | 'dealer'
+  | 'sales'
+  | 'finance'
   | 'stock_keeper';
 
 export interface User {
@@ -23,7 +23,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
-  login: (email: string, password: string) => Promise<{ success: boolean; error?: string }>;
+  login: (email: string, password: string) => Promise<{ success: boolean; error?: string; user?: User }>;
   logout: () => void;
 }
 
@@ -96,20 +96,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = useCallback(async (email: string, password: string) => {
     setIsLoading(true);
-    
+
     // Simulate API delay
     await new Promise(resolve => setTimeout(resolve, 800));
-    
+
     const normalizedEmail = email.toLowerCase().trim();
     const mockUser = MOCK_USERS[normalizedEmail];
-    
+
     if (mockUser && password === 'password123') {
       setUser(mockUser);
       localStorage.setItem('pvk_user', JSON.stringify(mockUser));
       setIsLoading(false);
-      return { success: true };
+      return { success: true, user: mockUser };
     }
-    
+
     setIsLoading(false);
     return { success: false, error: 'Invalid email or password' };
   }, []);

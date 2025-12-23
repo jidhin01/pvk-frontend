@@ -15,18 +15,18 @@ interface TopBarProps {
   sidebarCollapsed: boolean;
 }
 
-export function TopBar({ 
-  selectedRole, 
-  activeTab, 
+export function TopBar({
+  selectedRole,
+  activeTab,
   onTabChange,
-  sidebarCollapsed 
+  sidebarCollapsed
 }: TopBarProps) {
   const { theme, toggleTheme } = useTheme();
   const roleConfig = getRoleConfig(selectedRole);
   const tabs = roleConfig?.tabs || [];
 
   return (
-    <header 
+    <header
       className={cn(
         "fixed top-0 right-0 z-30 h-16 bg-card/80 backdrop-blur-md border-b border-border transition-all duration-300",
         sidebarCollapsed ? "left-16" : "left-60"
@@ -57,8 +57,8 @@ export function TopBar({
           {/* Search */}
           <div className="relative hidden md:block">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input 
-              placeholder="Search..." 
+            <Input
+              placeholder="Search..."
               className="w-56 pl-9 h-9 bg-muted/50 border-transparent focus:border-primary focus:bg-card"
             />
           </div>
@@ -77,9 +77,9 @@ export function TopBar({
           {/* Theme Toggle */}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button 
-                variant="ghost" 
-                size="icon" 
+              <Button
+                variant="ghost"
+                size="icon"
                 onClick={toggleTheme}
                 className="text-muted-foreground hover:text-foreground"
               >

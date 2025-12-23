@@ -10,6 +10,8 @@ import { Card } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import pvkLogo from '@/assets/pvk-logo.jpeg';
 
+import { getDashboardPath } from '@/config/navigation';
+
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -21,17 +23,17 @@ export default function Login() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!email || !password) {
       toast({ title: 'Error', description: 'Please fill in all fields', variant: 'destructive' });
       return;
     }
 
     const result = await login(email, password);
-    
-    if (result.success) {
+
+    if (result.success && result.user) {
       toast({ title: 'Welcome!', description: 'Login successful' });
-      navigate('/dashboard');
+      navigate(getDashboardPath(result.user.role));
     } else {
       toast({ title: 'Login Failed', description: result.error, variant: 'destructive' });
     }

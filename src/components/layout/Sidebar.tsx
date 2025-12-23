@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { 
-  ChevronLeft, 
+import {
+  ChevronLeft,
   ChevronRight,
   LogOut
 } from 'lucide-react';
@@ -19,11 +19,11 @@ interface SidebarProps {
   onCollapsedChange: (collapsed: boolean) => void;
 }
 
-export function Sidebar({ 
-  selectedRole, 
-  onRoleChange, 
-  collapsed, 
-  onCollapsedChange 
+export function Sidebar({
+  selectedRole,
+  onRoleChange,
+  collapsed,
+  onCollapsedChange
 }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -34,7 +34,7 @@ export function Sidebar({
   };
 
   return (
-    <aside 
+    <aside
       className={cn(
         "fixed left-0 top-0 z-40 h-screen bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-all duration-300 ease-in-out flex flex-col",
         collapsed ? "w-16" : "w-60"
@@ -47,9 +47,9 @@ export function Sidebar({
       )}>
         {!collapsed && (
           <div className="flex items-center gap-3">
-            <img 
-              src={pvkLogo} 
-              alt="PVK Enterprises" 
+            <img
+              src={pvkLogo}
+              alt="PVK Enterprises"
               className="h-9 w-9 rounded-lg object-cover"
             />
             <div className="flex flex-col">
@@ -59,9 +59,9 @@ export function Sidebar({
           </div>
         )}
         {collapsed && (
-          <img 
-            src={pvkLogo} 
-            alt="PVK" 
+          <img
+            src={pvkLogo}
+            alt="PVK"
             className="h-9 w-9 rounded-lg object-cover"
           />
         )}

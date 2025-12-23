@@ -1,12 +1,12 @@
-import { 
-  Crown, 
-  Shield, 
-  ClipboardList, 
-  Palette, 
-  Printer as PrinterIcon, 
-  Store, 
-  Briefcase, 
-  Coins, 
+import {
+  Crown,
+  Shield,
+  ClipboardList,
+  Palette,
+  Printer as PrinterIcon,
+  Store,
+  Briefcase,
+  Coins,
   Package,
   LayoutDashboard,
   Users,
@@ -151,4 +151,27 @@ export function getRoleConfig(roleId: UserRole): RoleConfig | undefined {
 
 export function getRoleLabel(roleId: UserRole): string {
   return getRoleConfig(roleId)?.label || roleId;
+}
+
+export function getDashboardPath(role: UserRole): string {
+  switch (role) {
+    case 'super_admin':
+    case 'admin':
+    case 'manager':
+      return '/admin';
+    case 'dealer':
+      return '/dealer';
+    case 'designer':
+      return '/designer';
+    case 'finance':
+      return '/finance';
+    case 'printer':
+      return '/printer';
+    case 'sales':
+      return '/sales';
+    case 'stock_keeper':
+      return '/stock';
+    default:
+      return '/dashboard';
+  }
 }
