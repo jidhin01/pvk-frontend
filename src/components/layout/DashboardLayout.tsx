@@ -3,7 +3,6 @@ import { cn } from '@/lib/utils';
 import { UserRole, useAuth } from '@/contexts/AuthContext';
 import { getRoleConfig } from '@/config/navigation';
 import { Sidebar } from './Sidebar';
-import { TopBar } from './TopBar';
 
 interface DashboardLayoutProps {
   children: (props: {
@@ -38,17 +37,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         onTabChange={setActiveTab}
       />
 
-      <TopBar
-        selectedRole={selectedRole}
-        activeTab={activeTab}
-        onTabChange={setActiveTab}
-        sidebarCollapsed={sidebarCollapsed}
-      />
-
       {/* Main Content */}
       <main
         className={cn(
-          "pt-16 min-h-screen transition-all duration-300",
+          "min-h-screen transition-all duration-300",
           sidebarCollapsed ? "pl-16" : "pl-60"
         )}
       >
