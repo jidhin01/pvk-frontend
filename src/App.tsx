@@ -17,6 +17,7 @@ import SalesDashboard from '@/pages/sales/salesDashboard';
 import StockDashboard from '@/pages/stock/stockDashboard';
 import PanCardDashboard from '@/pages/pancard/pancardDashboard';
 import SealDashboard from '@/pages/seal/sealDashboard';
+import Profile from '@/pages/profile';
 
 const queryClient = new QueryClient();
 
@@ -53,6 +54,7 @@ function AppRoutes() {
       <Route path="/stock" element={<ProtectedRoute><StockDashboard /></ProtectedRoute>} />
       <Route path="/pancard" element={<ProtectedRoute><PanCardDashboard /></ProtectedRoute>} />
       <Route path="/seal" element={<ProtectedRoute><SealDashboard /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
       {/* Fallback for generic /dashboard */}
       <Route

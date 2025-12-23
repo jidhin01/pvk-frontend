@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { UserRole, useAuth } from '@/contexts/AuthContext';
 import { getRoleConfig } from '@/config/navigation';
 import { Sidebar } from './Sidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface DashboardLayoutProps {
   children: (props: {
@@ -13,9 +14,10 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [selectedRole, setSelectedRole] = useState<UserRole>(user?.role || 'admin');
   const [activeTab, setActiveTab] = useState<string>('dashboard');
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Reset active tab when role changes
   const handleRoleChange = (role: UserRole) => {
@@ -31,20 +33,20 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <Sidebar
         selectedRole={selectedRole}
         onRoleChange={handleRoleChange}
-        collapsed={sidebarCollapsed}
-        onCollapsedChange={setSidebarCollapsed}
         activeTab={activeTab}
         onTabChange={setActiveTab}
+        mobileOpen={mobileOpen}
+        onMobileOpenChange={setMobileOpen}
       />
 
       {/* Main Content */}
       <main
         className={cn(
           "min-h-screen transition-all duration-300",
-          sidebarCollapsed ? "pl-16" : "pl-60"
+          isMobile ? "pl-0" : "pl-60"
         )}
       >
-        <div className="p-6">
+        <div className={cn("p-6", isMobile && "pt-20")}>
           {children({ selectedRole, activeTab })}
         </div>
       </main>
