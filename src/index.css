@@ -1,24 +1,158 @@
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-:root {
-  --color-pvk-blue: #00AEEF;
-  --color-pvk-green: #009444;
-  --color-pvk-bg: #F8FAFC;
-  --color-pvk-text: #1E293B;
+/* PVK Enterprises Design System
+   Brand Colors: Blue Primary, Green Secondary
+   All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* PVK Brand Colors */
+    --background: 210 20% 98%;
+    --foreground: 215 25% 15%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 15%;
+
+    /* Primary Blue - Brand Blue */
+    --primary: 197 100% 44%;
+    --primary-foreground: 0 0% 100%;
+
+    /* Secondary - Light Gray */
+    --secondary: 210 20% 96%;
+    --secondary-foreground: 215 25% 15%;
+
+    --muted: 210 15% 94%;
+    --muted-foreground: 215 15% 45%;
+
+    /* Accent Green - Brand Green */
+    --accent: 122 39% 49%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
+
+    /* Success - Green */
+    --success: 142 71% 45%;
+    --success-foreground: 0 0% 100%;
+
+    /* Warning - Amber */
+    --warning: 38 92% 50%;
+    --warning-foreground: 0 0% 100%;
+
+    /* Info - Blue */
+    --info: 197 100% 44%;
+    --info-foreground: 0 0% 100%;
+
+    --border: 214 20% 88%;
+    --input: 214 20% 88%;
+    --ring: 197 100% 44%;
+
+    --radius: 0.5rem;
+
+    /* Sidebar - Darker blue theme */
+    --sidebar-background: 215 25% 15%;
+    --sidebar-foreground: 210 20% 90%;
+    --sidebar-primary: 197 100% 44%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 215 25% 22%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 215 20% 25%;
+    --sidebar-ring: 197 100% 44%;
+    --sidebar-muted: 215 20% 35%;
+
+    /* Chart Colors */
+    --chart-1: 197 100% 44%;
+    --chart-2: 122 39% 49%;
+    --chart-3: 38 92% 50%;
+    --chart-4: 280 65% 60%;
+    --chart-5: 0 84% 60%;
+  }
+
+  .dark {
+    --background: 222 25% 8%;
+    --foreground: 210 20% 95%;
+
+    --card: 222 25% 12%;
+    --card-foreground: 210 20% 95%;
+
+    --popover: 222 25% 12%;
+    --popover-foreground: 210 20% 95%;
+
+    /* Primary Blue */
+    --primary: 197 100% 50%;
+    --primary-foreground: 222 25% 8%;
+
+    --secondary: 222 20% 18%;
+    --secondary-foreground: 210 20% 95%;
+
+    --muted: 222 20% 18%;
+    --muted-foreground: 215 15% 55%;
+
+    /* Accent Green */
+    --accent: 122 45% 55%;
+    --accent-foreground: 222 25% 8%;
+
+    --destructive: 0 70% 50%;
+    --destructive-foreground: 210 20% 95%;
+
+    --success: 142 65% 50%;
+    --success-foreground: 222 25% 8%;
+
+    --warning: 38 85% 55%;
+    --warning-foreground: 222 25% 8%;
+
+    --info: 197 100% 50%;
+    --info-foreground: 222 25% 8%;
+
+    --border: 222 20% 22%;
+    --input: 222 20% 22%;
+    --ring: 197 100% 50%;
+
+    /* Sidebar - Even darker */
+    --sidebar-background: 222 30% 6%;
+    --sidebar-foreground: 210 20% 85%;
+    --sidebar-primary: 197 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 222 25% 14%;
+    --sidebar-accent-foreground: 210 20% 95%;
+    --sidebar-border: 222 25% 16%;
+    --sidebar-ring: 197 100% 50%;
+    --sidebar-muted: 222 20% 28%;
+
+    /* Chart Colors */
+    --chart-1: 197 100% 55%;
+    --chart-2: 122 45% 55%;
+    --chart-3: 38 85% 55%;
+    --chart-4: 280 65% 65%;
+    --chart-5: 0 70% 55%;
+  }
 }
 
-@theme {
-  --color-pvk-blue: var(--color-pvk-blue);
-  --color-pvk-green: var(--color-pvk-green);
-  --color-pvk-bg: var(--color-pvk-bg);
-  --color-pvk-text: var(--color-pvk-text);
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground antialiased;
+    font-feature-settings: "rlig" 1, "calt" 1;
+  }
 }
 
-/* Custom Scrollbar */
 @layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: hsl(var(--muted-foreground) / 0.3) transparent;
+  }
+
   .scrollbar-thin::-webkit-scrollbar {
     width: 6px;
-    height: 6px;
   }
 
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -26,20 +160,11 @@
   }
 
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: var(--color-pvk-text);
-    /* Fallback or neutral */
-    border-radius: 9999px;
-    opacity: 0.2;
+    background-color: hsl(var(--muted-foreground) / 0.3);
+    border-radius: 3px;
   }
 
-  /* Make the thumb thinner/simpler as requested */
-  .scrollbar-simple::-webkit-scrollbar {
-    width: 4px;
-  }
-
-  .scrollbar-simple::-webkit-scrollbar-thumb {
-    background-color: #CBD5E1;
-    /* Slate-300 */
-    border-radius: 10px;
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: hsl(var(--muted-foreground) / 0.5);
   }
 }
