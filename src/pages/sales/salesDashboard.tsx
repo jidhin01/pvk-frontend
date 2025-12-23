@@ -1,9 +1,31 @@
+import React from 'react';
+import { DashboardLayout } from '@/components/layout';
+import DashboardOverview from './DashboardOverview';
+import DeliveryList from './DeliveryList';
+import PaymentCollection from './PaymentCollection';
+import DailyOperations from './DailyOperations';
+import Expenses from './Expenses';
 
 const SalesDashboard = () => {
   return (
-    <div>
-      <h1>SalesDashboard</h1>
-    </div>
+    <DashboardLayout>
+      {({ activeTab }) => {
+        switch (activeTab) {
+          case 'dashboard':
+            return <DashboardOverview />;
+          case 'delivery-list':
+            return <DeliveryList />;
+          case 'payment-collection':
+            return <PaymentCollection />;
+          case 'daily-operations':
+            return <DailyOperations />;
+          case 'expenses':
+            return <Expenses />;
+          default:
+            return <DashboardOverview />;
+        }
+      }}
+    </DashboardLayout>
   );
 };
 

@@ -38,7 +38,7 @@ export function Sidebar({
     navigate('/login');
   };
 
-  const isSpecialRole = user?.role === 'designer' || user?.role === 'printer' || user?.role === 'finance';
+  const isSpecialRole = user?.role === 'designer' || user?.role === 'printer' || user?.role === 'finance' || user?.role === 'dealer' || user?.role === 'sales' || user?.role === 'stock_keeper';
   const navItems = isSpecialRole
     ? getRoleConfig(user?.role as UserRole)?.tabs || []
     : ROLE_CONFIGS;

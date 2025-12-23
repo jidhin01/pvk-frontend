@@ -26,7 +26,10 @@ import {
   AlertCircle,
   TrendingUp,
   History,
-  Wallet
+  Wallet,
+  PlusCircle,
+  MapPin,
+  User
 } from 'lucide-react';
 import { UserRole } from '@/contexts/AuthContext';
 import { LucideIcon } from 'lucide-react';
@@ -105,10 +108,11 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Dealer',
     icon: Store,
     tabs: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { id: 'orders', label: 'Orders', icon: ShoppingCart },
-      { id: 'pan', label: 'PAN', icon: CreditCard },
-      { id: 'seals', label: 'Seals', icon: FileText },
-      { id: 'status', label: 'Status', icon: Activity },
+      { id: 'new-order', label: 'New Order', icon: PlusCircle },
+      { id: 'tracking', label: 'Tracking', icon: MapPin },
+      { id: 'profile', label: 'Profile', icon: User },
     ],
   },
   {
@@ -117,9 +121,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     icon: Briefcase,
     tabs: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'leads', label: 'Leads', icon: Users },
-      { id: 'orders', label: 'Orders', icon: ShoppingCart },
-      { id: 'targets', label: 'Targets', icon: TrendingUp },
+      { id: 'delivery-list', label: 'Delivery List', icon: MapPin },
+      { id: 'payment-collection', label: 'Payment', icon: CreditCard },
+      { id: 'daily-operations', label: 'Operations', icon: ClipboardList },
+      { id: 'expenses', label: 'Expenses', icon: Wallet },
     ],
   },
   {
@@ -141,10 +146,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Stock Keeper',
     icon: Package,
     tabs: [
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { id: 'inventory', label: 'Inventory', icon: Package },
-      { id: 'movements', label: 'Movements', icon: Activity },
-      { id: 'alerts', label: 'Alerts', icon: AlertCircle },
-      { id: 'reports', label: 'Reports', icon: BarChart3 },
+      { id: 'dead-stock', label: 'Dead Stock', icon: AlertCircle },
+      { id: 'alerts', label: 'Alerts', icon: Activity },
     ],
   },
 ];
