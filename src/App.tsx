@@ -14,8 +14,8 @@ import DesignerDashboard from "@/pages/designer/designerDashboard";
 import PrinterDashboard from "@/pages/printer/printerDashboard";
 import FinanceDashboard from "@/pages/finance/financeDashboard";
 import SalesDashboard from '@/pages/sales/salesDashboard';
-import StockDashboard from '@/pages/stock/stockDashboard';
-import PanCardDashboard from '@/pages/pancard/pancardDashboard';
+import StockDashboard from '@/pages/inventory/StockDashboard';
+import PanDashboard from '@/pages/pan-team/PanDashboard';
 import SealDashboard from '@/pages/seal/sealDashboard';
 
 const queryClient = new QueryClient();
@@ -46,13 +46,12 @@ function AppRoutes() {
       <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
       <Route path="/dealer" element={<ProtectedRoute><DealerDashboard /></ProtectedRoute>} />
-      <Route path="/dealer" element={<ProtectedRoute><DealerDashboard /></ProtectedRoute>} />
       <Route path="/designer" element={<ProtectedRoute><DesignerDashboard /></ProtectedRoute>} />
       <Route path="/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
       <Route path="/printer" element={<ProtectedRoute><PrinterDashboard /></ProtectedRoute>} />
       <Route path="/sales" element={<ProtectedRoute><SalesDashboard /></ProtectedRoute>} />
       <Route path="/stock" element={<ProtectedRoute><StockDashboard /></ProtectedRoute>} />
-      <Route path="/pancard" element={<ProtectedRoute><PanCardDashboard /></ProtectedRoute>} />
+      <Route path="/pancard" element={<ProtectedRoute><PanDashboard /></ProtectedRoute>} />
       <Route path="/seal" element={<ProtectedRoute><SealDashboard /></ProtectedRoute>} />
 
       {/* Fallback for generic /dashboard */}
