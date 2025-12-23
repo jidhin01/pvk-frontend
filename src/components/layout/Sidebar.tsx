@@ -25,6 +25,7 @@ export function Sidebar({
   selectedRole,
   onRoleChange,
   collapsed,
+
   onCollapsedChange,
   activeTab,
   onTabChange

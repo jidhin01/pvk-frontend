@@ -3,6 +3,7 @@ import { ShoppingCart, Users, DollarSign, Clock } from 'lucide-react';
 import { DashboardLayout, PageContainer } from '@/components/layout';
 import { StatCard, ActivityList, QuickActions, DataTable, RevenueChart, ProductChart } from '@/components/dashboard';
 import { getRoleConfig } from '@/config/navigation';
+import DealerDashboard from '@/pages/dealer/DashboardDealer';
 
 export default function AdminDashboard() {
   return (
@@ -10,6 +11,17 @@ export default function AdminDashboard() {
       {({ selectedRole, activeTab }) => {
         const roleConfig = getRoleConfig(selectedRole);
         const currentTab = roleConfig?.tabs.find(t => t.id === activeTab);
+
+        if (selectedRole === 'dealer') {
+          return (
+            <PageContainer
+              title={currentTab?.label || 'Dashboard'}
+              subtitle={`${roleConfig?.label} Portal`}
+            >
+              <DealerDashboard />
+            </PageContainer>
+          );
+        }
 
         return (
           <PageContainer
