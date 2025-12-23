@@ -9,13 +9,6 @@ import { getDashboardPath } from "@/config/navigation";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/AdminDashboard";
-import DesignerDashboard from "./pages/designer/designerDashboard";
-import FinanceDashboard from "./pages/finance/financeDashboard";
-import PrinterDashboard from "./pages/printer/printerDashboard";
-import SalesDashboard from "./pages/sales/salesDashboard";
-import StockDashboard from "./pages/stock/stockDashboard";
-import DealerDashboard from "./pages/dealer/DashboardDealer";
-import DealerLayout from "@/layouts/DealerLayout";
 
 const queryClient = new QueryClient();
 
@@ -41,18 +34,14 @@ function AppRoutes() {
     <Routes>
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="/login" element={<PublicRoute><Login /></PublicRoute>} />
-
       {/* Role-based Dashboards */}
       <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
-      <Route path="/dealer" element={<ProtectedRoute><DealerLayout /></ProtectedRoute>}>
-        <Route index element={<DealerDashboard />} />
-        <Route path="dashboard" element={<DealerDashboard />} />
-      </Route>
-      <Route path="/designer" element={<ProtectedRoute><DesignerDashboard /></ProtectedRoute>} />
-      <Route path="/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
-      <Route path="/printer" element={<ProtectedRoute><PrinterDashboard /></ProtectedRoute>} />
-      <Route path="/sales" element={<ProtectedRoute><SalesDashboard /></ProtectedRoute>} />
-      <Route path="/stock" element={<ProtectedRoute><StockDashboard /></ProtectedRoute>} />
+      <Route path="/dealer" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/designer" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/finance" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/printer" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/sales" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/stock" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
       {/* Fallback for generic /dashboard */}
       <Route
@@ -61,7 +50,6 @@ function AppRoutes() {
           user ? <Navigate to={getDashboardPath(user.role)} replace /> : <Navigate to="/login" replace />
         }
       />
-
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

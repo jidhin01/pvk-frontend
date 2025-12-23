@@ -6,8 +6,8 @@ import { Sidebar } from './Sidebar';
 import { TopBar } from './TopBar';
 
 interface DashboardLayoutProps {
-  children: (props: { 
-    selectedRole: UserRole; 
+  children: (props: {
+    selectedRole: UserRole;
     activeTab: string;
   }) => ReactNode;
 }
@@ -34,8 +34,10 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         onRoleChange={handleRoleChange}
         collapsed={sidebarCollapsed}
         onCollapsedChange={setSidebarCollapsed}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
       />
-      
+
       <TopBar
         selectedRole={selectedRole}
         activeTab={activeTab}
@@ -44,7 +46,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       />
 
       {/* Main Content */}
-      <main 
+      <main
         className={cn(
           "pt-16 min-h-screen transition-all duration-300",
           sidebarCollapsed ? "pl-16" : "pl-60"

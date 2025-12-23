@@ -6,7 +6,7 @@ import {
   LogOut
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { ROLE_CONFIGS, RoleConfig } from '@/config/navigation';
+import { getRoleConfig, ROLE_CONFIGS, RoleConfig } from '@/config/navigation';
 import { UserRole, useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -17,13 +17,18 @@ interface SidebarProps {
   onRoleChange: (role: UserRole) => void;
   collapsed: boolean;
   onCollapsedChange: (collapsed: boolean) => void;
+  activeTab?: string;
+  onTabChange?: (tab: string) => void;
 }
 
 export function Sidebar({
   selectedRole,
   onRoleChange,
   collapsed,
-  onCollapsedChange
+
+  onCollapsedChange,
+  activeTab,
+  onTabChange
 }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -32,6 +37,11 @@ export function Sidebar({
     logout();
     navigate('/login');
   };
+
+  const isDesigner = user?.role === 'designer';
+  const navItems = isDesigner
+    ? getRoleConfig('designer')?.tabs || []
+    : ROLE_CONFIGS;
 
   return (
     <aside
@@ -82,48 +92,62 @@ export function Sidebar({
         <div className={cn("mb-3 px-2", collapsed && "text-center")}>
           {!collapsed && (
             <span className="text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/50">
-              Modules
+              {isDesigner ? 'My Workspace' : 'Modules'}
             </span>
           )}
         </div>
         <ul className="space-y-1">
-          {ROLE_CONFIGS.map((config) => (
-            <li key={config.id}>
-              {collapsed ? (
-                <Tooltip delayDuration={0}>
-                  <TooltipTrigger asChild>
-                    <button
-                      onClick={() => onRoleChange(config.id)}
-                      className={cn(
-                        "w-full flex items-center justify-center p-2.5 rounded-lg transition-all duration-150",
-                        selectedRole === config.id
-                          ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                          : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                      )}
-                    >
-                      <config.icon className="h-5 w-5" />
-                    </button>
-                  </TooltipTrigger>
-                  <TooltipContent side="right" className="font-medium">
-                    {config.label}
-                  </TooltipContent>
-                </Tooltip>
-              ) : (
-                <button
-                  onClick={() => onRoleChange(config.id)}
-                  className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm",
-                    selectedRole === config.id
-                      ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
-                      : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                  )}
-                >
-                  <config.icon className="h-5 w-5 flex-shrink-0" />
-                  <span className="truncate">{config.label}</span>
-                </button>
-              )}
-            </li>
-          ))}
+          {navItems.map((item) => {
+            const isActive = isDesigner
+              ? activeTab === item.id
+              : selectedRole === item.id;
+
+            const handleClick = () => {
+              if (isDesigner && onTabChange) {
+                onTabChange(item.id);
+              } else {
+                onRoleChange(item.id as UserRole);
+              }
+            };
+
+            return (
+              <li key={item.id}>
+                {collapsed ? (
+                  <Tooltip delayDuration={0}>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={handleClick}
+                        className={cn(
+                          "w-full flex items-center justify-center p-2.5 rounded-lg transition-all duration-150",
+                          isActive
+                            ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                            : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        )}
+                      >
+                        <item.icon className="h-5 w-5" />
+                      </button>
+                    </TooltipTrigger>
+                    <TooltipContent side="right" className="font-medium">
+                      {item.label}
+                    </TooltipContent>
+                  </Tooltip>
+                ) : (
+                  <button
+                    onClick={handleClick}
+                    className={cn(
+                      "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm",
+                      isActive
+                        ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
+                        : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    )}
+                  >
+                    <item.icon className="h-5 w-5 flex-shrink-0" />
+                    <span className="truncate">{item.label}</span>
+                  </button>
+                )}
+              </li>
+            );
+          })}
         </ul>
       </nav>
 

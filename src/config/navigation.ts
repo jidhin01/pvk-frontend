@@ -82,10 +82,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Designer',
     icon: Palette,
     tabs: [
-      { id: 'projects', label: 'Projects', icon: FolderOpen },
-      { id: 'uploads', label: 'Uploads', icon: Upload },
-      { id: 'approvals', label: 'Approvals', icon: CheckSquare },
-      { id: 'templates', label: 'Templates', icon: Layers },
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'work-pool', label: 'Work Pool', icon: Layers },
+      { id: 'my-work', label: 'My Work', icon: FolderOpen },
+      { id: 'earnings', label: 'Earnings', icon: Coins },
     ],
   },
   {
