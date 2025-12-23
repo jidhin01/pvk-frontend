@@ -104,10 +104,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Dealer',
     icon: Store,
     tabs: [
-      { id: 'orders', label: 'Orders', icon: ShoppingCart },
-      { id: 'pan', label: 'PAN', icon: CreditCard },
-      { id: 'seals', label: 'Seals', icon: FileText },
-      { id: 'status', label: 'Status', icon: Activity },
+      { id: 'dashboard', label: 'Marketplace', icon: Store },
+      { id: 'orders', label: 'My Orders', icon: ShoppingCart },
+      { id: 'new-order', label: 'New Order', icon: Upload },
+      { id: 'profile', label: 'Profile', icon: Users },
     ],
   },
   {

@@ -38,9 +38,12 @@ export function Sidebar({
     navigate('/login');
   };
 
-  const isDesigner = user?.role === 'designer';
-  const navItems = isDesigner
-    ? getRoleConfig('designer')?.tabs || []
+  // Determine if single-role user (not admin/super_admin/manager who might see modules)
+  // For simplcity, anyone not admin/super_admin sees their own tabs
+  const isSingleRole = user?.role && !['super_admin', 'admin'].includes(user.role);
+
+  const navItems = isSingleRole
+    ? getRoleConfig(user!.role)?.tabs || []
     : ROLE_CONFIGS;
 
   return (
@@ -92,18 +95,18 @@ export function Sidebar({
         <div className={cn("mb-3 px-2", collapsed && "text-center")}>
           {!collapsed && (
             <span className="text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/50">
-              {isDesigner ? 'My Workspace' : 'Modules'}
+              {isSingleRole ? 'My Workspace' : 'Modules'}
             </span>
           )}
         </div>
         <ul className="space-y-1">
           {navItems.map((item) => {
-            const isActive = isDesigner
+            const isActive = isSingleRole
               ? activeTab === item.id
               : selectedRole === item.id;
 
             const handleClick = () => {
-              if (isDesigner && onTabChange) {
+              if (isSingleRole && onTabChange) {
                 onTabChange(item.id);
               } else {
                 onRoleChange(item.id as UserRole);

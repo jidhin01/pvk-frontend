@@ -9,6 +9,7 @@ interface DashboardLayoutProps {
   children: (props: {
     selectedRole: UserRole;
     activeTab: string;
+    onTabChange: (tab: string) => void;
   }) => ReactNode;
 }
 
@@ -53,7 +54,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         )}
       >
         <div className="p-6">
-          {children({ selectedRole, activeTab })}
+          {children({ selectedRole, activeTab, onTabChange: setActiveTab })}
         </div>
       </main>
     </div>

@@ -4,15 +4,20 @@ export interface Dealer {
     gstNumber: string;
     creditLimit: number;
     currentBalance: number;
+    isApproved: boolean; // New field for account status
 }
 
 export type OrderStatus = 'printing' | 'pending' | 'delivered';
+export type GoodsType = 'finished' | 'unfinished';
+export type PrintType = 'pvc' | 'laser' | 'offset';
 
 export interface BaseOrder {
     jobName: string;
     status: OrderStatus;
     cost: number;
-    date: string; // Added date property as it's required for the table in DashboardHome
+    date: string;
+    goodsType?: GoodsType; // New field
+    printType?: PrintType; // New field
 }
 
 export interface PrintOrder extends BaseOrder {
@@ -37,6 +42,7 @@ export const CURRENT_DEALER: Dealer = {
     gstNumber: "22AAAAA0000A1Z5",
     creditLimit: 50000,
     currentBalance: 42000,
+    isApproved: true, // Mock approved status
 };
 
 export const RECENT_ORDERS: Order[] = [
