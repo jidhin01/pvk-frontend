@@ -8,7 +8,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { getDashboardPath } from "@/config/navigation";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
-import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminDashboard from "./pages/admin/adminDashboard";
 import DealerDashboard from "@/pages/dealer/DashboardDealer";
 import DesignerDashboard from "@/pages/designer/designerDashboard";
 import PrinterDashboard from "@/pages/printer/printerDashboard";
