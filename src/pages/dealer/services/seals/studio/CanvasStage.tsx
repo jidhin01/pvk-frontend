@@ -28,7 +28,7 @@ const CanvasStage: React.FC = () => {
 
     // RENDER LOGIC
     const renderedContent = useMemo(() => {
-        if (template.renderType === 'circular') {
+        if (template.renderType === 'circular' || template.renderType === 'oval') {
             // Mapped Mode
             const textBlocks = blocks.filter(b => b.type === 'TEXT');
             const topBlock = textBlocks[0];
@@ -212,6 +212,7 @@ const CanvasStage: React.FC = () => {
 
                 <svg
                     viewBox={`0 0 ${size} ${size}`}
+                    preserveAspectRatio={template.renderType === 'oval' ? "none" : "xMidYMid meet"}
                     className="w-full h-full z-10"
                     style={{ filter: `url(#${filterId})` }}
                 >

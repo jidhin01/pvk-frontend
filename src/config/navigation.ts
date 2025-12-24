@@ -34,6 +34,8 @@ import {
   Stamp,
   CheckCircle,
   AlertTriangle,
+  Factory,
+  FolderArchive,
   type LucideIcon
 } from 'lucide-react';
 import { UserRole } from '@/contexts/AuthContext';
@@ -171,7 +173,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Seal Team',
     icon: Stamp,
     tabs: [
-      { id: 'dashboard', label: 'Work Floor', icon: LayoutDashboard },
+      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'floor', label: 'Work Floor', icon: Factory },
+      { id: 'materials', label: 'Materials', icon: Package },
+      { id: 'archives', label: 'Archives', icon: FolderArchive },
     ],
   },
 ];

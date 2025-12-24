@@ -68,5 +68,15 @@ export const MOCK_SEAL_ORDERS: SealOrder[] = [
         status: 'completed',
         isUrgent: true,
         orderDate: '2025-12-22T09:00:00'
+    },
+    {
+        id: 'SEAL-007',
+        content: 'Submitted via Studio',
+        type: 'SELF_INK',
+        machineModel: 'Shiny S-842',
+        size: '38x14 mm',
+        status: 'pending_batch',
+        isUrgent: false,
+        orderDate: '2025-12-24T14:15:00'
     }
 ];

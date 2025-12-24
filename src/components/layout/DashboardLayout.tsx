@@ -1,9 +1,10 @@
-import { useState, ReactNode } from 'react';
+import { useState, ReactNode, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { UserRole, useAuth } from '@/contexts/AuthContext';
 import { getRoleConfig } from '@/config/navigation';
 import { Sidebar } from './Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useLocation } from 'react-router-dom';
 
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -19,11 +20,20 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user } = useAuth();
+  const location = useLocation();
   const isMobile = useIsMobile();
   const [selectedRole, setSelectedRole] = useState<UserRole>(user?.role || 'admin');
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Sync activeTab with location state if provided (e.g. redirects)
+  useEffect(() => {
+    if (location.state?.activeTab) {
+      setActiveTab(location.state.activeTab);
+      // Optional: Clear state to prevent stickiness? No, it's fine.
+    }
+  }, [location]);
 
   // Reset active tab when role changes
   const handleRoleChange = (role: UserRole) => {

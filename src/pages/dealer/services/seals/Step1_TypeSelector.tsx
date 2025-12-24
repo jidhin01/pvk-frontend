@@ -23,10 +23,10 @@ const Step1_TypeSelector: React.FC<Step1Props> = ({ selectedType, onSelect }) =>
                     <Card
                         key={type.id}
                         className={cn(
-                            "cursor-pointer transition-all duration-300 relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 bg-white dark:bg-slate-950",
+                            "cursor-pointer transition-all duration-300 relative overflow-hidden group hover:shadow-xl hover:-translate-y-1 bg-card hover:bg-accent/5",
                             isSelected
                                 ? "border-primary ring-2 ring-primary shadow-lg"
-                                : "border-slate-200 hover:border-primary/50"
+                                : "border-border hover:border-primary/50"
                         )}
                         onClick={() => onSelect(type.id)}
                     >
@@ -41,12 +41,12 @@ const Step1_TypeSelector: React.FC<Step1Props> = ({ selectedType, onSelect }) =>
                                 "mx-auto h-20 w-20 rounded-full flex items-center justify-center transition-all duration-300 mb-4",
                                 isSelected
                                     ? "bg-primary/10 text-primary scale-110"
-                                    : "bg-slate-100 text-slate-500 group-hover:bg-primary/5 group-hover:text-primary/70 group-hover:scale-105"
+                                    : "bg-muted text-muted-foreground group-hover:bg-primary/5 group-hover:text-primary/70 group-hover:scale-105"
                             )}>
                                 <Icon className="h-10 w-10" />
                             </div>
 
-                            <CardTitle className="text-lg font-bold text-slate-800 dark:text-slate-100 group-hover:text-primary transition-colors">
+                            <CardTitle className="text-lg font-bold text-foreground group-hover:text-primary transition-colors">
                                 {type.name}
                             </CardTitle>
 
@@ -66,12 +66,12 @@ const Step1_TypeSelector: React.FC<Step1Props> = ({ selectedType, onSelect }) =>
                         </CardHeader>
 
                         <CardContent className="text-center px-6 pb-6">
-                            <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed mb-4 min-h-[40px]">
+                            <p className="text-sm text-muted-foreground leading-relaxed mb-4 min-h-[40px]">
                                 {type.description}
                             </p>
-                            <div className="pt-4 border-t border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                            <div className="pt-4 border-t border-border flex items-center justify-between">
                                 <span className="text-xs text-muted-foreground font-medium uppercase tracking-wide">Starting At</span>
-                                <span className={cn("text-lg font-bold tabular-nums", isSelected ? "text-primary" : "text-slate-900 dark:text-white")}>
+                                <span className={cn("text-lg font-bold tabular-nums", isSelected ? "text-primary" : "text-foreground")}>
                                     ₹{type.basePrice}
                                 </span>
                             </div>
