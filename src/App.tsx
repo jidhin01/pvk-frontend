@@ -9,7 +9,7 @@ import { getDashboardPath } from "@/config/navigation";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/adminDashboard";
-import DealerDashboard from "@/pages/dealer/DashboardDealer";
+import MarketplaceDashboard from "@/pages/marketplace/MarketplaceDashboard";
 import DesignerDashboard from "@/pages/designer/designerDashboard";
 import PrinterDashboard from "@/pages/printer/printerDashboard";
 import FinanceDashboard from "@/pages/finance/financeDashboard";
@@ -17,6 +17,7 @@ import SalesDashboard from '@/pages/sales/salesDashboard';
 import StockDashboard from '@/pages/inventory/StockDashboard';
 import PanDashboard from '@/pages/pan-team/PanDashboard';
 import SealTeamLayout from '@/pages/seal-team/SealTeamLayout';
+import Profile from '@/pages/profile';
 
 
 const queryClient = new QueryClient();
@@ -46,7 +47,7 @@ function AppRoutes() {
       {/* Role-based Dashboards */}
       <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
-      <Route path="/dealer" element={<ProtectedRoute><DealerDashboard /></ProtectedRoute>} />
+      <Route path="/marketplace/*" element={<ProtectedRoute><MarketplaceDashboard /></ProtectedRoute>} />
       <Route path="/designer" element={<ProtectedRoute><DesignerDashboard /></ProtectedRoute>} />
       <Route path="/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
       <Route path="/printer" element={<ProtectedRoute><PrinterDashboard /></ProtectedRoute>} />
@@ -54,6 +55,7 @@ function AppRoutes() {
       <Route path="/stock" element={<ProtectedRoute><StockDashboard /></ProtectedRoute>} />
       <Route path="/pancard" element={<ProtectedRoute><PanDashboard /></ProtectedRoute>} />
       <Route path="/seal" element={<ProtectedRoute><SealTeamLayout /></ProtectedRoute>} />
+      <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
 
 
       {/* Fallback for generic /dashboard */}

@@ -2,13 +2,12 @@ import React from 'react';
 import {
     Plus,
     ArrowRight,
-    ShoppingCart,
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MARKETPLACE_PRODUCTS, Product } from '@/data/mockMarketplaceData';
-import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface DashboardHomeProps {
     onNavigate: (tab: string) => void;
@@ -16,18 +15,22 @@ interface DashboardHomeProps {
 
 export default function DashboardHome({ onNavigate }: DashboardHomeProps) {
     const navigate = useNavigate();
+    const { user } = useAuth();
+    const isDealer = user?.role === 'dealer';
 
     return (
         <div className="space-y-8 animate-in fade-in duration-500 pb-10">
             {/* Hero / Quick Action Section */}
-            <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-background p-8 border border-primary/10">
-                <div className="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
-                    <div className="space-y-2 max-w-2xl">
-                        <h1 className="text-3xl font-extrabold tracking-tight text-foreground">
-                            Welcome to Dealer Marketplace
+            <div className="rounded-2xl bg-gradient-to-r from-primary/10 via-primary/5 to-background px-6 py-4 border border-primary/10">
+                <div className="flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-left">
+                    <div className="space-y-1">
+                        <h1 className="text-3xl font-extrabold tracking-wide text-foreground">
+                            Welcome to {isDealer ? 'Dealer Marketplace' : 'PVK Shop'}
                         </h1>
-                        <p className="text-muted-foreground text-lg">
-                            Access premium B2B rates. Upload your own designs or choose from our extensive catalog.
+                        <p className="text-muted-foreground text-sm tracking-wide">
+                            {isDealer
+                                ? 'Access premium B2B rates. Upload your own designs or choose from our extensive catalog.'
+                                : 'Explore our high-quality printing services and products.'}
                         </p>
                     </div>
                     <div>
@@ -37,7 +40,7 @@ export default function DashboardHome({ onNavigate }: DashboardHomeProps) {
                             onClick={() => onNavigate('new-order')}
                         >
                             <Plus className="mr-2 h-5 w-5" />
-                            Upload New Order
+                            {isDealer ? 'Upload New Order' : 'Start New Order'}
                         </Button>
                     </div>
                 </div>
@@ -57,8 +60,8 @@ export default function DashboardHome({ onNavigate }: DashboardHomeProps) {
                             className="group relative cursor-pointer overflow-hidden border-border/50 hover:border-primary/50 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 bg-card/50 backdrop-blur-sm"
                             onClick={() => console.log(`Navigating to ${product.slug}`)} // To be replaced with actual navigation
                         >
-                            {/* Offer Badge */}
-                            {product.offerBadge && (
+                            {/* Offer Badge - Only for Dealers or Special Items */}
+                            {product.offerBadge && isDealer && (
                                 <div className="absolute top-0 right-0 z-10">
                                     <div className="bg-red-500 text-white text-[10px] uppercase font-bold px-3 py-1 rounded-bl-lg shadow-sm">
                                         {product.offerBadge}
@@ -84,14 +87,23 @@ export default function DashboardHome({ onNavigate }: DashboardHomeProps) {
 
                                     {/* Price Block */}
                                     <div className="flex items-end gap-2">
-                                        <div className="flex flex-col">
-                                            <span className="text-2xl font-bold text-emerald-600">₹{product.dealerPrice}</span>
-                                            <span className="text-[10px] text-emerald-600/80 font-medium">Dealer Price</span>
-                                        </div>
-                                        <div className="flex flex-col mb-1.5 pl-2 border-l border-border/60">
-                                            <span className="text-xs text-muted-foreground line-through decoration-muted-foreground/50">₹{product.retailPrice}</span>
-                                            <span className="text-[10px] text-muted-foreground">Market Rate</span>
-                                        </div>
+                                        {isDealer ? (
+                                            <>
+                                                <div className="flex flex-col">
+                                                    <span className="text-2xl font-bold text-emerald-600">₹{product.dealerPrice}</span>
+                                                    <span className="text-[10px] text-emerald-600/80 font-medium">Dealer Price</span>
+                                                </div>
+                                                <div className="flex flex-col mb-1.5 pl-2 border-l border-border/60">
+                                                    <span className="text-xs text-muted-foreground line-through decoration-muted-foreground/50">₹{product.retailPrice}</span>
+                                                    <span className="text-[10px] text-muted-foreground">Market Rate</span>
+                                                </div>
+                                            </>
+                                        ) : (
+                                            <div className="flex flex-col">
+                                                <span className="text-2xl font-bold text-foreground">₹{product.retailPrice}</span>
+                                                <span className="text-[10px] text-muted-foreground font-medium">Price</span>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
 

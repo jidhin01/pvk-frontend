@@ -35,7 +35,7 @@ import {
     TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { RECENT_ORDERS, Order } from '@/data/mockDealerData';
+import { RECENT_ORDERS, Order } from '@/data/mockMarketplaceData';
 
 export default function OrdersPage() {
     const [filter, setFilter] = useState('all');

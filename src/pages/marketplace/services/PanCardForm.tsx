@@ -28,7 +28,9 @@ interface PanCardFormProps {
 export default function PanCardForm({ onBack }: PanCardFormProps) {
     const [subType, setSubType] = useState<'NORMAL' | 'EMERGENCY'>('NORMAL');
     const [formData, setFormData] = useState({
-        fullName: '',
+        applicantName: '',
+        nameAsPerAadhaar: '',
+        aadhaarNumber: '',
         dob: '',
         fatherName: '',
         mobile: '',
@@ -37,10 +39,12 @@ export default function PanCardForm({ onBack }: PanCardFormProps) {
         aadhaarFront: File | null;
         aadhaarBack: File | null;
         photo: File | null;
+        designReference: File | null;
     }>({
         aadhaarFront: null,
         aadhaarBack: null,
-        photo: null
+        photo: null,
+        designReference: null
     });
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -163,18 +167,42 @@ export default function PanCardForm({ onBack }: PanCardFormProps) {
                                     <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Applicant Details</h3>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                         <div className="space-y-2">
-                                            <Label htmlFor="fullName">Full Name</Label>
+                                            <Label htmlFor="applicantName">Applicant Name <span className="text-red-500">*</span></Label>
                                             <Input
-                                                id="fullName"
-                                                name="fullName"
+                                                id="applicantName"
+                                                name="applicantName"
                                                 required
-                                                placeholder="As per Aadhaar"
-                                                value={formData.fullName}
+                                                placeholder="Enter applicant name"
+                                                value={formData.applicantName}
                                                 onChange={handleInputChange}
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="dob">Date of Birth</Label>
+                                            <Label htmlFor="nameAsPerAadhaar">Name as per Aadhaar <span className="text-red-500">*</span></Label>
+                                            <Input
+                                                id="nameAsPerAadhaar"
+                                                name="nameAsPerAadhaar"
+                                                required
+                                                placeholder="Exact name on Aadhaar card"
+                                                value={formData.nameAsPerAadhaar}
+                                                onChange={handleInputChange}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="aadhaarNumber">Aadhaar Number <span className="text-red-500">*</span></Label>
+                                            <Input
+                                                id="aadhaarNumber"
+                                                name="aadhaarNumber"
+                                                required
+                                                placeholder="12-digit Aadhaar number"
+                                                maxLength={12}
+                                                pattern="[0-9]{12}"
+                                                value={formData.aadhaarNumber}
+                                                onChange={handleInputChange}
+                                            />
+                                        </div>
+                                        <div className="space-y-2">
+                                            <Label htmlFor="dob">Date of Birth <span className="text-red-500">*</span></Label>
                                             <Input
                                                 id="dob"
                                                 name="dob"
@@ -185,7 +213,7 @@ export default function PanCardForm({ onBack }: PanCardFormProps) {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="fatherName">Father's Name</Label>
+                                            <Label htmlFor="fatherName">Father's Name <span className="text-red-500">*</span></Label>
                                             <Input
                                                 id="fatherName"
                                                 name="fatherName"
@@ -196,7 +224,7 @@ export default function PanCardForm({ onBack }: PanCardFormProps) {
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label htmlFor="mobile">Mobile Number</Label>
+                                            <Label htmlFor="mobile">Mobile Number <span className="text-red-500">*</span></Label>
                                             <Input
                                                 id="mobile"
                                                 name="mobile"
@@ -227,6 +255,16 @@ export default function PanCardForm({ onBack }: PanCardFormProps) {
                                             <Label className="mb-2 block">Passport Size Photo <span className="text-red-500">*</span></Label>
                                             <Input type="file" required accept="image/*" onChange={handleFileChange('photo')} />
                                         </div>
+                                    </div>
+                                </div>
+
+                                {/* Optional Upload - Design Reference */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Design Reference (Optional)</h3>
+                                    <div className="border border-dashed border-muted-foreground/30 rounded-lg p-4 bg-muted/20">
+                                        <Label className="mb-2 block">Upload Design / Reference</Label>
+                                        <p className="text-xs text-muted-foreground mb-2">Upload any design template or reference image if you have specific requirements</p>
+                                        <Input type="file" accept="image/*,.pdf" onChange={handleFileChange('designReference')} />
                                     </div>
                                 </div>
 

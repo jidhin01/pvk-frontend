@@ -71,9 +71,21 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     icon: Shield,
     tabs: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'users', label: 'Users', icon: Users },
-      { id: 'approvals', label: 'Approvals', icon: CheckSquare },
+      { id: 'users', label: 'User Management', icon: Users },
+      { id: 'dealer-approvals', label: 'Dealer Approvals', icon: CheckSquare },
+      // Role Management Sections
+      { id: 'manage-designer', label: 'Designer', icon: Palette },
+      { id: 'manage-printer', label: 'Printer', icon: PrinterIcon },
+      { id: 'manage-sales', label: 'Sales / Line Staff', icon: Briefcase },
+      { id: 'manage-finance', label: 'Finance', icon: Coins },
+      { id: 'manage-stock', label: 'Stock Keeper', icon: Package },
+      { id: 'manage-pancard', label: 'PAN Card Team', icon: IdCard },
+      { id: 'manage-seal', label: 'Seal Team', icon: Stamp },
+      { id: 'manage-dealer', label: 'Dealers', icon: Store },
+      { id: 'manage-customer', label: 'Customers', icon: User },
+      // System
       { id: 'settings', label: 'Settings', icon: Settings },
+      { id: 'activity-logs', label: 'Activity Logs', icon: History },
     ],
   },
   {
@@ -82,9 +94,19 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     icon: ClipboardList,
     tabs: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'orders', label: 'Orders', icon: ShoppingCart },
-      { id: 'team', label: 'Team', icon: Users },
-      { id: 'reports', label: 'Reports', icon: BarChart3 },
+      { id: 'users', label: 'User Management', icon: Users },
+      { id: 'dealer-approvals', label: 'Dealer Approvals', icon: CheckSquare },
+      // Role Management Sections (No Finance for Manager)
+      { id: 'manage-designer', label: 'Designer', icon: Palette },
+      { id: 'manage-printer', label: 'Printer', icon: PrinterIcon },
+      { id: 'manage-sales', label: 'Sales / Line Staff', icon: Briefcase },
+      { id: 'manage-stock', label: 'Stock Keeper', icon: Package },
+      { id: 'manage-pancard', label: 'PAN Card Team', icon: IdCard },
+      { id: 'manage-seal', label: 'Seal Team', icon: Stamp },
+      { id: 'manage-dealer', label: 'Dealers', icon: Store },
+      { id: 'manage-customer', label: 'Customers', icon: User },
+      // System
+      { id: 'settings', label: 'Settings', icon: Settings },
     ],
   },
   {
@@ -114,6 +136,18 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     icon: Store,
     tabs: [
       { id: 'dashboard', label: 'Marketplace', icon: Store },
+      { id: 'orders', label: 'My Orders', icon: ShoppingCart },
+      { id: 'new-order', label: 'New Order', icon: Upload },
+      { id: 'tracking', label: 'Tracking', icon: MapPin },
+      { id: 'profile', label: 'Profile', icon: Users },
+    ],
+  },
+  {
+    id: 'customer',
+    label: 'Customer',
+    icon: User,
+    tabs: [
+      { id: 'dashboard', label: 'Shop', icon: Store },
       { id: 'orders', label: 'My Orders', icon: ShoppingCart },
       { id: 'new-order', label: 'New Order', icon: Upload },
       { id: 'tracking', label: 'Tracking', icon: MapPin },
@@ -196,7 +230,8 @@ export function getDashboardPath(role: UserRole): string {
     case 'manager':
       return '/admin';
     case 'dealer':
-      return '/dealer';
+    case 'customer':
+      return '/marketplace';
     case 'designer':
       return '/designer';
     case 'finance':

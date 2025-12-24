@@ -2,15 +2,20 @@ import React from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
-import { CURRENT_DEALER } from '@/data/mockDealerData';
+import { CURRENT_DEALER } from '@/data/mockMarketplaceData';
 import NewOrder from './NewOrder';
 import Tracking from './Tracking';
 import Profile from './Profile';
 import DashboardHome from './DashboardHome';
 import OrdersPage from './OrdersPage';
 
-export default function DealerDashboard() {
-    const isApproved = CURRENT_DEALER.isApproved;
+import { useAuth } from '@/contexts/AuthContext';
+
+export default function MarketplaceDashboard() {
+    const { user } = useAuth();
+    const isDealer = user?.role === 'dealer';
+    // Only dealers need approval; customers are auto-approved for viewing
+    const isApproved = isDealer ? CURRENT_DEALER.isApproved : true;
 
     return (
         <DashboardLayout>

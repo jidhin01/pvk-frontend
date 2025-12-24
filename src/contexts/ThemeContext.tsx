@@ -11,7 +11,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem('pvk_theme') as Theme) || 'system'
+    () => (localStorage.getItem('pvk_theme') as Theme) || 'light'
   );
 
   useEffect(() => {

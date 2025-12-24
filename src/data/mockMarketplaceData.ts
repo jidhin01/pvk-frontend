@@ -1,101 +1,172 @@
-import {
-    CreditCard,
-    Stamp,
-    FileText,
-    BookOpen,
-    Printer,
-    IdCard,
-    Award,
-    FileCheck,
-    Contact,
-    type LucideIcon
-} from 'lucide-react';
+export interface DealerProfile {
+    id: string;
+    businessName: string;
+    gstNumber: string;
+    creditLimit: number;
+    currentBalance: number;
+    isApproved: boolean; // New field for account status
+}
+
+export type OrderStatus = 'printing' | 'pending' | 'delivered';
+export type GoodsType = 'finished' | 'unfinished';
+export type PrintType = 'pvc' | 'laser' | 'offset';
+
+export interface BaseOrder {
+    id: string;
+    jobName: string;
+    status: OrderStatus;
+    cost: number;
+    date: string;
+    goodsType?: GoodsType; // New field
+    printType?: PrintType; // New field
+}
+
+export interface PrintOrder extends BaseOrder {
+    type: 'PRINT';
+    fileUrl: string;
+    specs: {
+        dimensions: string; // e.g., "10x12 ft"
+        mediaType: string;
+        quality: string;
+    }
+}
+
+export interface ServiceOrder extends BaseOrder {
+    type: 'PAN' | 'SEAL';
+    details: any;
+}
+
+export type Order = PrintOrder | ServiceOrder;
+
+export const CURRENT_DEALER: DealerProfile = {
+    id: "D-101",
+    businessName: "Kerala Digital House",
+    gstNumber: "22AAAAA0000A1Z5",
+    creditLimit: 50000,
+    currentBalance: 42000,
+    isApproved: true, // Mock approved status
+};
+
+export const RECENT_ORDERS: Order[] = [
+    {
+        id: "ORD-001",
+        jobName: "Summer Sale Banner",
+        type: "PRINT",
+        status: "printing",
+        cost: 450,
+        date: "2023-10-25",
+        fileUrl: "#",
+        specs: { dimensions: "10x4 ft", mediaType: "Flex Star", quality: "High" },
+        goodsType: 'unfinished',
+        printType: 'laser'
+    },
+    {
+        id: "ORD-002",
+        jobName: "John Doe PAN Card",
+        type: "PAN",
+        status: "pending",
+        cost: 120,
+        date: "2023-10-26",
+        details: { name: "John Doe", type: "Individual" }
+    },
+    {
+        id: "ORD-003",
+        jobName: "Office Rubber Stamp",
+        type: "SEAL",
+        status: "delivered",
+        cost: 250,
+        date: "2023-10-22",
+        details: { text: "APPROVED", type: "Self Inking" }
+    }
+];
+
+// Product Interface and Marketplace Products for Dashboard
+import { LucideIcon, Image, FileText, Stamp, CreditCard, Printer, Package } from 'lucide-react';
 
 export interface Product {
     id: string;
     name: string;
-    category: string;
     slug: string;
-    icon: LucideIcon; // Changed to LucideIcon for better type safety
-    dealerPrice: number;
+    category: string;
     retailPrice: number;
+    dealerPrice: number;
+    icon: LucideIcon;
     offerBadge?: string;
 }
 
 export const MARKETPLACE_PRODUCTS: Product[] = [
     {
-        id: '1',
-        name: 'PAN Card',
-        category: 'Identity Documents',
-        slug: 'pan-card',
-        icon: CreditCard,
-        dealerPrice: 85,
+        id: 'prd-1',
+        name: 'Flex Banner Printing',
+        slug: 'flex-banner',
+        category: 'Large Format',
+        retailPrice: 25,
+        dealerPrice: 18,
+        icon: Image,
+        offerBadge: '28% OFF',
+    },
+    {
+        id: 'prd-2',
+        name: 'Business Cards',
+        slug: 'business-cards',
+        category: 'Stationery',
         retailPrice: 150,
-        offerBadge: 'Best Seller',
+        dealerPrice: 100,
+        icon: CreditCard,
     },
     {
-        id: '2',
+        id: 'prd-3',
+        name: 'PVC ID Cards',
+        slug: 'pvc-id-cards',
+        category: 'ID Solutions',
+        retailPrice: 80,
+        dealerPrice: 55,
+        icon: CreditCard,
+        offerBadge: 'HOT',
+    },
+    {
+        id: 'prd-4',
         name: 'Rubber Stamps',
-        category: 'Seals & Stamps',
         slug: 'rubber-stamps',
-        icon: Stamp,
-        dealerPrice: 120,
+        category: 'Office Supplies',
         retailPrice: 250,
+        dealerPrice: 180,
+        icon: Stamp,
     },
     {
-        id: '3',
-        name: 'Visiting Cards',
-        category: 'Printing',
-        slug: 'visiting-cards',
-        icon: IdCard,
-        dealerPrice: 200,
-        retailPrice: 350,
-        offerBadge: 'Hot',
-    },
-    {
-        id: '4',
-        name: 'Letterheads',
-        category: 'Printing',
-        slug: 'letterheads',
+        id: 'prd-5',
+        name: 'Brochures & Flyers',
+        slug: 'brochures-flyers',
+        category: 'Marketing',
+        retailPrice: 200,
+        dealerPrice: 140,
         icon: FileText,
-        dealerPrice: 450,
-        retailPrice: 700,
     },
     {
-        id: '5',
-        name: 'Brochures',
-        category: 'Marketing',
-        slug: 'brochures',
-        icon: BookOpen,
-        dealerPrice: 800,
-        retailPrice: 1200,
-    },
-    {
-        id: '6',
-        name: 'Flex Banners',
-        category: 'Marketing',
-        slug: 'flex-banners',
+        id: 'prd-6',
+        name: 'Offset Printing',
+        slug: 'offset-printing',
+        category: 'Bulk Printing',
+        retailPrice: 500,
+        dealerPrice: 350,
         icon: Printer,
-        dealerPrice: 25,
-        retailPrice: 45,
-        offerBadge: 'Per Sq.Ft',
     },
     {
-        id: '7',
-        name: 'Certificates',
-        category: 'Documents',
-        slug: 'certificates',
-        icon: Award,
-        dealerPrice: 150,
+        id: 'prd-7',
+        name: 'Packaging & Labels',
+        slug: 'packaging-labels',
+        category: 'Packaging',
         retailPrice: 300,
+        dealerPrice: 220,
+        icon: Package,
     },
     {
-        id: '8',
-        name: 'ID Cards',
-        category: 'Identity Documents',
-        slug: 'id-cards',
-        icon: FileCheck, // Changed from Contact to FileCheck if not available, or keep Contact. Let's use Contact as it is safer.
-        dealerPrice: 50,
-        retailPrice: 100,
+        id: 'prd-8',
+        name: 'Photo Printing',
+        slug: 'photo-printing',
+        category: 'Photography',
+        retailPrice: 50,
+        dealerPrice: 35,
+        icon: Image,
     },
 ];

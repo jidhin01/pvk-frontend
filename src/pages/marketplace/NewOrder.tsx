@@ -6,7 +6,6 @@ import {
     Stamp,
     AlertCircle,
     ArrowRight,
-    Calculator,
     Upload,
     CheckCircle2,
     Package,
@@ -28,17 +27,17 @@ import {
     SelectTrigger,
     SelectValue,
 } from "@/components/ui/select";
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import {
     Tooltip,
     TooltipContent,
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { CURRENT_DEALER, GoodsType, PrintType } from '@/data/mockDealerData';
+import { CURRENT_DEALER, GoodsType, PrintType } from '@/data/mockMarketplaceData';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
 import SealWizardLayout from './services/seals/SealWizardLayout';
+import { useAuth } from '@/contexts/AuthContext';
 
 const STEPS = [
     { id: 1, label: 'Goods Type' },
@@ -58,6 +57,9 @@ export default function NewOrder() {
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
     const [isSealConfigComplete, setIsSealConfigComplete] = useState(false);
 
+    const { user } = useAuth();
+    const isDealer = user?.role === 'dealer';
+
     // Price Calculation Logic
     useEffect(() => {
         let price = 0;
@@ -69,10 +71,15 @@ export default function NewOrder() {
             const quantity = parseInt(formData.quantity) || 1;
 
             // Mock Rates
-            let ratePerSqFt = 10;
-            if (printType === 'pvc') ratePerSqFt = 45;
-            if (printType === 'laser') ratePerSqFt = 25;
-            if (printType === 'offset') ratePerSqFt = 5;
+            // Base rates are Retail rates. Dealer rates are discounted.
+            // Let's assume the previous rates were Dealer rates.
+            // Dealer sqft: pve=45, laser=25, offset=5 (Previous)
+            // Retail sqft: pvc=60, laser=35, offset=8 (Hypothetical increase for retail)
+
+            let ratePerSqFt = isDealer ? 10 : 15;
+            if (printType === 'pvc') ratePerSqFt = isDealer ? 45 : 60;
+            if (printType === 'laser') ratePerSqFt = isDealer ? 25 : 35;
+            if (printType === 'offset') ratePerSqFt = isDealer ? 5 : 8;
 
             if (width > 0 && height > 0) {
                 const area = width * height;
@@ -83,14 +90,14 @@ export default function NewOrder() {
                 breakdown = `${area.toFixed(1)} sq.ft x ₹${ratePerSqFt}/sq.ft x ${quantity} qty`;
             }
         } else if (selectedService === 'PAN') {
-            price = 120;
-            breakdown = 'Fixed Dealer Rate';
+            price = isDealer ? 120 : 150;
+            breakdown = isDealer ? 'Fixed Dealer Rate' : 'Standard Service Fee';
         } else if (selectedService === 'SEAL') {
             // Price handling now delegated to Wizard callback for updates, 
             // but we keep a base fallback here if needed, or rely on the callback.
             // The callback `onPriceUpdate` will override this.
             if (estimatedPrice === 0) {
-                price = 200; // Default fallback
+                price = isDealer ? 200 : 250; // Default fallback
                 breakdown = 'Estimated Base Rate';
             } else {
                 return; // Allow wizard to control
@@ -98,7 +105,7 @@ export default function NewOrder() {
         }
         setEstimatedPrice(price);
         setPriceBreakdown(breakdown);
-    }, [formData, selectedService, printType]);
+    }, [formData, selectedService, printType, isDealer]);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -113,7 +120,9 @@ export default function NewOrder() {
 
     const handleNextStep = () => setStep(prev => prev + 1);
     const handleBackStep = () => setStep(prev => prev - 1);
-    const isCreditExceeded = (CURRENT_DEALER.currentBalance + estimatedPrice) > CURRENT_DEALER.creditLimit;
+
+    // Credit check only for dealers
+    const isCreditExceeded = isDealer && ((CURRENT_DEALER.currentBalance + estimatedPrice) > CURRENT_DEALER.creditLimit);
 
     // --- WIZARD STEPS ---
 
@@ -172,11 +181,7 @@ export default function NewOrder() {
                 </div>
             </RadioGroup>
 
-            <div className="pt-6 flex justify-end">
-                <Button size="lg" disabled={!goodsType} onClick={handleNextStep} className="w-full md:w-auto">
-                    Continue <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-            </div>
+
 
             <div className="mt-10 pt-6 border-t">
                 <p className="text-sm font-medium text-muted-foreground mb-4">Quick Actions</p>
@@ -234,12 +239,7 @@ export default function NewOrder() {
                 ))}
             </div>
 
-            <div className="pt-6 flex justify-between">
-                <Button variant="ghost" onClick={handleBackStep}>Back</Button>
-                <Button size="lg" disabled={!printType} onClick={handleNextStep}>
-                    Next Step <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-            </div>
+
         </div>
     );
 
@@ -284,14 +284,26 @@ export default function NewOrder() {
                             )}
 
                             {selectedService === 'PAN' && (
-                                <div className="grid grid-cols-1 gap-6">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="space-y-2">
-                                        <Label>Applicant Name</Label>
-                                        <Input name="applicantName" placeholder="Name as per Aadhaar" onChange={handleInputChange} />
+                                        <Label>Applicant Name <span className="text-red-500">*</span></Label>
+                                        <Input name="applicantName" placeholder="Enter applicant name" onChange={handleInputChange} />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label>Father's Name</Label>
-                                        <Input name="fatherName" onChange={handleInputChange} />
+                                        <Label>Name as per Aadhaar <span className="text-red-500">*</span></Label>
+                                        <Input name="nameAsPerAadhaar" placeholder="Exact name on Aadhaar card" onChange={handleInputChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Aadhaar Number <span className="text-red-500">*</span></Label>
+                                        <Input name="aadhaarNumber" placeholder="12-digit Aadhaar number" maxLength={12} onChange={handleInputChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Date of Birth <span className="text-red-500">*</span></Label>
+                                        <Input name="dob" type="date" onChange={handleInputChange} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        <Label>Father's Name <span className="text-red-500">*</span></Label>
+                                        <Input name="fatherName" placeholder="Father's full name" onChange={handleInputChange} />
                                     </div>
                                 </div>
                             )}
@@ -397,28 +409,30 @@ export default function NewOrder() {
                                 )}
                             </div>
 
-                            {/* Credit Status */}
-                            <div className={cn(
-                                "mt-4 p-3 rounded-lg text-xs font-medium flex items-start gap-2",
-                                isCreditExceeded ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700"
-                            )}>
-                                {isCreditExceeded ? <AlertCircle className="h-4 w-4 shrink-0" /> : <CheckCircle2 className="h-4 w-4 shrink-0" />}
-                                <div>
-                                    {isCreditExceeded
-                                        ? `Credit Limit Exceeded by ₹${((CURRENT_DEALER.currentBalance + estimatedPrice) - CURRENT_DEALER.creditLimit).toLocaleString()}`
-                                        : `Credit Approved. Balance available.`
-                                    }
+                            {/* Credit Status - Only for Dealers */}
+                            {isDealer && (
+                                <div className={cn(
+                                    "mt-4 p-3 rounded-lg text-xs font-medium flex items-start gap-2",
+                                    isCreditExceeded ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700"
+                                )}>
+                                    {isCreditExceeded ? <AlertCircle className="h-4 w-4 shrink-0" /> : <CheckCircle2 className="h-4 w-4 shrink-0" />}
+                                    <div>
+                                        {isCreditExceeded
+                                            ? `Credit Limit Exceeded by ₹${((CURRENT_DEALER.currentBalance + estimatedPrice) - CURRENT_DEALER.creditLimit).toLocaleString()}`
+                                            : `Credit Approved. Balance available.`
+                                        }
+                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full" size="lg" disabled={isCreditExceeded || estimatedPrice === 0 || (!formData.jobName && selectedService === 'PRINT') || (selectedService === 'SEAL' && !isSealConfigComplete)}>
+                            <Button className="w-full" size="lg" disabled={(isDealer && isCreditExceeded) || estimatedPrice === 0 || (!formData.jobName && selectedService === 'PRINT') || (selectedService === 'SEAL' && !isSealConfigComplete)}>
                                 Place Order
                             </Button>
                         </CardFooter>
                     </Card>
 
-                    <Button variant="outline" className="w-full" onClick={handleBackStep}>Change Specifications</Button>
+
                 </div>
 
             </div>
@@ -454,8 +468,39 @@ export default function NewOrder() {
 
     return (
         <div className="max-w-5xl mx-auto py-8">
+            {/* Top Navigation & Title */}
+            <div className="flex items-center justify-between mb-8">
+                <div>
+                    <h1 className="text-3xl font-bold tracking-tight">New Order</h1>
+                    <p className="text-muted-foreground">Create a new service request</p>
+                </div>
+                <div className="flex gap-3">
+                    <Button
+                        variant="outline"
+                        size="lg"
+                        onClick={handleBackStep}
+                        disabled={step === 1}
+                        className={cn("gap-2 border-primary/20", step > 1 ? "opacity-100" : "opacity-0 pointer-events-none")}
+                    >
+                        <ArrowRight className="h-4 w-4 rotate-180" /> Back
+                    </Button>
+                    <Button
+                        size="lg"
+                        onClick={handleNextStep}
+                        disabled={
+                            (step === 1 && !goodsType) ||
+                            (step === 2 && !printType) ||
+                            step === 3 // Hide Next on last step
+                        }
+                        className={cn("gap-2 shadow-lg shadow-primary/20", step === 3 ? "hidden" : "")}
+                    >
+                        Next Step <ArrowRight className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+
             {/* Visual Stepper */}
-            <div className="mb-10 max-w-2xl mx-auto">
+            <div className="mb-10 max-w-4xl mx-auto px-4">
                 <div className="relative flex justify-between items-center">
                     {/* Progress Line */}
                     <div className="absolute top-1/2 left-0 w-full h-0.5 bg-muted -z-10" />
@@ -466,16 +511,52 @@ export default function NewOrder() {
                     {STEPS.map((s) => {
                         const isActive = step >= s.id;
                         const isCompleted = step > s.id;
+                        const isClickable = step > s.id || (s.id < step); // Can go back, or forward if completed (conceptually)
+
                         return (
-                            <div key={s.id} className="flex flex-col items-center gap-2 bg-background px-2">
+                            <div
+                                key={s.id}
+                                className={cn(
+                                    "flex flex-col items-center gap-3 bg-background px-4 py-2 rounded-xl border border-transparent transition-all duration-300",
+                                    "cursor-pointer hover:bg-muted/50",
+                                    step === s.id && "scale-110"
+                                )}
+                                onClick={() => {
+                                    // Simple logic: Allow going back to any previous step. 
+                                    // Allow going forward only if we are basically just reviewing (not implemented strictly here, so just limiting to current flow)
+                                    // For now, let's allow clicking any step <= current step + 1 logic if strictly needed, 
+                                    // but user asked for "clickable". 
+                                    // SAFEST: Allow jumping to any step that we have data for?
+                                    // EASIER UX: Just allow setStep(s.id) but maybe validate?
+                                    // Let's allow jumping to previous steps always.
+                                    // Jumping forward: Only if we have necessary data.
+
+                                    if (s.id < step) {
+                                        setStep(s.id);
+                                    } else if (s.id === step) {
+                                        // Do nothing
+                                    } else {
+                                        // Trying to go forward
+                                        // Only allow if we are on step s.id - 1 and have data
+                                        const canGoTo2 = goodsType;
+                                        const canGoTo3 = goodsType && printType;
+
+                                        if (s.id === 2 && canGoTo2) setStep(2);
+                                        if (s.id === 3 && canGoTo3) setStep(3);
+                                    }
+                                }}
+                            >
                                 <div className={cn(
-                                    "h-8 w-8 rounded-full flex items-center justify-center border-2 transition-all duration-300",
-                                    isActive ? "border-primary bg-primary text-primary-foreground" : "border-muted-foreground/30 bg-background text-muted-foreground",
+                                    "h-10 w-10 rounded-full flex items-center justify-center border-2 transition-all duration-300 shadow-sm",
+                                    isActive ? "border-primary bg-primary text-primary-foreground shadow-primary/25" : "border-muted-foreground/30 bg-background text-muted-foreground",
                                     isCompleted ? "bg-primary border-primary" : ""
                                 )}>
-                                    {isCompleted ? <Check className="h-4 w-4" /> : <span className="text-xs font-bold">{s.id}</span>}
+                                    {isCompleted ? <Check className="h-5 w-5" /> : <span className="text-sm font-bold">{s.id}</span>}
                                 </div>
-                                <span className={cn("text-xs font-medium transition-colors", isActive ? "text-foreground" : "text-muted-foreground")}>
+                                <span className={cn(
+                                    "text-sm font-medium transition-colors whitespace-nowrap px-2 py-0.5 rounded-md",
+                                    isActive ? "text-foreground font-semibold bg-accent/50" : "text-muted-foreground"
+                                )}>
                                     {s.label}
                                 </span>
                             </div>
