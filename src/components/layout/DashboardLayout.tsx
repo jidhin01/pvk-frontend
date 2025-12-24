@@ -48,6 +48,8 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         onRoleChange={handleRoleChange}
         activeTab={activeTab}
         onTabChange={handleTabChange}
+        collapsed={sidebarCollapsed}
+        onCollapsedChange={setSidebarCollapsed}
       />
 
       {/* Mobile Header */}

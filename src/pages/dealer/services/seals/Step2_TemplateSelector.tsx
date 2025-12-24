@@ -27,18 +27,18 @@ const Step2_TemplateSelector: React.FC<Step2Props> = ({ selectedTemplate, onSele
                             onClick={() => onSelect(tmpl.id)}
                             className={cn(
                                 "group cursor-pointer rounded-xl border-2 transition-all duration-300 p-1 bg-white hover:shadow-lg",
-                                isSelected ? "border-emerald-500 shadow-md transform -translate-y-1" : "border-slate-100 hover:border-emerald-200"
+                                isSelected ? "border-primary shadow-md transform -translate-y-1" : "border-slate-100 hover:border-primary/30"
                             )}
                         >
                             <div className={cn(
                                 "rounded-lg p-6 flex flex-col items-center justify-center relative overflow-hidden min-h-[160px] transition-colors",
-                                isSelected ? "bg-emerald-50/50" : "bg-slate-50 group-hover:bg-white"
+                                isSelected ? "bg-primary/5" : "bg-slate-50 group-hover:bg-white"
                             )}>
                                 {/* Grid Background */}
                                 <div className="absolute inset-0 opacity-[0.03] bg-[linear-gradient(to_right,#000_1px,transparent_1px),linear-gradient(to_bottom,#000_1px,transparent_1px)] bg-[size:16px_16px]" />
 
                                 {isSelected && (
-                                    <div className="absolute top-2 right-2 text-emerald-600 animate-in zoom-in spin-in-45 duration-300">
+                                    <div className="absolute top-2 right-2 text-primary animate-in zoom-in spin-in-45 duration-300">
                                         <Check className="h-5 w-5" />
                                     </div>
                                 )}
@@ -46,7 +46,7 @@ const Step2_TemplateSelector: React.FC<Step2Props> = ({ selectedTemplate, onSele
                                 {/* Shape Preview */}
                                 <div
                                     className={cn(
-                                        "border-2 border-dashed flex items-center justify-center text-[10px] sm:text-xs font-bold text-slate-400 group-hover:text-emerald-500 group-hover:border-emerald-300 transition-all duration-300 mb-3",
+                                        "border-2 border-dashed flex items-center justify-center text-[10px] sm:text-xs font-bold text-slate-400 group-hover:text-primary group-hover:border-primary/50 transition-all duration-300 mb-3",
                                         tmpl.shape === 'ROUND' ? "rounded-full h-20 w-20" :
                                             tmpl.shape === 'OVAL' ? "rounded-[50%] h-16 w-24" :
                                                 "rounded-md h-12 w-28"
@@ -59,9 +59,9 @@ const Step2_TemplateSelector: React.FC<Step2Props> = ({ selectedTemplate, onSele
 
                             <div className="px-4 py-3">
                                 <div className="flex justify-between items-center mb-1">
-                                    <h4 className={cn("font-bold text-sm", isSelected ? "text-emerald-700" : "text-slate-700")}>{tmpl.name}</h4>
+                                    <h4 className={cn("font-bold text-sm", isSelected ? "text-primary" : "text-slate-700")}>{tmpl.name}</h4>
                                     {tmpl.priceModifier > 0 && (
-                                        <Badge variant="outline" className="text-[10px] border-emerald-200 text-emerald-600 bg-emerald-50">
+                                        <Badge variant="outline" className="text-[10px] border-primary/20 text-primary bg-primary/5">
                                             +₹{tmpl.priceModifier}
                                         </Badge>
                                     )}

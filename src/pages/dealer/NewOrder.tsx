@@ -297,23 +297,22 @@ export default function NewOrder() {
                             )}
 
                             {selectedService === 'SEAL' && (
-                                <SealWizardLayout
-                                    onConfigurationComplete={(config) => {
-                                        setFormData(prev => ({
-                                            ...prev,
-                                            sealConfig: config,
-                                            sealType: config.type,
-                                            sealTemplate: config.template,
-                                            sealContent: config.content.join('\n'),
-                                            sealColor: config.color
-                                        }));
-                                        setIsSealConfigComplete(true);
-                                    }}
-                                    onPriceUpdate={(price) => {
-                                        setEstimatedPrice(price);
-                                        setPriceBreakdown('Base + Template Modifier');
-                                    }}
-                                />
+                                <div className="border-2 border-dashed border-primary/20 bg-primary/5 rounded-xl p-8 flex flex-col items-center justify-center text-center">
+                                    <div className="bg-primary/10 p-3 rounded-full mb-4">
+                                        <CheckCircle2 className="h-8 w-8 text-primary" />
+                                    </div>
+                                    <h3 className="font-bold text-lg text-primary mb-1">Seal Design Ready</h3>
+                                    <p className="text-sm text-primary/80 mb-6 max-w-xs">
+                                        Your seal configuration has been saved. You can now proceed to place the order.
+                                    </p>
+                                    <Button
+                                        variant="outline"
+                                        onClick={() => setIsSealConfigComplete(false)}
+                                        className="border-primary/20 text-primary hover:bg-primary/10 hover:text-primary"
+                                    >
+                                        Edit Design
+                                    </Button>
+                                </div>
                             )}
 
                             {/* ENHANCED FILE UPLOAD */}
@@ -425,6 +424,33 @@ export default function NewOrder() {
             </div>
         </div>
     );
+
+    // --- RENDER ---
+
+    // SPECIAL FULL SCREEN MODE FOR SEAL STUDIO
+    if (step === 3 && selectedService === 'SEAL' && !isSealConfigComplete) {
+        return (
+            <div className="fixed inset-0 z-50 bg-background flex flex-col animate-in fade-in duration-300">
+                <SealWizardLayout
+                    onConfigurationComplete={(config) => {
+                        setFormData(prev => ({
+                            ...prev,
+                            sealConfig: config,
+                            sealType: config.type,
+                            sealTemplate: config.template,
+                            sealContent: config.content.join('\n'),
+                            sealColor: config.color
+                        }));
+                        setIsSealConfigComplete(true);
+                    }}
+                    onPriceUpdate={(price) => {
+                        setEstimatedPrice(price);
+                        setPriceBreakdown('Base + Template Modifier');
+                    }}
+                />
+            </div>
+        );
+    }
 
     return (
         <div className="max-w-5xl mx-auto py-8">

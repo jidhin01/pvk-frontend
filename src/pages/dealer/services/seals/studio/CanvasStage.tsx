@@ -2,8 +2,6 @@
 import React, { useMemo } from 'react';
 import { useStudio } from './StudioContext';
 import { cn } from '@/lib/utils';
-import { ZoomIn, ZoomOut, Maximize, Grid } from 'lucide-react';
-import { Button } from '@/components/ui/button';
 
 // Helper for AutoFit
 const getAutoFitSize = (text: string, baseSize: number, charLimit: number) => {
@@ -14,7 +12,7 @@ const getAutoFitSize = (text: string, baseSize: number, charLimit: number) => {
 };
 
 const CanvasStage: React.FC = () => {
-    const { template, blocks, selectedBlockId, selectBlock, zoom, setZoom, gridVisible, toggleGrid, isEasyMode } = useStudio();
+    const { template, blocks, selectedBlockId, selectBlock, zoom, gridVisible, isEasyMode } = useStudio();
 
     if (!template) return <div className="flex h-full items-center justify-center text-slate-400">No Template</div>;
 
@@ -191,80 +189,54 @@ const CanvasStage: React.FC = () => {
     }, [template, blocks, selectedBlockId, center, radius, isEasyMode]);
 
 
+    // Simplified Return: Just the Scalable Stage Object
     return (
-        <div className="flex-1 relative flex items-center justify-center overflow-hidden bg-slate-200" onClick={() => selectBlock(null)}>
-            {/* Dot Grid Background */}
+        <div
+            className="relative transition-transform duration-200 ease-out origin-center"
+            style={{ transform: `scale(${zoom})` }}
+        >
             <div
-                className="absolute inset-0 opacity-[0.4] pointer-events-none"
-                style={{
-                    backgroundImage: 'radial-gradient(#64748b 1px, transparent 1px)',
-                    backgroundSize: '20px 20px'
-                }}
-            />
-
-            {/* Stage Container with Shape Logic */}
-            <div
-                className="relative transition-transform duration-200 ease-out"
-                style={{ transform: `scale(${zoom})` }}
+                onClick={(e) => e.stopPropagation()}
+                className={cn(
+                    "bg-white shadow-2xl relative overflow-hidden flex items-center justify-center ring-1 ring-slate-900/5 transition-all duration-500", // Force BG White
+                    template.renderType === 'circular' ? "rounded-full w-[300px] h-[300px]" :
+                        template.renderType === 'oval' ? "rounded-[50%] w-[350px] h-[220px]" :
+                            "rounded-md w-[350px] h-[150px]"
+                )}
             >
-                <div
-                    onClick={(e) => e.stopPropagation()}
-                    className={cn(
-                        "bg-white shadow-2xl relative overflow-hidden flex items-center justify-center ring-1 ring-slate-900/5 transition-all duration-500",
-                        template.renderType === 'circular' ? "rounded-full w-[300px] h-[300px]" :
-                            template.renderType === 'oval' ? "rounded-[50%] w-[350px] h-[220px]" :
-                                "rounded-md w-[350px] h-[150px]"
-                    )}
+                {/* Safety Zone */}
+                <div className="absolute inset-2 border border-dashed border-red-300 rounded-[inherit] pointer-events-none z-20 opacity-40 mix-blend-multiply" />
+
+                {/* Paper Texture */}
+                <div className="absolute inset-0 opacity-20 bg-stone-100 mix-blend-multiply pointer-events-none" />
+
+                <svg
+                    viewBox={`0 0 ${size} ${size}`}
+                    className="w-full h-full z-10"
+                    style={{ filter: `url(#${filterId})` }}
                 >
-                    {/* Safety Zone */}
-                    <div className="absolute inset-2 border border-dashed border-red-300 rounded-[inherit] pointer-events-none z-20 opacity-40 mix-blend-multiply" />
+                    <defs>
+                        <filter id={filterId}>
+                            <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise" />
+                            <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 15 -7" in="noise" result="coloredNoise" />
+                            <feComposite operator="in" in="coloredNoise" in2="SourceGraphic" result="composite" />
+                            <feComposite operator="atop" in="SourceGraphic" in2="composite" />
+                        </filter>
+                        <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
+                            <path d="M 20 0 L 0 0 0 20" fill="none" stroke="cyan" strokeWidth="1" opacity="0.3" />
+                        </pattern>
+                    </defs>
 
-                    {/* Paper Texture */}
-                    <div className="absolute inset-0 opacity-20 bg-stone-100 mix-blend-multiply pointer-events-none" />
+                    {/* Grid Layer */}
+                    {gridVisible && (
+                        <rect x="0" y="0" width="100%" height="100%" fill="url(#grid)" className="pointer-events-none" />
+                    )}
 
-                    <svg
-                        viewBox={`0 0 ${size} ${size}`}
-                        className="w-full h-full z-10"
-                        style={{ filter: `url(#${filterId})` }}
-                    >
-                        <defs>
-                            <filter id={filterId}>
-                                <feTurbulence type="fractalNoise" baseFrequency="0.8" numOctaves="3" result="noise" />
-                                <feColorMatrix type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 15 -7" in="noise" result="coloredNoise" />
-                                <feComposite operator="in" in="coloredNoise" in2="SourceGraphic" result="composite" />
-                                <feComposite operator="atop" in="SourceGraphic" in2="composite" />
-                            </filter>
-                            <pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse">
-                                <path d="M 20 0 L 0 0 0 20" fill="none" stroke="cyan" strokeWidth="1" opacity="0.3" />
-                            </pattern>
-                        </defs>
-
-                        {/* Grid Layer */}
-                        {gridVisible && (
-                            <rect x="0" y="0" width="100%" height="100%" fill="url(#grid)" className="pointer-events-none" />
-                        )}
-
-                        {/* Interactive Content */}
-                        <g className="opacity-95">
-                            {renderedContent}
-                        </g>
-                    </svg>
-                </div>
-            </div>
-
-            {/* Floating Zoom Controls */}
-            <div className="absolute bottom-6 right-6 flex items-center gap-2 z-30 bg-white/90 backdrop-blur-md p-1.5 rounded-full border shadow-lg">
-                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full" onClick={(e) => { e.stopPropagation(); setZoom(z => Math.max(z - 0.1, 0.5)); }}>
-                    <ZoomOut className="h-4 w-4 text-slate-600" />
-                </Button>
-                <div className="text-xs font-mono font-bold w-12 text-center text-slate-600">{Math.round(zoom * 100)}%</div>
-                <Button size="icon" variant="ghost" className="h-8 w-8 rounded-full" onClick={(e) => { e.stopPropagation(); setZoom(z => Math.min(z + 0.1, 2)); }}>
-                    <ZoomIn className="h-4 w-4 text-slate-600" />
-                </Button>
-                <div className="w-px h-4 bg-slate-200 mx-1" />
-                <Button size="icon" variant={gridVisible ? "secondary" : "ghost"} className="h-8 w-8 rounded-full" onClick={(e) => { e.stopPropagation(); toggleGrid(); }}>
-                    <Grid className="h-4 w-4 text-slate-600" />
-                </Button>
+                    {/* Interactive Content */}
+                    <g className="opacity-95 text-slate-900">
+                        {renderedContent}
+                    </g>
+                </svg>
             </div>
         </div>
     );
