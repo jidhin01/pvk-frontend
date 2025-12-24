@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -11,15 +12,22 @@ import {
     CheckCircle2,
     AlertTriangle,
     Clock,
-    Box
+    Box,
+    Eye,
+    Pencil
 } from 'lucide-react';
 import { MOCK_SEAL_ORDERS, SealOrder } from '@/data/mockSealData';
+import { MOCK_INVENTORY } from '@/data/mockInventoryData';
+import SealStudioLayout from '../dealer/services/seals/studio/SealStudioLayout';
+import { SEAL_TEMPLATES } from '@/data/mockSealCatalog';
 import { DashboardLayout } from '@/components/layout';
 import { toast } from 'sonner';
 
 const SealTeamDashboard = () => {
     // Note: In a real app, filtering would use state management or API
     const [orders, setOrders] = useState<SealOrder[]>(MOCK_SEAL_ORDERS);
+    const [editingOrder, setEditingOrder] = useState<SealOrder | null>(null);
+    const navigate = useNavigate();
 
     // Derived State for Workflow Buckets
     const pendingBatch = orders.filter(o => o.status === 'pending_batch');
@@ -38,10 +46,20 @@ const SealTeamDashboard = () => {
         // Simulating Inventory Logic Hook Trigger
         if (newStatus === 'completed') {
             const order = orders.find(o => o.id === id);
-            if (order?.type === 'SELF_INK' || order?.type === 'POCKET') {
-                toast.success(`Inventory Updated: 1x ${order.machineModel} consumed.`);
+            // INVENTORY LOGIC (Simulated)
+            let itemToDeduct = null;
+            if (order?.type === 'SELF_INK') {
+                // Find matching machine
+                itemToDeduct = MOCK_INVENTORY.find(i => i.name.includes(order.machineModel || ''));
+            } else if (order?.type === 'WOODEN') {
+                itemToDeduct = MOCK_INVENTORY.find(i => i.name.includes('Wooden Handle'));
+            }
+
+            if (itemToDeduct) {
+                toast.success(`Inventory Updated: Deducted 1x ${itemToDeduct.name}`);
+                toast.success(`Dealer Notified: Order ${order?.id} is Ready for Pickup`);
             } else {
-                toast.success("Order marked as Completed");
+                toast.success("Order marked as Completed (No stock item linked)");
             }
         } else {
             toast.success(`Moved to ${newStatus.replace('_', ' ')}`);
@@ -49,12 +67,8 @@ const SealTeamDashboard = () => {
     };
 
     const runBatch = () => {
-        // Move all pending to 'exposure_done'
-        const ids = pendingBatch.map(o => o.id);
-        setOrders(prev => prev.map(o =>
-            ids.includes(o.id) ? { ...o, status: 'exposure_done' } : o
-        ));
-        toast.info(`Batch Run Initiated for ${ids.length} orders!`);
+        // Navigate to the Batching Workstation
+        navigate('/seal/batching');
     };
 
     return (
@@ -141,7 +155,11 @@ const SealTeamDashboard = () => {
                                 <Layers className="h-4 w-4" /> Pending Batch
                             </h3>
                             {pendingBatch.map(order => (
-                                <SealOrderCard key={order.id} order={order} />
+                                <SealOrderCard
+                                    key={order.id}
+                                    order={order}
+                                    onEdit={() => setEditingOrder(order)}
+                                />
                             ))}
                             {pendingBatch.length === 0 && <EmptyState message="No pending orders" />}
                         </div>
@@ -161,6 +179,7 @@ const SealTeamDashboard = () => {
                                         label: 'Start Mounting',
                                         onClick: () => handleStatusUpdate(order.id, 'mounting')
                                     } : undefined}
+                                    onEdit={() => setEditingOrder(order)}
                                 />
                             ))}
                             {(exposureReady.length + mountingInProgress.length) === 0 && <EmptyState message="Assembly line clear" />}
@@ -176,6 +195,20 @@ const SealTeamDashboard = () => {
                             ))}
                         </div>
                     </div>
+                    {/* Quick Edit Overlay */}
+                    {editingOrder && (
+                        <div className="fixed inset-0 z-50 bg-background animate-in fade-in slide-in-from-bottom-5">
+                            <SealStudioLayout
+                                template={SEAL_TEMPLATES[0]}
+                                initialBlocks={[{ id: '1', type: 'TEXT', content: editingOrder.content, fontSize: 12, align: 'center', bold: true }]}
+                                onBack={() => setEditingOrder(null)}
+                                onComplete={() => {
+                                    toast.success("Design Corrections Saved");
+                                    setEditingOrder(null);
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
             )}
         </DashboardLayout>
@@ -189,14 +222,25 @@ const SealOrderCard = ({
     actionLabel,
     onAction,
     secondaryAction,
-    isCompleted
+    isCompleted,
+    onEdit
 }: {
     order: SealOrder,
     actionLabel?: string,
     onAction?: () => void,
     secondaryAction?: { label: string, onClick: () => void },
-    isCompleted?: boolean
+    isCompleted?: boolean,
+    onEdit?: () => void
 }) => {
+    // Inventory Logic for Card
+    const inventoryItem = order.type === 'SELF_INK'
+        ? MOCK_INVENTORY.find(i => i.name.includes(order.machineModel || ''))
+        : order.type === 'WOODEN'
+            ? MOCK_INVENTORY.find(i => i.name.includes('Wooden Handle'))
+            : null;
+
+    const isOutOfStock = inventoryItem ? inventoryItem.shopQty <= 0 : false;
+
     return (
         <Card className={`
             shadow-sm hover:shadow-md transition-all 
@@ -207,7 +251,17 @@ const SealOrderCard = ({
                     <span className="font-medium text-sm line-clamp-2" title={order.content}>
                         {order.content}
                     </span>
-                    {order.isUrgent && <Badge variant="destructive" className="text-[10px] h-5">URGENT</Badge>}
+                    <div className="flex items-center gap-1">
+                        {onEdit && (
+                            <Button size="icon" variant="ghost" className="h-5 w-5 text-muted-foreground" title="Quick Edit" onClick={onEdit}>
+                                <Pencil className="h-3 w-3" />
+                            </Button>
+                        )}
+                        <Button size="icon" variant="ghost" className="h-5 w-5 text-muted-foreground" title="View Design" onClick={() => toast.info("Opening Design Preview...")}>
+                            <Eye className="h-3 w-3" />
+                        </Button>
+                        {order.isUrgent && <Badge variant="destructive" className="text-[10px] h-5">URGENT</Badge>}
+                    </div>
                 </div>
 
                 <div className="space-y-1">
@@ -221,10 +275,20 @@ const SealOrderCard = ({
                             </span>
                         )}
                     </div>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        <span>Ord: {new Date(order.orderDate).toLocaleDateString()}</span>
-                    </div>
+
+                    {/* INVENTORY INDICATOR */}
+                    {!isCompleted && inventoryItem && (
+                        <div className={`flex items-center gap-2 text-xs border rounded px-1.5 py-0.5 ${isOutOfStock ? 'bg-red-50 text-red-600 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+                            <Box className="h-3 w-3" />
+                            <span className="font-medium">
+                                Requires: {inventoryItem.name.substring(0, 20)}...
+                                {isOutOfStock ?
+                                    <span className="font-bold ml-1">OUT OF STOCK (0)</span> :
+                                    <span className="font-bold ml-1">IN STOCK ({inventoryItem.shopQty})</span>
+                                }
+                            </span>
+                        </div>
+                    )}
                 </div>
 
                 {!isCompleted && (
@@ -235,8 +299,13 @@ const SealOrderCard = ({
                             </Button>
                         )}
                         {onAction && (
-                            <Button size="sm" className="flex-1 h-8 text-xs bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900" onClick={onAction}>
-                                {actionLabel}
+                            <Button
+                                size="sm"
+                                disabled={isOutOfStock}
+                                className={`flex-1 h-8 text-xs ${isOutOfStock ? 'opacity-50 cursor-not-allowed' : 'bg-slate-900 hover:bg-slate-800 dark:bg-slate-100 dark:text-slate-900'}`}
+                                onClick={onAction}
+                            >
+                                {isOutOfStock ? 'Stock Required' : actionLabel}
                             </Button>
                         )}
                     </div>

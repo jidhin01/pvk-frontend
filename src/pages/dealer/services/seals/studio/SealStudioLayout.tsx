@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { StudioProvider, useStudio } from './StudioContext';
 import CanvasStage from './CanvasStage';
 import ControlPanel from './ControlPanel';
-import OrderSummaryModal from './OrderSummaryModal';
+import OrderReviewModal from './OrderReviewModal';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -141,10 +141,9 @@ const StudioShell: React.FC<{
             </div>
 
             {/* MODALS */}
-            <OrderSummaryModal
+            <OrderReviewModal
                 isOpen={isSummaryOpen}
                 onClose={() => setSummaryOpen(false)}
-                onConfirm={() => onSave(blocks)}
                 template={template}
                 blocks={blocks}
                 color={color}

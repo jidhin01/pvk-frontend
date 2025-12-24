@@ -16,7 +16,7 @@ const LiveStampPreview: React.FC<Step3PreviewProps> = ({ template, blocks, color
     // SVG CONFIG
     const size = 300;
     const center = size / 2;
-    const radius = 110;
+    const radius = 100; // Reduced from 110 to fix clipping
 
     // FILTER DEFINITIONS
     const filterId = "stamp-grunge";
@@ -118,7 +118,7 @@ const LiveStampPreview: React.FC<Step3PreviewProps> = ({ template, blocks, color
                 </defs>
 
                 {lineTop && (
-                    <text fontSize="28" fontWeight="bold" fill="currentColor">
+                    <text fontSize="24" fontWeight="bold" fill="currentColor">
                         <textPath href={`#${pathTopId}`} startOffset="50%" textAnchor="middle">
                             {lineTop.toUpperCase()}
                         </textPath>
@@ -132,7 +132,7 @@ const LiveStampPreview: React.FC<Step3PreviewProps> = ({ template, blocks, color
                 )}
 
                 {lineBottom && (
-                    <text fontSize="24" fontWeight="bold" fill="currentColor">
+                    <text fontSize="20" fontWeight="bold" fill="currentColor">
                         <textPath href={`#${pathBottomId}`} startOffset="50%" textAnchor="middle">
                             {lineBottom.toUpperCase()}
                         </textPath>
@@ -145,12 +145,16 @@ const LiveStampPreview: React.FC<Step3PreviewProps> = ({ template, blocks, color
 
     return (
         <div className="relative animate-in zoom-in-95 duration-700">
-            <div className="bg-white shadow-2xl rounded-lg overflow-hidden w-full max-w-[500px] aspect-square mx-auto border border-slate-100 flex items-center justify-center p-8 relative">
+            <div className={cn(
+                "bg-card shadow-2xl rounded-lg overflow-hidden w-full max-w-[500px] mx-auto border border-border flex items-center justify-center p-8 relative",
+                renderType === 'oval' ? "aspect-[1.6]" : "aspect-square"
+            )}>
                 {/* Paper Texture */}
                 <div className="absolute inset-0 opacity-40 bg-[url('https://www.transparenttextures.com/patterns/cream-paper.png')] mix-blend-multiply pointer-events-none" />
 
                 <svg
                     viewBox={`0 0 ${size} ${size}`}
+                    preserveAspectRatio={renderType === 'oval' ? "none" : "xMidYMid meet"}
                     className="w-full h-full max-h-[400px] z-10 transition-all duration-300"
                     style={{
                         color: color,
@@ -168,20 +172,17 @@ const LiveStampPreview: React.FC<Step3PreviewProps> = ({ template, blocks, color
 
                     {/* BASE SHAPES */}
                     <g className="opacity-90">
-                        {renderType === 'circular' && (
+                        {(renderType === 'circular' || renderType === 'oval') && (
                             <circle cx={center} cy={center} r={radius + 15} fill="none" stroke="currentColor" strokeWidth="6" />
                         )}
                         {renderType === 'rectangular' && (
                             <rect x={center - 130} y={center - 50} width={260} height={100} rx="4" fill="none" stroke="currentColor" strokeWidth="6" />
                         )}
-                        {renderType === 'oval' && (
-                            <ellipse cx={center} cy={center} rx={radius + 20} ry={radius - 20} fill="none" stroke="currentColor" strokeWidth="6" />
-                        )}
                     </g>
 
                     {/* CONTENT LAYER */}
                     <g className="font-serif tracking-widest opacity-95">
-                        {renderType === 'circular' ? renderCircularMapped() : renderRectangularStack()}
+                        {['circular', 'oval'].includes(renderType) ? renderCircularMapped() : renderRectangularStack()}
                     </g>
 
                 </svg>

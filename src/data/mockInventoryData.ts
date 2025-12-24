@@ -110,6 +110,32 @@ export const MOCK_INVENTORY: InventoryItem[] = [
         unit: "Pieces",
         purchasePrice: 80,
         sellingPrice: 120
+    },
+    {
+        id: "INV-007",
+        name: "Shiny Printer S-842 (Self-Inking)",
+        category: "Stationery",
+        shopQty: 20,
+        godownQty: 100,
+        minStockLimit: 10,
+        lastMovedDate: "2025-12-24",
+        deadStockDuration: 365,
+        unit: "Pieces",
+        purchasePrice: 200,
+        sellingPrice: 450
+    },
+    {
+        id: "INV-008",
+        name: "Wooden Handle (2 inch)",
+        category: "Stationery",
+        shopQty: 0, // Mock "Out of Stock" scenario for testing visual? Or 50. Let's do 50.
+        godownQty: 200,
+        minStockLimit: 20,
+        lastMovedDate: "2025-12-20",
+        deadStockDuration: 365,
+        unit: "Pieces",
+        purchasePrice: 20,
+        sellingPrice: 50
     }
 ];
 
