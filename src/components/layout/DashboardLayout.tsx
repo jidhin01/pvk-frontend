@@ -3,6 +3,7 @@ import { cn } from '@/lib/utils';
 import { UserRole, useAuth } from '@/contexts/AuthContext';
 import { getRoleConfig } from '@/config/navigation';
 import { Sidebar } from './Sidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -18,6 +19,7 @@ interface DashboardLayoutProps {
 
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [selectedRole, setSelectedRole] = useState<UserRole>(user?.role || 'admin');
   const [activeTab, setActiveTab] = useState<string>('dashboard');
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
@@ -44,8 +46,6 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
       <Sidebar
         selectedRole={selectedRole}
         onRoleChange={handleRoleChange}
-        collapsed={sidebarCollapsed}
-        onCollapsedChange={setSidebarCollapsed}
         activeTab={activeTab}
         onTabChange={handleTabChange}
       />
