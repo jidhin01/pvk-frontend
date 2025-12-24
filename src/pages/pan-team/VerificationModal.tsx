@@ -37,6 +37,7 @@ import { Button } from '@/components/ui/button';
 import { PanApplication } from '@/data/mockPanData';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
+import gridPattern from '@/assets/grid-pattern.svg';
 
 interface VerificationModalProps {
     application: PanApplication;
@@ -193,7 +194,7 @@ export function VerificationModal({ application, open, onOpenChange, onVerify }:
                                 </Button>
                             </div>
 
-                            <div className="flex-1 overflow-auto flex items-center justify-center p-8 bg-[url('/grid-pattern.svg')]">
+                            <div className="flex-1 overflow-auto flex items-center justify-center p-8" style={{ backgroundImage: `url(${gridPattern})` }}>
                                 <TabsContent value="aadhaar" className="w-full h-full flex items-center justify-center p-0 m-0 border-0 outline-none data-[state=inactive]:hidden">
                                     <div
                                         className="relative transition-transform duration-200 ease-out origin-center cursor-move"

@@ -152,12 +152,10 @@ export function Sidebar({
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto scrollbar-thin py-4 px-2">
-        <div className={cn("mb-3 px-2", collapsed && "text-center")}>
-          {!collapsed && (
-            <span className="text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/50">
-              {isSingleRole ? 'My Workspace' : 'Modules'}
-            </span>
-          )}
+        <div className="mb-3 px-2">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/50">
+            {isSingleRole ? 'My Workspace' : 'Modules'}
+          </span>
         </div>
         <ul className="space-y-1">
           {navItems.map((item) => {
