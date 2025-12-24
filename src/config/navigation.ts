@@ -171,10 +171,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Seal Team',
     icon: Stamp,
     tabs: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'new-orders', label: 'New Orders', icon: FileText },
-      { id: 'processing', label: 'Processing', icon: Activity },
-      { id: 'completed', label: 'Completed', icon: CheckSquare },
+      { id: 'dashboard', label: 'Work Floor', icon: LayoutDashboard },
     ],
   },
 ];

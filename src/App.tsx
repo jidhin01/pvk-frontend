@@ -16,7 +16,7 @@ import FinanceDashboard from "@/pages/finance/financeDashboard";
 import SalesDashboard from '@/pages/sales/salesDashboard';
 import StockDashboard from '@/pages/inventory/StockDashboard';
 import PanDashboard from '@/pages/pan-team/PanDashboard';
-import SealDashboard from '@/pages/seal/sealDashboard';
+import SealTeamDashboard from '@/pages/seal-team/SealTeamDashboard';
 
 const queryClient = new QueryClient();
 
@@ -52,7 +52,7 @@ function AppRoutes() {
       <Route path="/sales" element={<ProtectedRoute><SalesDashboard /></ProtectedRoute>} />
       <Route path="/stock" element={<ProtectedRoute><StockDashboard /></ProtectedRoute>} />
       <Route path="/pancard" element={<ProtectedRoute><PanDashboard /></ProtectedRoute>} />
-      <Route path="/seal" element={<ProtectedRoute><SealDashboard /></ProtectedRoute>} />
+      <Route path="/seal" element={<ProtectedRoute><SealTeamDashboard /></ProtectedRoute>} />
 
       {/* Fallback for generic /dashboard */}
       <Route
