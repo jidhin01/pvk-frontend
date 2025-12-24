@@ -27,17 +27,17 @@ interface SidebarProps {
   onRoleChange: (role: UserRole) => void;
   activeTab?: string;
   onTabChange?: (tab: string) => void;
-  mobileOpen?: boolean;
-  onMobileOpenChange?: (open: boolean) => void;
+  mobile?: boolean; // New prop
 }
 
 export function Sidebar({
   selectedRole,
   onRoleChange,
+  collapsed,
+  onCollapsedChange,
   activeTab,
   onTabChange,
-  mobileOpen = false,
-  onMobileOpenChange
+  mobile = false
 }: SidebarProps) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
@@ -59,28 +59,41 @@ export function Sidebar({
     navigate('/login');
   };
 
-  const isSpecialRole = user?.role === 'designer' || user?.role === 'printer' || user?.role === 'finance' || user?.role === 'dealer' || user?.role === 'sales' || user?.role === 'stock_keeper' || user?.role === 'pan_card_team' || user?.role === 'seal_team';
-  const navItems = isSpecialRole
-    ? getRoleConfig(user?.role as UserRole)?.tabs || []
+  // Determine if single-role user (not admin/super_admin/manager who might see modules)
+  // For simplcity, anyone not admin/super_admin sees their own tabs
+  const isSingleRole = user?.role && !['super_admin', 'admin'].includes(user.role);
+
+  const navItems = isSingleRole
+    ? getRoleConfig(user!.role)?.tabs || []
     : ROLE_CONFIGS;
 
-  const handleNavClick = (item: RoleConfig | { id: string; label: string; icon: React.ComponentType<{ className?: string }> }) => {
-    if (isSpecialRole && onTabChange) {
-      onTabChange(item.id);
-    } else {
-      onRoleChange(item.id as UserRole);
-    }
-    // Close mobile sidebar on navigation
-    if (isMobile && onMobileOpenChange) {
-      onMobileOpenChange(false);
-    }
-  };
-
-  const sidebarContent = (
-    <>
-      {/* Header Section with Logo, Title, and Theme Toggle */}
-      <div className="flex items-center justify-between border-b border-sidebar-border h-16 px-4">
-        <div className="flex items-center gap-3">
+  return (
+    <aside
+      className={cn(
+        "bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out flex flex-col h-full",
+        mobile ? "w-full" : "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border hidden md:flex",
+        !mobile && (collapsed ? "w-16" : "w-64")
+      )}
+    >
+      {/* Logo Section */}
+      <div className={cn(
+        "flex items-center border-b border-sidebar-border h-16 px-3",
+        collapsed ? "justify-center" : "justify-between"
+      )}>
+        {!collapsed && (
+          <div className="flex items-center gap-3">
+            <img
+              src={pvkLogo}
+              alt="PVK Enterprises"
+              className="h-9 w-9 rounded-lg object-cover"
+            />
+            <div className="flex flex-col">
+              <span className="font-semibold text-sm text-sidebar-accent-foreground">PVK</span>
+              <span className="text-[10px] text-sidebar-foreground/60">Enterprises</span>
+            </div>
+          </div>
+        )}
+        {collapsed && (
           <img
             src={pvkLogo}
             alt="PVK Enterprises"
@@ -128,17 +141,27 @@ export function Sidebar({
 
 
       {/* Navigation */}
-      <nav className="flex-1 overflow-y-auto scrollbar-thin py-4 px-3">
-        <div className="mb-3 px-2">
-          <span className="text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/50">
-            {isSpecialRole ? 'My Workspace' : 'Modules'}
-          </span>
+      <nav className="flex-1 overflow-y-auto scrollbar-thin py-4 px-2">
+        <div className={cn("mb-3 px-2", collapsed && "text-center")}>
+          {!collapsed && (
+            <span className="text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/50">
+              {isSingleRole ? 'My Workspace' : 'Modules'}
+            </span>
+          )}
         </div>
         <ul className="space-y-1">
           {navItems.map((item) => {
-            const isActive = isSpecialRole
+            const isActive = isSingleRole
               ? activeTab === item.id
               : selectedRole === item.id;
+
+            const handleClick = () => {
+              if (isSingleRole && onTabChange) {
+                onTabChange(item.id);
+              } else {
+                onRoleChange(item.id as UserRole);
+              }
+            };
 
             return (
               <li key={item.id}>

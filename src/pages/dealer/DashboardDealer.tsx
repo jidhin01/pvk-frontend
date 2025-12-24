@@ -1,7 +1,7 @@
 import React from 'react';
 import { AlertCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { DashboardLayout } from '@/components/layout';
+import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { CURRENT_DEALER } from '@/data/mockDealerData';
 import NewOrder from './NewOrder';
 import Tracking from './Tracking';

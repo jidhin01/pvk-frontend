@@ -1,83 +1,81 @@
-
-export interface Dealer {
+export interface DealerProfile {
+    id: string;
     businessName: string;
     gstNumber: string;
     creditLimit: number;
     currentBalance: number;
+    isApproved: boolean; // New field for account status
 }
 
 export type OrderStatus = 'printing' | 'pending' | 'delivered';
+export type GoodsType = 'finished' | 'unfinished';
+export type PrintType = 'pvc' | 'laser' | 'offset';
 
 export interface BaseOrder {
+    id: string;
     jobName: string;
     status: OrderStatus;
     cost: number;
-    date: string; // Added date property as it's required for the table in DashboardHome
+    date: string;
+    goodsType?: GoodsType; // New field
+    printType?: PrintType; // New field
 }
 
 export interface PrintOrder extends BaseOrder {
     type: 'PRINT';
-    material: string;
+    fileUrl: string;
+    specs: {
+        dimensions: string; // e.g., "10x12 ft"
+        mediaType: string;
+        quality: string;
+    }
 }
 
-export interface PanOrder extends BaseOrder {
-    type: 'PAN';
-    applicant: string;
+export interface ServiceOrder extends BaseOrder {
+    type: 'PAN' | 'SEAL';
+    details: any;
 }
 
-export interface SealOrder extends BaseOrder {
-    type: 'SEAL';
-    matter: string;
-}
+export type Order = PrintOrder | ServiceOrder;
 
-export type Order = PrintOrder | PanOrder | SealOrder;
-
-export const CURRENT_DEALER: Dealer = {
-    businessName: "PVK Dealer Enterprise",
+export const CURRENT_DEALER: DealerProfile = {
+    id: "D-101",
+    businessName: "Kerala Digital House",
     gstNumber: "22AAAAA0000A1Z5",
     creditLimit: 50000,
     currentBalance: 42000,
+    isApproved: true, // Mock approved status
 };
 
 export const RECENT_ORDERS: Order[] = [
     {
-        type: 'PRINT',
-        jobName: 'Summer Campaign Banners',
-        status: 'printing',
-        cost: 1200,
-        material: 'Flex',
-        date: '2023-10-25'
+        id: "ORD-001",
+        jobName: "Summer Sale Banner",
+        type: "PRINT",
+        status: "printing",
+        cost: 450,
+        date: "2023-10-25",
+        fileUrl: "#",
+        specs: { dimensions: "10x4 ft", mediaType: "Flex Star", quality: "High" },
+        goodsType: 'unfinished',
+        printType: 'laser'
     },
     {
-        type: 'PAN',
-        jobName: 'New Applicant Reg',
-        status: 'pending',
-        cost: 150,
-        applicant: 'John Doe',
-        date: '2023-10-26'
+        id: "ORD-002",
+        jobName: "John Doe PAN Card",
+        type: "PAN",
+        status: "pending",
+        cost: 120,
+        date: "2023-10-26",
+        details: { name: "John Doe", type: "Individual" }
     },
     {
-        type: 'SEAL',
-        jobName: 'Director Stamp',
-        status: 'delivered',
-        cost: 350,
-        matter: 'Director',
-        date: '2023-10-20'
-    },
-    {
-        type: 'PRINT',
-        jobName: 'Office Branding',
-        status: 'pending',
-        cost: 4500,
-        material: 'Vinyl',
-        date: '2023-10-27'
-    },
-    {
-        type: 'SEAL',
-        jobName: 'Round Seal',
-        status: 'delivered',
-        cost: 200,
-        matter: 'Manager',
-        date: '2023-10-22'
+        id: "ORD-003",
+        jobName: "Office Rubber Stamp",
+        type: "SEAL",
+        status: "delivered",
+        cost: 250,
+        date: "2023-10-22",
+        details: { text: "APPROVED", type: "Self Inking" }
     }
 ];

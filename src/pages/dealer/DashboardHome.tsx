@@ -7,7 +7,7 @@ import {
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { MARKETPLACE_PRODUCTS, Product } from '@/data/mockMarketplaceData';
-import { cn } from '@/lib/utils'; // Assuming you have a utility for classnames
+import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
 interface DashboardHomeProps {

@@ -1,92 +1,89 @@
-import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+
+import React, { useMemo } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Wallet, TrendingDown, Fuel, Truck, Wrench, FileText } from 'lucide-react';
-
-// Mock data for expenses
-const expensesData = [
-    { id: 1, category: 'Fuel', description: 'Delivery vehicle fuel', amount: 2500, staff: 'Arun', date: '2024-12-23', status: 'Approved' },
-    { id: 2, category: 'Maintenance', description: 'Printer repair', amount: 4500, staff: 'Shop', date: '2024-12-22', status: 'Approved' },
-    { id: 3, category: 'Transport', description: 'Courier charges', amount: 800, staff: 'Kiran', date: '2024-12-22', status: 'Pending' },
-    { id: 4, category: 'Supplies', description: 'Ink cartridges', amount: 3200, staff: 'Shop', date: '2024-12-21', status: 'Approved' },
-    { id: 5, category: 'Fuel', description: 'Delivery fuel', amount: 1800, staff: 'Meera', date: '2024-12-21', status: 'Approved' },
-    { id: 6, category: 'Miscellaneous', description: 'Office supplies', amount: 650, staff: 'Shop', date: '2024-12-20', status: 'Pending' },
-];
+import { Wallet, TrendingDown, Fuel, Truck, Wrench, FileText, Coffee, Lightbulb } from 'lucide-react';
+import { MOCK_EXPENSES } from '@/data/mockFinanceData';
 
 const Expenses = () => {
-    const totalExpenses = expensesData.reduce((sum, e) => sum + e.amount, 0);
-    const approvedExpenses = expensesData.filter(e => e.status === 'Approved').reduce((sum, e) => sum + e.amount, 0);
-    const pendingExpenses = expensesData.filter(e => e.status === 'Pending').reduce((sum, e) => sum + e.amount, 0);
-
-    const expenseByCategory = expensesData.reduce((acc, e) => {
-        acc[e.category] = (acc[e.category] || 0) + e.amount;
-        return acc;
-    }, {} as Record<string, number>);
+    // Unified Calculation Logic
+    const stats = useMemo(() => {
+        const total = MOCK_EXPENSES.reduce((sum, e) => sum + e.amount, 0);
+        // Assuming mocked data is 'Approved' for now, but counting them all
+        const byCategory: Record<string, number> = {};
+        MOCK_EXPENSES.forEach(e => {
+            byCategory[e.category] = (byCategory[e.category] || 0) + e.amount;
+        });
+        return { total, byCategory };
+    }, []);
 
     const getCategoryIcon = (category: string) => {
         switch (category) {
-            case 'Fuel': return <Fuel className="h-4 w-4" />;
-            case 'Transport': return <Truck className="h-4 w-4" />;
-            case 'Maintenance': return <Wrench className="h-4 w-4" />;
-            case 'Supplies': return <FileText className="h-4 w-4" />;
-            default: return <Wallet className="h-4 w-4" />;
+            case 'Rent': return <Wallet className="h-4 w-4" />;
+            case 'Electricity': return <Lightbulb className="h-4 w-4" />;
+            case 'Machine Maintenance': return <Wrench className="h-4 w-4" />;
+            case 'Raw Materials': return <Truck className="h-4 w-4" />;
+            case 'Tea/Snacks': return <Coffee className="h-4 w-4" />;
+            case 'Salary': return <Wallet className="h-4 w-4" />;
+            default: return <FileText className="h-4 w-4" />;
         }
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             <div>
-                <h1 className="text-3xl font-bold tracking-tight">Expenses</h1>
-                <p className="text-muted-foreground">Track operational expenses including line staff expenses.</p>
+                <h1 className="text-3xl font-bold tracking-tight">Expense Tracker</h1>
+                <p className="text-muted-foreground">Central ledger for all operational outflows.</p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-4">
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Total Expenses</CardTitle>
+                        <CardTitle className="text-sm font-medium">Total Outflow</CardTitle>
                         <TrendingDown className="h-4 w-4 text-red-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-red-600">₹{totalExpenses.toLocaleString()}</div>
-                        <p className="text-xs text-muted-foreground">This month</p>
+                        <div className="text-2xl font-bold text-red-600">₹{stats.total.toLocaleString()}</div>
+                        <p className="text-xs text-muted-foreground">Total recorded expenses</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Approved</CardTitle>
-                        <Wallet className="h-4 w-4 text-green-500" />
+                        <CardTitle className="text-sm font-medium">Raw Materials</CardTitle>
+                        <Truck className="h-4 w-4 text-blue-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-green-600">₹{approvedExpenses.toLocaleString()}</div>
-                        <p className="text-xs text-muted-foreground">Verified expenses</p>
+                        <div className="text-2xl font-bold">₹{(stats.byCategory['Raw Materials'] || 0).toLocaleString()}</div>
+                        <p className="text-xs text-muted-foreground">Stock replenishment</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Pending Review</CardTitle>
-                        <Wallet className="h-4 w-4 text-orange-500" />
+                        <CardTitle className="text-sm font-medium">Overheads</CardTitle>
+                        <Lightbulb className="h-4 w-4 text-yellow-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold text-orange-600">₹{pendingExpenses.toLocaleString()}</div>
-                        <p className="text-xs text-muted-foreground">Awaiting approval</p>
+                        <div className="text-2xl font-bold">₹{((stats.byCategory['Rent'] || 0) + (stats.byCategory['Electricity'] || 0)).toLocaleString()}</div>
+                        <p className="text-xs text-muted-foreground">Rent + Electricity</p>
                     </CardContent>
                 </Card>
                 <Card>
                     <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Fuel Costs</CardTitle>
-                        <Fuel className="h-4 w-4 text-muted-foreground" />
+                        <CardTitle className="text-sm font-medium">Petty Cash</CardTitle>
+                        <Coffee className="h-4 w-4 text-orange-500" />
                     </CardHeader>
                     <CardContent>
-                        <div className="text-2xl font-bold">₹{(expenseByCategory['Fuel'] || 0).toLocaleString()}</div>
-                        <p className="text-xs text-muted-foreground">Delivery expenses</p>
+                        <div className="text-2xl font-bold">₹{(stats.byCategory['Tea/Snacks'] || 0).toLocaleString()}</div>
+                        <p className="text-xs text-muted-foreground">Tea & Snacks</p>
                     </CardContent>
                 </Card>
             </div>
 
             <Card>
                 <CardHeader>
-                    <CardTitle>Expense Log</CardTitle>
+                    <CardTitle>Expense Journal</CardTitle>
+                    <CardDescription>Detailed log of every payment made.</CardDescription>
                 </CardHeader>
                 <CardContent>
                     <Table>
@@ -95,29 +92,27 @@ const Expenses = () => {
                                 <TableHead>Date</TableHead>
                                 <TableHead>Category</TableHead>
                                 <TableHead>Description</TableHead>
-                                <TableHead>Staff/Source</TableHead>
+                                <TableHead>Paid Via</TableHead>
                                 <TableHead className="text-right">Amount (₹)</TableHead>
-                                <TableHead>Status</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {expensesData.map((expense) => (
+                            {MOCK_EXPENSES.map((expense) => (
                                 <TableRow key={expense.id}>
-                                    <TableCell>{expense.date}</TableCell>
+                                    <TableCell className="whitespace-nowrap">{expense.date}</TableCell>
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                             {getCategoryIcon(expense.category)}
                                             {expense.category}
                                         </div>
                                     </TableCell>
-                                    <TableCell className="font-medium">{expense.description}</TableCell>
-                                    <TableCell>{expense.staff}</TableCell>
-                                    <TableCell className="text-right text-red-600">₹{expense.amount.toLocaleString()}</TableCell>
+                                    <TableCell className="font-medium text-muted-foreground">{expense.description}</TableCell>
                                     <TableCell>
-                                        <Badge variant={expense.status === 'Approved' ? 'default' : 'secondary'}>
-                                            {expense.status}
+                                        <Badge variant="outline" className="font-normal">
+                                            {expense.paidBy}
                                         </Badge>
                                     </TableCell>
+                                    <TableCell className="text-right font-bold text-slate-700">₹{expense.amount.toLocaleString()}</TableCell>
                                 </TableRow>
                             ))}
                         </TableBody>

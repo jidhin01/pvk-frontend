@@ -31,10 +31,12 @@ import {
   MapPin,
   User,
   IdCard,
-  Stamp
+  Stamp,
+  CheckCircle,
+  AlertTriangle,
+  type LucideIcon
 } from 'lucide-react';
 import { UserRole } from '@/contexts/AuthContext';
-import { LucideIcon } from 'lucide-react';
 
 export interface NavTab {
   id: string;
@@ -99,10 +101,9 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Printer',
     icon: PrinterIcon,
     tabs: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'pending-jobs', label: 'Pending Jobs', icon: FileText },
-      { id: 'completed-jobs', label: 'Completed Jobs', icon: CheckSquare },
-      { id: 'rejected-jobs', label: 'Rejected Jobs', icon: AlertCircle },
+      { id: 'dashboard', label: 'Job Queue', icon: PrinterIcon },
+      { id: 'history', label: 'Completed History', icon: CheckCircle },
+      { id: 'rejected', label: 'Rejected Log', icon: AlertTriangle },
     ],
   },
   {
@@ -110,11 +111,11 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Dealer',
     icon: Store,
     tabs: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'orders', label: 'Orders', icon: ShoppingCart },
-      { id: 'new-order', label: 'New Order', icon: PlusCircle },
+      { id: 'dashboard', label: 'Marketplace', icon: Store },
+      { id: 'orders', label: 'My Orders', icon: ShoppingCart },
+      { id: 'new-order', label: 'New Order', icon: Upload },
       { id: 'tracking', label: 'Tracking', icon: MapPin },
-      { id: 'profile', label: 'Profile', icon: User },
+      { id: 'profile', label: 'Profile', icon: Users },
     ],
   },
   {
@@ -170,10 +171,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Seal Team',
     icon: Stamp,
     tabs: [
-      { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'new-orders', label: 'New Orders', icon: FileText },
-      { id: 'processing', label: 'Processing', icon: Activity },
-      { id: 'completed', label: 'Completed', icon: CheckSquare },
+      { id: 'dashboard', label: 'Work Floor', icon: LayoutDashboard },
     ],
   },
 ];

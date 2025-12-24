@@ -1,6 +1,7 @@
 import { useAuth } from '@/contexts/AuthContext';
-import AdminDashboard from './admin/adminDashboard';
+
 import DesignerDashboard from './designer/designerDashboard';
+import AdminDashboard from './admin/AdminDashboard';
 
 export default function Dashboard() {
     const { user } = useAuth();
