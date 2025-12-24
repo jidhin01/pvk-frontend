@@ -3,9 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import {
   LogOut,
   Sun,
-  Moon,
-  Menu,
-  X
+  Moon
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getRoleConfig, ROLE_CONFIGS, RoleConfig } from '@/config/navigation';
@@ -33,8 +31,6 @@ interface SidebarProps {
 export function Sidebar({
   selectedRole,
   onRoleChange,
-  collapsed,
-  onCollapsedChange,
   activeTab,
   onTabChange,
   mobile = false
@@ -71,29 +67,12 @@ export function Sidebar({
     <aside
       className={cn(
         "bg-sidebar text-sidebar-foreground transition-all duration-300 ease-in-out flex flex-col h-full",
-        mobile ? "w-full" : "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border hidden md:flex",
-        !mobile && (collapsed ? "w-16" : "w-64")
+        mobile ? "w-full" : "fixed left-0 top-0 z-40 h-screen border-r border-sidebar-border hidden md:flex w-64"
       )}
     >
       {/* Logo Section */}
-      <div className={cn(
-        "flex items-center border-b border-sidebar-border h-16 px-3",
-        collapsed ? "justify-center" : "justify-between"
-      )}>
-        {!collapsed && (
-          <div className="flex items-center gap-3">
-            <img
-              src={pvkLogo}
-              alt="PVK Enterprises"
-              className="h-9 w-9 rounded-lg object-cover"
-            />
-            <div className="flex flex-col">
-              <span className="font-semibold text-sm text-sidebar-accent-foreground">PVK</span>
-              <span className="text-[10px] text-sidebar-foreground/60">Enterprises</span>
-            </div>
-          </div>
-        )}
-        {collapsed && (
+      <div className="flex items-center border-b border-sidebar-border h-16 px-3 justify-between">
+        <div className="flex items-center gap-3">
           <img
             src={pvkLogo}
             alt="PVK Enterprises"
@@ -142,12 +121,10 @@ export function Sidebar({
 
       {/* Navigation */}
       <nav className="flex-1 overflow-y-auto scrollbar-thin py-4 px-2">
-        <div className={cn("mb-3 px-2", collapsed && "text-center")}>
-          {!collapsed && (
-            <span className="text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/50">
-              {isSingleRole ? 'My Workspace' : 'Modules'}
-            </span>
-          )}
+        <div className="mb-3 px-2">
+          <span className="text-[10px] font-medium uppercase tracking-wider text-sidebar-foreground/50">
+            {isSingleRole ? 'My Workspace' : 'Modules'}
+          </span>
         </div>
         <ul className="space-y-1">
           {navItems.map((item) => {
@@ -166,7 +143,7 @@ export function Sidebar({
             return (
               <li key={item.id}>
                 <button
-                  onClick={() => handleNavClick(item)}
+                  onClick={handleClick}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm",
                     isActive
@@ -187,12 +164,7 @@ export function Sidebar({
       <div className="border-t border-sidebar-border p-3">
         {user && (
           <button
-            onClick={() => {
-              navigate('/profile');
-              if (isMobile && onMobileOpenChange) {
-                onMobileOpenChange(false);
-              }
-            }}
+            onClick={() => navigate('/profile')}
             className="w-full flex items-center gap-3 mb-3 px-1 py-2 -my-2 rounded-lg hover:bg-sidebar-accent transition-colors cursor-pointer"
           >
             <div className="h-8 w-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-sidebar-primary font-medium text-sm">
@@ -215,48 +187,6 @@ export function Sidebar({
           <span>Logout</span>
         </Button>
       </div>
-    </>
-  );
-
-  // Mobile: Overlay sidebar
-  if (isMobile) {
-    return (
-      <>
-        {/* Mobile Menu Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={() => onMobileOpenChange?.(!mobileOpen)}
-          className="fixed top-4 left-4 z-50 h-10 w-10 bg-background/80 backdrop-blur-sm border border-border shadow-sm md:hidden"
-        >
-          {mobileOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
-
-        {/* Mobile Overlay */}
-        {mobileOpen && (
-          <div
-            className="fixed inset-0 bg-black/50 z-40 md:hidden"
-            onClick={() => onMobileOpenChange?.(false)}
-          />
-        )}
-
-        {/* Mobile Sidebar */}
-        <aside
-          className={cn(
-            "fixed left-0 top-0 z-40 h-screen w-72 bg-sidebar text-sidebar-foreground border-r border-sidebar-border transition-transform duration-300 ease-in-out flex flex-col md:hidden",
-            mobileOpen ? "translate-x-0" : "-translate-x-full"
-          )}
-        >
-          {sidebarContent}
-        </aside>
-      </>
-    );
-  }
-
-  // Desktop: Fixed sidebar (no collapse)
-  return (
-    <aside className="fixed left-0 top-0 z-40 h-screen w-60 bg-sidebar text-sidebar-foreground border-r border-sidebar-border flex flex-col hidden md:flex">
-      {sidebarContent}
     </aside>
   );
 }
