@@ -38,6 +38,7 @@ import {
 import { CURRENT_DEALER, GoodsType, PrintType } from '@/data/mockDealerData';
 import { cn } from '@/lib/utils';
 import { toast } from 'sonner';
+import SealWizardLayout from './services/seals/SealWizardLayout';
 
 const STEPS = [
     { id: 1, label: 'Goods Type' },
@@ -55,6 +56,7 @@ export default function NewOrder() {
     const [estimatedPrice, setEstimatedPrice] = useState(0);
     const [priceBreakdown, setPriceBreakdown] = useState<string>('');
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
+    const [isSealConfigComplete, setIsSealConfigComplete] = useState(false);
 
     // Price Calculation Logic
     useEffect(() => {
@@ -84,8 +86,15 @@ export default function NewOrder() {
             price = 120;
             breakdown = 'Fixed Dealer Rate';
         } else if (selectedService === 'SEAL') {
-            price = 200;
-            breakdown = 'Fixed Dealer Rate';
+            // Price handling now delegated to Wizard callback for updates, 
+            // but we keep a base fallback here if needed, or rely on the callback.
+            // The callback `onPriceUpdate` will override this.
+            if (estimatedPrice === 0) {
+                price = 200; // Default fallback
+                breakdown = 'Estimated Base Rate';
+            } else {
+                return; // Allow wizard to control
+            }
         }
         setEstimatedPrice(price);
         setPriceBreakdown(breakdown);
@@ -288,32 +297,35 @@ export default function NewOrder() {
                             )}
 
                             {selectedService === 'SEAL' && (
-                                <div className="space-y-4">
-                                    <div className="space-y-2">
-                                        <Label>Seal Text Content</Label>
-                                        <Input name="sealText" placeholder="Line 1 / Line 2" onChange={handleInputChange} />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <Label>Mount Type</Label>
-                                        <Select onValueChange={(v) => null}>
-                                            <SelectTrigger><SelectValue placeholder="Select Mount" /></SelectTrigger>
-                                            <SelectContent>
-                                                <SelectItem value="normal">Normal Wood Handle</SelectItem>
-                                                <SelectItem value="self">Self Inking</SelectItem>
-                                            </SelectContent>
-                                        </Select>
-                                    </div>
-                                </div>
+                                <SealWizardLayout
+                                    onConfigurationComplete={(config) => {
+                                        setFormData(prev => ({
+                                            ...prev,
+                                            sealConfig: config,
+                                            sealType: config.type,
+                                            sealTemplate: config.template,
+                                            sealContent: config.content.join('\n'),
+                                            sealColor: config.color
+                                        }));
+                                        setIsSealConfigComplete(true);
+                                    }}
+                                    onPriceUpdate={(price) => {
+                                        setEstimatedPrice(price);
+                                        setPriceBreakdown('Base + Template Modifier');
+                                    }}
+                                />
                             )}
 
                             {/* ENHANCED FILE UPLOAD */}
                             <div className="space-y-3 pt-2">
                                 <Label className="flex items-center gap-2">
-                                    Upload Design File
+                                    Upload Design / Reference
                                     <TooltipProvider>
                                         <Tooltip><TooltipTrigger><Info className="h-4 w-4 text-muted-foreground" /></TooltipTrigger><TooltipContent>PDF, CDR, AI, EPS supported.</TooltipContent></Tooltip>
                                     </TooltipProvider>
                                 </Label>
+
+                                {selectedService === 'SEAL' && <p className="text-xs text-muted-foreground">Upload a logo or specific design if required.</p>}
 
                                 {!selectedFile ? (
                                     <div className="border-2 border-dashed border-muted-foreground/25 rounded-xl p-8 flex flex-col items-center justify-center text-center hover:bg-muted/30 transition-colors relative group">
@@ -366,6 +378,16 @@ export default function NewOrder() {
                                 </>
                             )}
 
+                            {selectedService === 'SEAL' && (
+                                <>
+                                    <div className="flex justify-between items-center text-sm">
+                                        <span className="text-muted-foreground">Category</span>
+                                        <span className="font-medium capitalize">Seal</span>
+                                    </div>
+                                </>
+                            )}
+
+
                             <div className="pt-4 border-t flex flex-col gap-2">
                                 <div className="flex justify-between items-center">
                                     <span className="font-semibold">Total Cost</span>
@@ -391,7 +413,7 @@ export default function NewOrder() {
                             </div>
                         </CardContent>
                         <CardFooter>
-                            <Button className="w-full" size="lg" disabled={isCreditExceeded || estimatedPrice === 0 || !formData.jobName && selectedService === 'PRINT'}>
+                            <Button className="w-full" size="lg" disabled={isCreditExceeded || estimatedPrice === 0 || (!formData.jobName && selectedService === 'PRINT') || (selectedService === 'SEAL' && !isSealConfigComplete)}>
                                 Place Order
                             </Button>
                         </CardFooter>
