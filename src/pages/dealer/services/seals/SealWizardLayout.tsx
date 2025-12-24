@@ -91,17 +91,17 @@ export default function SealWizardLayout({ onConfigurationComplete, onPriceUpdat
     }
 
     return (
-        <div className="flex flex-col min-h-screen bg-slate-50/50 -mx-6 -my-6 sm:rounded-xl overflow-hidden">
+        <div className="flex flex-col min-h-[calc(100vh-4rem)] bg-background border rounded-xl overflow-hidden shadow-sm animate-in fade-in">
             {/* 1. Header & Progress */}
-            <header className="bg-white border-b sticky top-0 z-40 shadow-sm backdrop-blur-xl bg-white/80">
+            <header className="bg-background/95 backdrop-blur-sm border-b sticky top-0 z-40">
                 <div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
                     <div className="flex items-center gap-2">
-                        <div className="bg-emerald-100 p-2 rounded-lg text-emerald-600">
+                        <div className="bg-primary/10 p-2 rounded-lg text-primary">
                             <Sparkles className="h-5 w-5" />
                         </div>
                         <div>
-                            <h1 className="font-bold text-slate-800 leading-none">Seal Studio</h1>
-                            <span className="text-[10px] uppercase font-bold text-slate-400 tracking-wider">Step {step}: {step === 1 ? 'Select Type' : 'Select Template'}</span>
+                            <h1 className="font-bold text-foreground leading-none">Seal Studio</h1>
+                            <span className="text-[10px] uppercase font-bold text-muted-foreground tracking-wider">Step {step}: {step === 1 ? 'Select Type' : 'Select Template'}</span>
                         </div>
                     </div>
 
@@ -111,18 +111,18 @@ export default function SealWizardLayout({ onConfigurationComplete, onPriceUpdat
                             <div key={s} className="flex items-center gap-2">
                                 <div className={cn(
                                     "h-8 w-8 rounded-full flex items-center justify-center font-bold text-xs transition-all duration-500",
-                                    step === s ? "bg-emerald-600 text-white shadow-emerald-200 shadow-lg scale-110" :
-                                        step > s ? "bg-emerald-100 text-emerald-700" : "bg-slate-100 text-slate-400"
+                                    step === s ? "bg-primary text-primary-foreground shadow-primary/30 shadow-lg scale-110" :
+                                        step > s ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground"
                                 )}>
                                     {step > s ? <Check className="h-4 w-4" /> : s}
                                 </div>
                                 <span className={cn(
                                     "hidden md:block text-sm font-medium transition-colors duration-300",
-                                    step >= s ? "text-slate-800" : "text-slate-300"
+                                    step >= s ? "text-foreground" : "text-muted-foreground"
                                 )}>
                                     {s === 1 ? 'Select Type' : s === 2 ? 'Template' : 'Design'}
                                 </span>
-                                {s < 3 && <div className="hidden md:block w-8 h-0.5 bg-slate-200 mx-2" />}
+                                {s < 3 && <div className="hidden md:block w-8 h-0.5 bg-muted mx-2" />}
                             </div>
                         ))}
                     </div>
@@ -130,7 +130,7 @@ export default function SealWizardLayout({ onConfigurationComplete, onPriceUpdat
             </header>
 
             {/* 2. Main Canvas */}
-            <main className="flex-1 max-w-6xl mx-auto w-full p-6 pb-24">
+            <main className="flex-1 w-full max-w-6xl mx-auto p-6 pb-32">
                 {step === 1 && (
                     <Step1_TypeSelector selectedType={selectedType} onSelect={setSelectedType} />
                 )}
@@ -141,13 +141,13 @@ export default function SealWizardLayout({ onConfigurationComplete, onPriceUpdat
             </main>
 
             {/* 3. Sticky Footer */}
-            <footer className="fixed bottom-0 left-0 right-0 bg-white/90 backdrop-blur-md border-t p-4 z-50">
+            <footer className="fixed bottom-0 left-0 right-0 lg:left-64 bg-background/95 backdrop-blur-md border-t p-4 z-40 transition-all duration-300">
                 <div className="max-w-4xl mx-auto flex items-center justify-between">
                     <Button
                         variant="ghost"
                         onClick={prevStep}
                         disabled={step === 1}
-                        className="text-slate-500 hover:text-slate-800"
+                        className="text-muted-foreground hover:text-foreground"
                     >
                         <ChevronLeft className="mr-2 h-4 w-4" /> Back
                     </Button>
@@ -156,7 +156,7 @@ export default function SealWizardLayout({ onConfigurationComplete, onPriceUpdat
                         size="lg"
                         onClick={nextStep}
                         disabled={(step === 1 && !selectedType) || (step === 2 && !selectedTemplate)}
-                        className="min-w-[160px] shadow-lg shadow-emerald-200 transition-all bg-emerald-600 hover:bg-emerald-700"
+                        className="min-w-[160px] shadow-lg shadow-primary/20 transition-all bg-primary hover:bg-primary/90 text-primary-foreground"
                     >
                         Continue <ArrowRight className="ml-2 h-4 w-4" />
                     </Button>
