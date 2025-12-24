@@ -1,73 +1,133 @@
-# React + TypeScript + Vite
+# PVK Enterprises - Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern, role-based enterprise management dashboard built with React, TypeScript, and Tailwind CSS.
 
-Currently, two official plugins are available:
+## 🚀 Tech Stack
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **Framework**: [React](https://react.dev/) 18 + [TypeScript](https://www.typescriptlang.org/)
+- **Build Tool**: [Vite](https://vite.dev/)
+- **Styling**: [Tailwind CSS](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
+- **Routing**: [React Router](https://reactrouter.com/) v6
+- **State Management**: [TanStack Query](https://tanstack.com/query)
+- **Forms**: [React Hook Form](https://react-hook-form.com/) + [Zod](https://zod.dev/)
+- **Charts**: [Recharts](https://recharts.org/)
+- **Animations**: [Framer Motion](https://www.framer.com/motion/)
 
-## React Compiler
+## 📁 Project Structure
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+src/
+├── components/        # Reusable UI components
+│   ├── layout/       # Layout components (Sidebar, TopBar)
+│   └── ui/           # shadcn/ui components
+├── config/           # App configuration
+├── contexts/         # React contexts (Auth, Theme)
+├── data/             # Mock data and constants
+├── hooks/            # Custom React hooks
+├── lib/              # Utility functions
+└── pages/            # Route pages
+    ├── admin/        # Admin dashboard pages
+    ├── dealer/       # Dealer workflow pages
+    ├── designer/     # Designer workflow pages
+    ├── finance/      # Finance management pages
+    ├── inventory/    # Inventory management pages
+    ├── pan-team/     # PAN verification pages
+    ├── printer/      # Printer workflow pages
+    ├── sales/        # Sales management pages
+    ├── seal-team/    # Seal team pages
+    └── stock/        # Stock keeper pages
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 🎭 Role-Based Access
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+The application supports multiple user roles, each with a customized dashboard:
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+| Role | Description |
+|------|-------------|
+| Admin | Full system administration |
+| Dealer | Dealer operations management |
+| Designer | Design workflow management |
+| Finance | Financial reports and management |
+| Printer | Print job management |
+| Sales | Sales operations |
+| Stock Keeper | Inventory control |
+| PAN Team | PAN card verification |
+| Seal Team | Seal management |
+
+## 🛠️ Getting Started
+
+### Prerequisites
+
+- Node.js 18+ or Bun
+- npm, yarn, or bun
+
+### Installation
+
+```bash
+# Clone the repository
+git clone <repository-url>
+
+# Navigate to the project
+cd pvk-frontend
+
+# Install dependencies
+npm install
+# or
+bun install
 ```
+
+### Development
+
+```bash
+# Start development server
+npm run dev
+# or
+bun dev
+```
+
+The app will be available at `http://localhost:5173`
+
+### Build
+
+```bash
+# Production build
+npm run build
+
+# Development build
+npm run build:dev
+
+# Preview production build
+npm run preview
+```
+
+### Linting
+
+```bash
+npm run lint
+```
+
+## 🎨 Features
+
+- **Dark/Light Mode**: Theme switching with system preference detection
+- **Responsive Design**: Mobile-friendly sidebar and layouts
+- **Role-Based Navigation**: Dynamic sidebar based on user role
+- **Modern UI**: Clean, minimal design with smooth animations
+- **Form Validation**: Comprehensive form handling with Zod schemas
+- **Data Visualization**: Interactive charts and graphs
+
+## 📦 Deployment
+
+The project is configured for deployment on [Vercel](https://vercel.com/). The `vercel.json` file handles client-side routing rewrites.
+
+```bash
+# Deploy to Vercel
+vercel deploy
+```
+
+## 📄 License
+
+Private - All rights reserved
+
+---
+
+Built with ❤️ for PVK Enterprises
