@@ -78,12 +78,11 @@ const StudioShell: React.FC<{
     color: string;
 }> = ({ onBack, onSave, template, color }) => {
     const { blocks, zoom, setZoom, gridVisible, toggleGrid, selectBlock } = useStudio();
-    const [isSummaryOpen, setSummaryOpen] = useState(false);
 
     return (
         <div className="flex flex-col h-[calc(100vh-64px)] w-full bg-slate-50 dark:bg-slate-950 overflow-hidden">
             {/* 1. Header (Fixed Height) */}
-            <StudioHeader onBack={onBack} onFinish={() => setSummaryOpen(true)} />
+            <StudioHeader onBack={onBack} onFinish={() => onSave(blocks)} />
 
             {/* 2. Main Workspace (Takes all remaining height) */}
             <div className="flex-1 flex overflow-hidden relative">
@@ -139,15 +138,6 @@ const StudioShell: React.FC<{
             <div className="md:hidden h-[50vh] bg-white dark:bg-slate-900 border-t dark:border-slate-800 flex flex-col z-30 shadow-[0_-4px_10px_rgba(0,0,0,0.1)]">
                 <ControlPanel />
             </div>
-
-            {/* MODALS */}
-            <OrderReviewModal
-                isOpen={isSummaryOpen}
-                onClose={() => setSummaryOpen(false)}
-                template={template}
-                blocks={blocks}
-                color={color}
-            />
         </div>
     );
 };
