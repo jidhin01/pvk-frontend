@@ -5,10 +5,16 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import { ThemeProvider } from "@/contexts/ThemeContext";
+import { InventoryProvider } from "@/contexts/InventoryContext";
 import { getDashboardPath } from "@/config/navigation";
 import Login from "./pages/Login";
 import NotFound from "./pages/NotFound";
 import AdminDashboard from "./pages/admin/adminDashboard";
+import AdminInventoryLayout from "./pages/admin/inventory/AdminInventoryLayout";
+import FinancialDashboard from "./pages/admin/inventory/FinancialDashboard";
+import ApprovalCenter from "./pages/admin/inventory/ApprovalCenter";
+import MasterData from "./pages/admin/inventory/MasterData";
+import InventoryReports from "./pages/admin/inventory/InventoryReports";
 import MarketplaceDashboard from "@/pages/marketplace/MarketplaceDashboard";
 import DesignerDashboard from "@/pages/designer/designerDashboard";
 import PrinterDashboard from "@/pages/printer/printerDashboard";
@@ -47,6 +53,15 @@ function AppRoutes() {
       {/* Role-based Dashboards */}
       <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
 
+      {/* Admin Inventory Control Tower Routes */}
+      <Route path="/admin/inventory" element={<ProtectedRoute><AdminInventoryLayout /></ProtectedRoute>}>
+        <Route index element={<Navigate to="dashboard" replace />} />
+        <Route path="dashboard" element={<FinancialDashboard />} />
+        <Route path="approvals" element={<ApprovalCenter />} />
+        <Route path="masters" element={<MasterData />} />
+        <Route path="reports" element={<InventoryReports />} />
+      </Route>
+
       <Route path="/marketplace/*" element={<ProtectedRoute><MarketplaceDashboard /></ProtectedRoute>} />
       <Route path="/designer" element={<ProtectedRoute><DesignerDashboard /></ProtectedRoute>} />
       <Route path="/finance" element={<ProtectedRoute><FinanceDashboard /></ProtectedRoute>} />
@@ -73,15 +88,17 @@ function AppRoutes() {
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <ThemeProvider>
-      <AuthProvider>
-        <TooltipProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <AppRoutes />
-          </BrowserRouter>
-        </TooltipProvider>
-      </AuthProvider>
+      <InventoryProvider>
+        <AuthProvider>
+          <TooltipProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <AppRoutes />
+            </BrowserRouter>
+          </TooltipProvider>
+        </AuthProvider>
+      </InventoryProvider>
     </ThemeProvider>
   </QueryClientProvider>
 );

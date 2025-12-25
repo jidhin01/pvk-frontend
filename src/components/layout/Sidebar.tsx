@@ -85,6 +85,7 @@ export function Sidebar({
     : getRoleConfig(user?.role || 'admin')?.tabs || [];  // All other users see their own tabs
 
   const handleNavClick = (item: any) => {
+    // Standard behavior
     if (isSuperAdmin && onRoleChange) {
       // Super admin switches between roles
       onRoleChange(item.id as UserRole);
