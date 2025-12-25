@@ -25,6 +25,7 @@ import PartnersManagement from './PartnersManagement';
 import DesignerManagement from './DesignerManagement';
 import InventoryModule from './inventory/InventoryModule';
 import PrinterManager from './printer/PrinterManager';
+import AdminPancardManager from './pancard/AdminPancardManager';
 
 
 export default function AdminDashboard() {
@@ -72,13 +73,7 @@ export default function AdminDashboard() {
             return <InventoryModule />;
 
           case 'manage-pancard':
-            return (
-              <RoleManagement
-                roleId="pancard"
-                roleName="PAN Card Team"
-                roleIcon={<IdCard className="h-6 w-6 text-primary" />}
-              />
-            );
+            return <AdminPancardManager />;
 
           case 'manage-seal':
             return (
