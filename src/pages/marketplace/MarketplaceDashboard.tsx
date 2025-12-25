@@ -8,6 +8,8 @@ import Tracking from './Tracking';
 import Profile from './Profile';
 import DashboardHome from './DashboardHome';
 import OrdersPage from './OrdersPage';
+import NewPanCard from './NewPanCard';
+import NewRubberSeal from './NewRubberSeal';
 
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -60,12 +62,16 @@ export default function MarketplaceDashboard() {
                         return <OrdersPage />;
                     case 'new-order':
                         return <NewOrder />;
+                    case 'new-pan-card':
+                        return <NewPanCard onNavigate={onTabChange} />;
+                    case 'new-rubber-seal':
+                        return <NewRubberSeal onNavigate={onTabChange} />;
                     case 'tracking':
                         return <Tracking />;
                     case 'profile':
                         return <Profile />;
                     default:
-                        return <DashboardHome onNavigate={onTabChange} />
+                        return <DashboardHome onNavigate={onTabChange} />;
                 }
             }}
         </DashboardLayout>

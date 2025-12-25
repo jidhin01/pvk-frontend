@@ -191,25 +191,7 @@ export function Sidebar({
 
       {/* User Section */}
       <div className="border-t border-sidebar-border p-3 flex-shrink-0">
-        {user && (
-          <button
-            onClick={() => {
-              navigate('/profile');
-              if (isMobile && onMobileOpenChange) {
-                onMobileOpenChange(false);
-              }
-            }}
-            className="w-full flex items-center gap-3 mb-3 px-1 py-2 -my-2 rounded-lg hover:bg-sidebar-accent transition-colors cursor-pointer"
-          >
-            <div className="h-8 w-8 rounded-full bg-sidebar-primary/20 flex items-center justify-center text-sidebar-primary font-medium text-sm flex-shrink-0">
-              {user.name.charAt(0)}
-            </div>
-            <div className="flex-1 min-w-0 text-left">
-              <p className="text-sm font-medium text-sidebar-accent-foreground truncate">{user.name}</p>
-              <p className="text-[10px] text-sidebar-foreground/60 truncate">{user.email}</p>
-            </div>
-          </button>
-        )}
+
 
         {/* Logout Button with Confirmation Dialog */}
         <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>

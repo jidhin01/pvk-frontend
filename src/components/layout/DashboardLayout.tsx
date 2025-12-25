@@ -3,7 +3,12 @@ import { cn } from '@/lib/utils';
 import { UserRole, useAuth } from '@/contexts/AuthContext';
 import { getRoleConfig } from '@/config/navigation';
 import { Sidebar } from './Sidebar';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 
 import { Menu } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -21,6 +26,7 @@ interface DashboardLayoutProps {
 export function DashboardLayout({ children }: DashboardLayoutProps) {
   const { user } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [selectedRole, setSelectedRole] = useState<UserRole>(user?.role || 'admin');
 
   // Get initial tab from role config
@@ -78,6 +84,22 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         <div className="font-bold text-lg">PVK Enterprises</div>
         <div className="flex items-center gap-2">
           <NotificationBell />
+          {user && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm hover:bg-primary/20 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  {user.name.charAt(0).toUpperCase()}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="end">
+                <div className="text-sm font-medium">{user.name}</div>
+                <div className="text-xs text-muted-foreground">{user.email}</div>
+              </TooltipContent>
+            </Tooltip>
+          )}
           <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon">
@@ -101,7 +123,25 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
       {/* Desktop Top Bar */}
       <div className="hidden md:flex fixed top-0 left-64 right-0 h-14 items-center justify-end px-6 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-30">
-        <NotificationBell />
+        <div className="flex items-center gap-2">
+          <NotificationBell />
+          {user && (
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  onClick={() => navigate('/profile')}
+                  className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium text-sm hover:bg-primary/20 transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+                >
+                  {user.name.charAt(0).toUpperCase()}
+                </button>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="end">
+                <div className="text-sm font-medium">{user.name}</div>
+                <div className="text-xs text-muted-foreground">{user.email}</div>
+              </TooltipContent>
+            </Tooltip>
+          )}
+        </div>
       </div>
 
       {/* Main Content */}
