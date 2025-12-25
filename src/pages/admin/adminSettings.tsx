@@ -26,8 +26,11 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 
 const AdminSettings = () => {
+  const { user } = useAuth();
+  const isAdmin = user?.role === 'admin' || user?.role === 'super_admin';
   const [settings, setSettings] = useState({
     // Business
     businessName: 'PVK Enterprises',
@@ -86,7 +89,7 @@ const AdminSettings = () => {
 
       {/* Settings Tabs */}
       <Tabs defaultValue="business" className="space-y-4">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-3'}`}>
           <TabsTrigger value="business" className="gap-2">
             <Building2 className="h-4 w-4" />
             <span className="hidden sm:inline">Business</span>
@@ -95,10 +98,12 @@ const AdminSettings = () => {
             <Bell className="h-4 w-4" />
             <span className="hidden sm:inline">Notifications</span>
           </TabsTrigger>
-          <TabsTrigger value="rules" className="gap-2">
-            <Shield className="h-4 w-4" />
-            <span className="hidden sm:inline">Rules</span>
-          </TabsTrigger>
+          {isAdmin && (
+            <TabsTrigger value="rules" className="gap-2">
+              <Shield className="h-4 w-4" />
+              <span className="hidden sm:inline">Rules</span>
+            </TabsTrigger>
+          )}
           <TabsTrigger value="system" className="gap-2">
             <Settings className="h-4 w-4" />
             <span className="hidden sm:inline">System</span>
@@ -243,64 +248,66 @@ const AdminSettings = () => {
           </Card>
         </TabsContent>
 
-        {/* Business Rules */}
-        <TabsContent value="rules">
-          <Card>
-            <CardHeader>
-              <CardTitle>Business Rules</CardTitle>
-              <CardDescription>Configure pricing and operational rules</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="designerEarning">Designer Earning per Design (₹)</Label>
-                  <Input
-                    id="designerEarning"
-                    type="number"
-                    value={settings.designerEarningPerDesign}
-                    onChange={(e) => setSettings({ ...settings, designerEarningPerDesign: parseInt(e.target.value) })}
-                  />
+        {/* Business Rules - Admin Only */}
+        {isAdmin && (
+          <TabsContent value="rules">
+            <Card>
+              <CardHeader>
+                <CardTitle>Business Rules</CardTitle>
+                <CardDescription>Configure pricing and operational rules</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="designerEarning">Designer Earning per Design (₹)</Label>
+                    <Input
+                      id="designerEarning"
+                      type="number"
+                      value={settings.designerEarningPerDesign}
+                      onChange={(e) => setSettings({ ...settings, designerEarningPerDesign: parseInt(e.target.value) })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="designerFine">Designer Fine per Mistake (₹)</Label>
+                    <Input
+                      id="designerFine"
+                      type="number"
+                      value={settings.designerFinePerMistake}
+                      onChange={(e) => setSettings({ ...settings, designerFinePerMistake: parseInt(e.target.value) })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="uploadReward">Upload Reward (₹)</Label>
+                    <Input
+                      id="uploadReward"
+                      type="number"
+                      value={settings.uploadReward}
+                      onChange={(e) => setSettings({ ...settings, uploadReward: parseInt(e.target.value) })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="deadStockDays">Dead Stock Duration (Days)</Label>
+                    <Input
+                      id="deadStockDays"
+                      type="number"
+                      value={settings.deadStockDays}
+                      onChange={(e) => setSettings({ ...settings, deadStockDays: parseInt(e.target.value) })}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="minStock">Minimum Stock Threshold</Label>
+                    <Input
+                      id="minStock"
+                      type="number"
+                      value={settings.minStockThreshold}
+                      onChange={(e) => setSettings({ ...settings, minStockThreshold: parseInt(e.target.value) })}
+                    />
+                  </div>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="designerFine">Designer Fine per Mistake (₹)</Label>
-                  <Input
-                    id="designerFine"
-                    type="number"
-                    value={settings.designerFinePerMistake}
-                    onChange={(e) => setSettings({ ...settings, designerFinePerMistake: parseInt(e.target.value) })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="uploadReward">Upload Reward (₹)</Label>
-                  <Input
-                    id="uploadReward"
-                    type="number"
-                    value={settings.uploadReward}
-                    onChange={(e) => setSettings({ ...settings, uploadReward: parseInt(e.target.value) })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="deadStockDays">Dead Stock Duration (Days)</Label>
-                  <Input
-                    id="deadStockDays"
-                    type="number"
-                    value={settings.deadStockDays}
-                    onChange={(e) => setSettings({ ...settings, deadStockDays: parseInt(e.target.value) })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="minStock">Minimum Stock Threshold</Label>
-                  <Input
-                    id="minStock"
-                    type="number"
-                    value={settings.minStockThreshold}
-                    onChange={(e) => setSettings({ ...settings, minStockThreshold: parseInt(e.target.value) })}
-                  />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </TabsContent>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        )}
 
         {/* System Settings */}
         <TabsContent value="system">
