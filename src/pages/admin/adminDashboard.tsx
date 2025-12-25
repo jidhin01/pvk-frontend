@@ -21,6 +21,7 @@ import FinanceOverview from './FinanceOverview';
 import AdminSettings from './adminSettings';
 import AdminActivityLogs from './adminActivityLogs';
 import RoleManagement from './RoleManagement';
+import PartnersManagement from './PartnersManagement';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -108,23 +109,8 @@ export default function AdminDashboard() {
               />
             );
 
-          case 'manage-dealer':
-            return (
-              <RoleManagement
-                roleId="dealer"
-                roleName="Dealers"
-                roleIcon={<Store className="h-6 w-6 text-primary" />}
-              />
-            );
-
-          case 'manage-customer':
-            return (
-              <RoleManagement
-                roleId="customer"
-                roleName="Customers"
-                roleIcon={<User className="h-6 w-6 text-primary" />}
-              />
-            );
+          case 'manage-partners':
+            return <PartnersManagement />;
 
           case 'finance-overview':
             // Only show finance for admin

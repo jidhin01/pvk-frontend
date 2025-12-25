@@ -11,7 +11,8 @@ import {
     MapPin,
     Calendar,
     FileText,
-    Image
+    Image,
+    Navigation
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -27,6 +28,14 @@ import {
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from '@/components/ui/select';
+import { Route, ROUTES, getRouteLabel } from '@/data/mockSalesData';
 
 // Mock pending dealer requests
 const MOCK_PENDING_DEALERS = [
@@ -108,11 +117,25 @@ const DealerApprovals = () => {
     const [selectedDealer, setSelectedDealer] = useState<any>(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+    const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+    const [selectedRoute, setSelectedRoute] = useState<Route | ''>('');
     const [rejectReason, setRejectReason] = useState('');
 
-    const handleApprove = (dealer: any) => {
-        console.log('Approving dealer:', dealer);
-        // Mock approval
+    const openApproveModal = (dealer: any) => {
+        setSelectedDealer(dealer);
+        setSelectedRoute('');
+        setIsApproveModalOpen(true);
+    };
+
+    const confirmApproval = () => {
+        if (!selectedRoute) {
+            return;
+        }
+        console.log('Approving dealer:', selectedDealer, 'with route:', selectedRoute);
+        setIsApproveModalOpen(false);
+        setIsViewModalOpen(false);
+        setSelectedRoute('');
+        // Mock approval - in real implementation, this would call an API
     };
 
     const handleReject = () => {
@@ -261,7 +284,7 @@ const DealerApprovals = () => {
                                     </Button>
                                     <Button
                                         className="flex-1 bg-green-600 hover:bg-green-700"
-                                        onClick={() => handleApprove(dealer)}
+                                        onClick={() => openApproveModal(dealer)}
                                     >
                                         <CheckCircle className="h-4 w-4 mr-2" />
                                         Approve
@@ -399,10 +422,7 @@ const DealerApprovals = () => {
                         </Button>
                         <Button
                             className="bg-green-600 hover:bg-green-700"
-                            onClick={() => {
-                                handleApprove(selectedDealer);
-                                setIsViewModalOpen(false);
-                            }}
+                            onClick={() => openApproveModal(selectedDealer)}
                         >
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Approve
@@ -438,6 +458,74 @@ const DealerApprovals = () => {
                         <Button variant="destructive" onClick={handleReject}>
                             <XCircle className="h-4 w-4 mr-2" />
                             Reject Application
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            {/* Approve Modal with Route Selection */}
+            <Dialog open={isApproveModalOpen} onOpenChange={setIsApproveModalOpen}>
+                <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                        <DialogTitle className="flex items-center gap-2">
+                            <CheckCircle className="h-5 w-5 text-green-600" />
+                            Approve Dealer Application
+                        </DialogTitle>
+                        <DialogDescription>
+                            Assign a delivery route to this dealer before approval
+                        </DialogDescription>
+                    </DialogHeader>
+                    {selectedDealer && (
+                        <div className="space-y-4">
+                            <div className="bg-muted/50 rounded-lg p-4">
+                                <div className="flex items-center gap-3">
+                                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
+                                        <Store className="h-5 w-5 text-primary" />
+                                    </div>
+                                    <div>
+                                        <h4 className="font-semibold">{selectedDealer.companyName}</h4>
+                                        <p className="text-sm text-muted-foreground">{selectedDealer.ownerName}</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div className="space-y-2">
+                                <Label htmlFor="route-select" className="flex items-center gap-2">
+                                    <Navigation className="h-4 w-4" />
+                                    Select Delivery Route *
+                                </Label>
+                                <Select
+                                    value={selectedRoute}
+                                    onValueChange={(val) => setSelectedRoute(val as Route)}
+                                >
+                                    <SelectTrigger id="route-select" className="w-full">
+                                        <SelectValue placeholder="Choose a route for this dealer" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {ROUTES.map((route) => (
+                                            <SelectItem key={route.id} value={route.id}>
+                                                {route.label}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                                <p className="text-xs text-muted-foreground">
+                                    This route will be used for delivery assignments to this dealer's location.
+                                </p>
+                            </div>
+                        </div>
+                    )}
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsApproveModalOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button
+                            className="bg-green-600 hover:bg-green-700"
+                            onClick={confirmApproval}
+                            disabled={!selectedRoute}
+                        >
+                            <CheckCircle className="h-4 w-4 mr-2" />
+                            Approve Dealer
                         </Button>
                     </DialogFooter>
                 </DialogContent>

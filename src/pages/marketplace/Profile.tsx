@@ -172,46 +172,82 @@ export default function Profile() {
                             <MapPin className="h-5 w-5 text-primary" />
                             Saved Addresses
                         </CardTitle>
-                        <CardDescription>Manage your shipping locations.</CardDescription>
+                        <CardDescription>Manage your shipping locations with assigned delivery routes.</CardDescription>
                     </div>
                     <Button variant="outline" size="sm">
                         <Plus className="h-4 w-4 mr-1" /> Add New
                     </Button>
                 </CardHeader>
                 <CardContent className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 pt-4">
-                    <div className="flex items-start gap-3 p-4 border rounded-lg bg-primary/5 border-primary/20">
-                        <MapPin className="h-5 w-5 text-primary mt-0.5" />
-                        <div className="space-y-1 flex-1">
-                            <div className="flex items-center justify-between">
-                                <p className="font-medium text-sm">Main Office</p>
-                                <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full">Default</span>
+                    {/* Main Office Address */}
+                    <div className="p-4 border rounded-lg bg-primary/5 border-primary/20 space-y-3">
+                        <div className="flex items-start gap-3">
+                            <MapPin className="h-5 w-5 text-primary mt-0.5 flex-shrink-0" />
+                            <div className="space-y-1 flex-1 min-w-0">
+                                <div className="flex items-center justify-between gap-2">
+                                    <p className="font-medium text-sm truncate">Main Office</p>
+                                    <span className="text-xs bg-primary text-primary-foreground px-2 py-0.5 rounded-full flex-shrink-0">Default</span>
+                                </div>
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                    123, Business Park, MG Road,<br />
+                                    Cochin, Kerala - 682001
+                                </p>
                             </div>
-                            <p className="text-xs text-muted-foreground leading-relaxed">
-                                123, Business Park, MG Road,<br />
-                                Cochin, Kerala - 682001
-                            </p>
+                        </div>
+                        <div className="flex items-center gap-2 pt-2 border-t border-primary/10">
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-blue-100 dark:bg-blue-900/40 rounded-md">
+                                <svg className="h-3.5 w-3.5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                </svg>
+                                <span className="text-xs font-semibold text-blue-700 dark:text-blue-400">Route #A1</span>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">MG Road Line</span>
                         </div>
                     </div>
 
-                    <div className="flex items-start gap-3 p-4 border rounded-lg bg-background hover:bg-muted/30 transition-colors">
-                        <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                        <div className="space-y-1 flex-1">
-                            <p className="font-medium text-sm">Branch Office</p>
-                            <p className="text-xs text-muted-foreground leading-relaxed">
-                                456, Industrial Area,<br />
-                                Trivandrum, Kerala - 695001
-                            </p>
+                    {/* Branch Office Address */}
+                    <div className="p-4 border rounded-lg bg-background hover:bg-muted/30 transition-colors space-y-3">
+                        <div className="flex items-start gap-3">
+                            <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                            <div className="space-y-1 flex-1 min-w-0">
+                                <p className="font-medium text-sm truncate">Branch Office</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                    456, Industrial Area,<br />
+                                    Trivandrum, Kerala - 695001
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-2 border-t border-border">
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-100 dark:bg-emerald-900/40 rounded-md">
+                                <svg className="h-3.5 w-3.5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                </svg>
+                                <span className="text-xs font-semibold text-emerald-700 dark:text-emerald-400">Route #B3</span>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">TVM South Line</span>
                         </div>
                     </div>
 
-                    <div className="flex items-start gap-3 p-4 border rounded-lg bg-background hover:bg-muted/30 transition-colors">
-                        <MapPin className="h-5 w-5 text-muted-foreground mt-0.5" />
-                        <div className="space-y-1 flex-1">
-                            <p className="font-medium text-sm">Warehouse</p>
-                            <p className="text-xs text-muted-foreground leading-relaxed">
-                                789, Logistics Hub,<br />
-                                Kochi, Kerala - 682030
-                            </p>
+                    {/* Warehouse Address */}
+                    <div className="p-4 border rounded-lg bg-background hover:bg-muted/30 transition-colors space-y-3">
+                        <div className="flex items-start gap-3">
+                            <MapPin className="h-5 w-5 text-muted-foreground mt-0.5 flex-shrink-0" />
+                            <div className="space-y-1 flex-1 min-w-0">
+                                <p className="font-medium text-sm truncate">Warehouse</p>
+                                <p className="text-xs text-muted-foreground leading-relaxed">
+                                    789, Logistics Hub,<br />
+                                    Kochi, Kerala - 682030
+                                </p>
+                            </div>
+                        </div>
+                        <div className="flex items-center gap-2 pt-2 border-t border-border">
+                            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-orange-100 dark:bg-orange-900/40 rounded-md">
+                                <svg className="h-3.5 w-3.5 text-orange-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7" />
+                                </svg>
+                                <span className="text-xs font-semibold text-orange-700 dark:text-orange-400">Route #C2</span>
+                            </div>
+                            <span className="text-[10px] text-muted-foreground">Industrial Zone</span>
                         </div>
                     </div>
                 </CardContent>

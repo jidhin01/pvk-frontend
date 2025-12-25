@@ -15,7 +15,10 @@ import {
     Clock,
     CheckCircle,
     AlertCircle,
-    Save
+    Save,
+    ShoppingCart,
+    IndianRupee,
+    Activity
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -42,6 +45,9 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
+import PartnersOrdersTab from './components/PartnersOrdersTab';
+import PartnersPricingTab from './components/PartnersPricingTab';
+import PartnersActivityTab from './components/PartnersActivityTab';
 
 interface RoleManagementProps {
     roleId: string;
@@ -611,131 +617,264 @@ const RoleManagement: React.FC<RoleManagementProps> = ({ roleId, roleName, roleI
                 ))}
             </div>
 
-            {/* Tabs */}
-            <Tabs defaultValue="members" className="space-y-4">
-                <TabsList>
-                    <TabsTrigger value="members">
-                        <Users className="h-4 w-4 mr-2" />
-                        Members ({users.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="settings">
-                        <Settings className="h-4 w-4 mr-2" />
-                        Settings & Pricing
-                    </TabsTrigger>
-                </TabsList>
+            {/* Check if this is a partner management role */}
+            {(roleId === 'dealer' || roleId === 'customer') ? (
+                /* Partner Management Tabs */
+                <Tabs defaultValue="orders" className="space-y-4">
+                    <TabsList className="grid w-full grid-cols-4 lg:w-auto lg:inline-flex">
+                        <TabsTrigger value="orders">
+                            <ShoppingCart className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">Orders</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="members">
+                            <Users className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">Members</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="pricing">
+                            <IndianRupee className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">Pricing</span>
+                        </TabsTrigger>
+                        <TabsTrigger value="activity">
+                            <Activity className="h-4 w-4 mr-2" />
+                            <span className="hidden sm:inline">Activity</span>
+                        </TabsTrigger>
+                    </TabsList>
 
-                {/* Members Tab */}
-                <TabsContent value="members" className="space-y-4">
-                    {/* Search */}
-                    <Card>
-                        <CardContent className="pt-4">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                    placeholder={`Search ${roleName.toLowerCase()}s...`}
-                                    className="pl-9"
-                                    value={searchQuery}
-                                    onChange={(e) => setSearchQuery(e.target.value)}
-                                />
-                            </div>
-                        </CardContent>
-                    </Card>
+                    {/* Orders Tab */}
+                    <TabsContent value="orders" className="space-y-4">
+                        <PartnersOrdersTab partnerType={roleId as 'dealer' | 'customer'} />
+                    </TabsContent>
 
-                    {/* Members List */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle className="text-lg">{roleName} Members</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-3">
-                                {filteredUsers.map((member) => (
-                                    <div
-                                        key={member.id}
-                                        className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
-                                    >
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
-                                                {member.name.charAt(0)}
+                    {/* Members Tab */}
+                    <TabsContent value="members" className="space-y-4">
+                        {/* Search */}
+                        <Card>
+                            <CardContent className="pt-4">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder={`Search ${roleName.toLowerCase()}s...`}
+                                        className="pl-9"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Members List */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">{roleName} Members</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-3">
+                                    {filteredUsers.map((member) => (
+                                        <div
+                                            key={member.id}
+                                            className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                                                    {member.name.charAt(0)}
+                                                </div>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-medium">{member.name}</p>
+                                                        {member.status === 'active' ? (
+                                                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs">Active</Badge>
+                                                        ) : (
+                                                            <Badge variant="outline" className="text-orange-500 border-orange-500 text-xs">Inactive</Badge>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                                                        <span className="flex items-center gap-1">
+                                                            <Mail className="h-3 w-3" />
+                                                            {member.email}
+                                                        </span>
+                                                        <span className="hidden sm:flex items-center gap-1">
+                                                            <Phone className="h-3 w-3" />
+                                                            {member.phone}
+                                                        </span>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <p className="font-medium">{member.name}</p>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <MoreVertical className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>
+                                                        <Edit className="h-4 w-4 mr-2" />
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
                                                     {member.status === 'active' ? (
-                                                        <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs">Active</Badge>
+                                                        <DropdownMenuItem className="text-orange-600">
+                                                            <UserX className="h-4 w-4 mr-2" />
+                                                            Deactivate
+                                                        </DropdownMenuItem>
                                                     ) : (
-                                                        <Badge variant="outline" className="text-orange-500 border-orange-500 text-xs">Inactive</Badge>
+                                                        <DropdownMenuItem className="text-green-600">
+                                                            <UserCheck className="h-4 w-4 mr-2" />
+                                                            Activate
+                                                        </DropdownMenuItem>
                                                     )}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
+                                        </div>
+                                    ))}
+
+                                    {filteredUsers.length === 0 && (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                            <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                                            <p>No {roleName.toLowerCase()}s found</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
+
+                    {/* Pricing Tab */}
+                    <TabsContent value="pricing" className="space-y-4">
+                        <PartnersPricingTab partnerType={roleId as 'dealer' | 'customer'} />
+                    </TabsContent>
+
+                    {/* Activity Tab */}
+                    <TabsContent value="activity" className="space-y-4">
+                        <PartnersActivityTab partnerType={roleId as 'dealer' | 'customer'} />
+                    </TabsContent>
+                </Tabs>
+            ) : (
+                /* Standard Role Management Tabs */
+                <Tabs defaultValue="members" className="space-y-4">
+                    <TabsList>
+                        <TabsTrigger value="members">
+                            <Users className="h-4 w-4 mr-2" />
+                            Members ({users.length})
+                        </TabsTrigger>
+                        <TabsTrigger value="settings">
+                            <Settings className="h-4 w-4 mr-2" />
+                            Settings & Pricing
+                        </TabsTrigger>
+                    </TabsList>
+
+                    {/* Members Tab */}
+                    <TabsContent value="members" className="space-y-4">
+                        {/* Search */}
+                        <Card>
+                            <CardContent className="pt-4">
+                                <div className="relative">
+                                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        placeholder={`Search ${roleName.toLowerCase()}s...`}
+                                        className="pl-9"
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                    />
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Members List */}
+                        <Card>
+                            <CardHeader>
+                                <CardTitle className="text-lg">{roleName} Members</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="space-y-3">
+                                    {filteredUsers.map((member) => (
+                                        <div
+                                            key={member.id}
+                                            className="flex items-center justify-between p-4 rounded-lg border hover:bg-muted/50 transition-colors"
+                                        >
+                                            <div className="flex items-center gap-4">
+                                                <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-medium">
+                                                    {member.name.charAt(0)}
                                                 </div>
-                                                <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
-                                                    <span className="flex items-center gap-1">
-                                                        <Mail className="h-3 w-3" />
-                                                        {member.email}
-                                                    </span>
-                                                    <span className="hidden sm:flex items-center gap-1">
-                                                        <Phone className="h-3 w-3" />
-                                                        {member.phone}
-                                                    </span>
+                                                <div>
+                                                    <div className="flex items-center gap-2">
+                                                        <p className="font-medium">{member.name}</p>
+                                                        {member.status === 'active' ? (
+                                                            <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200 text-xs">Active</Badge>
+                                                        ) : (
+                                                            <Badge variant="outline" className="text-orange-500 border-orange-500 text-xs">Inactive</Badge>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex items-center gap-3 mt-1 text-sm text-muted-foreground">
+                                                        <span className="flex items-center gap-1">
+                                                            <Mail className="h-3 w-3" />
+                                                            {member.email}
+                                                        </span>
+                                                        <span className="hidden sm:flex items-center gap-1">
+                                                            <Phone className="h-3 w-3" />
+                                                            {member.phone}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
+                                            <DropdownMenu>
+                                                <DropdownMenuTrigger asChild>
+                                                    <Button variant="ghost" size="icon">
+                                                        <MoreVertical className="h-4 w-4" />
+                                                    </Button>
+                                                </DropdownMenuTrigger>
+                                                <DropdownMenuContent align="end">
+                                                    <DropdownMenuItem>
+                                                        <Edit className="h-4 w-4 mr-2" />
+                                                        Edit
+                                                    </DropdownMenuItem>
+                                                    <DropdownMenuSeparator />
+                                                    {member.status === 'active' ? (
+                                                        <DropdownMenuItem className="text-orange-600">
+                                                            <UserX className="h-4 w-4 mr-2" />
+                                                            Deactivate
+                                                        </DropdownMenuItem>
+                                                    ) : (
+                                                        <DropdownMenuItem className="text-green-600">
+                                                            <UserCheck className="h-4 w-4 mr-2" />
+                                                            Activate
+                                                        </DropdownMenuItem>
+                                                    )}
+                                                </DropdownMenuContent>
+                                            </DropdownMenu>
                                         </div>
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon">
-                                                    <MoreVertical className="h-4 w-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end">
-                                                <DropdownMenuItem>
-                                                    <Edit className="h-4 w-4 mr-2" />
-                                                    Edit
-                                                </DropdownMenuItem>
-                                                <DropdownMenuSeparator />
-                                                {member.status === 'active' ? (
-                                                    <DropdownMenuItem className="text-orange-600">
-                                                        <UserX className="h-4 w-4 mr-2" />
-                                                        Deactivate
-                                                    </DropdownMenuItem>
-                                                ) : (
-                                                    <DropdownMenuItem className="text-green-600">
-                                                        <UserCheck className="h-4 w-4 mr-2" />
-                                                        Activate
-                                                    </DropdownMenuItem>
-                                                )}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-                                ))}
+                                    ))}
 
-                                {filteredUsers.length === 0 && (
-                                    <div className="text-center py-8 text-muted-foreground">
-                                        <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
-                                        <p>No {roleName.toLowerCase()}s found</p>
-                                    </div>
-                                )}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
+                                    {filteredUsers.length === 0 && (
+                                        <div className="text-center py-8 text-muted-foreground">
+                                            <Users className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                                            <p>No {roleName.toLowerCase()}s found</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </TabsContent>
 
-                {/* Settings Tab */}
-                <TabsContent value="settings" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{roleName} Settings</CardTitle>
-                            <CardDescription>Configure pricing, rules, and preferences for {roleName.toLowerCase()}</CardDescription>
-                        </CardHeader>
-                        <CardContent>
-                            {renderSettings()}
-                        </CardContent>
-                    </Card>
-                    <div className="flex justify-end">
-                        <Button onClick={handleSaveSettings}>
-                            <Save className="h-4 w-4 mr-2" />
-                            Save Settings
-                        </Button>
-                    </div>
-                </TabsContent>
-            </Tabs>
+                    {/* Settings Tab */}
+                    <TabsContent value="settings" className="space-y-4">
+                        <Card>
+                            <CardHeader>
+                                <CardTitle>{roleName} Settings</CardTitle>
+                                <CardDescription>Configure pricing, rules, and preferences for {roleName.toLowerCase()}</CardDescription>
+                            </CardHeader>
+                            <CardContent>
+                                {renderSettings()}
+                            </CardContent>
+                        </Card>
+                        <div className="flex justify-end">
+                            <Button onClick={handleSaveSettings}>
+                                <Save className="h-4 w-4 mr-2" />
+                                Save Settings
+                            </Button>
+                        </div>
+                    </TabsContent>
+                </Tabs>
+            )}
         </div>
     );
 };

@@ -9,22 +9,20 @@ import {
     CheckCircle2,
     Printer as PrinterIcon,
     XCircle,
-    LayoutList
+    LayoutList,
+    ChevronDown,
+    ChevronUp,
+    Package,
+    Calendar,
+    FileText,
+    Layers,
+    IndianRupee
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from "@/components/ui/table";
-import {
     Tabs,
-    TabsContent,
     TabsList,
     TabsTrigger,
 } from "@/components/ui/tabs";
@@ -34,18 +32,41 @@ import {
     TooltipProvider,
     TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+    Collapsible,
+    CollapsibleContent,
+    CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { RECENT_ORDERS, Order } from '@/data/mockMarketplaceData';
+import { RECENT_ORDERS, Order, PrintOrder, ServiceOrder } from '@/data/mockMarketplaceData';
 
 export default function OrdersPage() {
-    const [filter, setFilter] = useState('all');
+    const [filter, setFilter] = useState('pending');
+    const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
 
     const filteredOrders = RECENT_ORDERS.filter(order => {
         if (filter === 'all') return true;
+        if (filter === 'pending') return order.status === 'pending';
         if (filter === 'processing') return ['printing', 'processing'].includes(order.status);
         if (filter === 'delivered') return order.status === 'delivered';
         return true;
     });
+
+    const toggleOrder = (orderId: string) => {
+        setExpandedOrders(prev =>
+            prev.includes(orderId)
+                ? prev.filter(id => id !== orderId)
+                : [...prev, orderId]
+        );
+    };
+
+    const expandAll = () => {
+        setExpandedOrders(filteredOrders.map(order => order.id));
+    };
+
+    const collapseAll = () => {
+        setExpandedOrders([]);
+    };
 
     const getStatusBadge = (status: Order['status']) => {
         switch (status) {
@@ -60,123 +81,248 @@ export default function OrdersPage() {
         }
     };
 
+    const getTypeBadge = (type: Order['type']) => {
+        switch (type) {
+            case 'PRINT':
+                return <Badge className="bg-purple-100 text-purple-700 border-purple-200">Print</Badge>;
+            case 'PAN':
+                return <Badge className="bg-orange-100 text-orange-700 border-orange-200">PAN Card</Badge>;
+            case 'SEAL':
+                return <Badge className="bg-teal-100 text-teal-700 border-teal-200">Seal/Stamp</Badge>;
+            default:
+                return <Badge variant="outline">{type}</Badge>;
+        }
+    };
+
+    const renderOrderDetails = (order: Order) => {
+        if (order.type === 'PRINT') {
+            const printOrder = order as PrintOrder;
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                            <Layers className="w-4 h-4" /> Specifications
+                        </h4>
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                            <p className="text-sm"><span className="font-medium">Dimensions:</span> {printOrder.specs.dimensions}</p>
+                            <p className="text-sm"><span className="font-medium">Media Type:</span> {printOrder.specs.mediaType}</p>
+                            <p className="text-sm"><span className="font-medium">Quality:</span> {printOrder.specs.quality}</p>
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                            <FileText className="w-4 h-4" /> File Information
+                        </h4>
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                            <p className="text-sm"><span className="font-medium">File:</span> {printOrder.fileUrl === '#' ? 'Uploaded' : printOrder.fileUrl}</p>
+                            {printOrder.goodsType && (
+                                <p className="text-sm"><span className="font-medium">Goods Type:</span> {printOrder.goodsType === 'finished' ? 'Finished' : 'Unfinished'}</p>
+                            )}
+                            {printOrder.printType && (
+                                <p className="text-sm"><span className="font-medium">Print Type:</span> {printOrder.printType.toUpperCase()}</p>
+                            )}
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                            <Package className="w-4 h-4" /> Order Info
+                        </h4>
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                            <p className="text-sm"><span className="font-medium">Order ID:</span> {order.id}</p>
+                            <p className="text-sm"><span className="font-medium">Date:</span> {order.date}</p>
+                            <p className="text-sm"><span className="font-medium">Cost:</span> ₹{order.cost}</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        } else {
+            const serviceOrder = order as ServiceOrder;
+            return (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                            <FileText className="w-4 h-4" /> Service Details
+                        </h4>
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                            {serviceOrder.details && Object.entries(serviceOrder.details).map(([key, value]) => (
+                                <p key={key} className="text-sm">
+                                    <span className="font-medium capitalize">{key}:</span> {String(value)}
+                                </p>
+                            ))}
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                            <Package className="w-4 h-4" /> Order Info
+                        </h4>
+                        <div className="bg-muted/50 rounded-lg p-3 space-y-1">
+                            <p className="text-sm"><span className="font-medium">Order ID:</span> {order.id}</p>
+                            <p className="text-sm"><span className="font-medium">Date:</span> {order.date}</p>
+                            <p className="text-sm"><span className="font-medium">Cost:</span> ₹{order.cost}</p>
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+    };
+
+    const renderOrderActions = (order: Order) => {
+        return (
+            <div className="flex justify-end gap-2" onClick={(e) => e.stopPropagation()}>
+                {/* Pending Actions */}
+                {order.status === 'pending' && (
+                    <>
+                        <TooltipProvider>
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
+                                        <Edit className="h-4 w-4" />
+                                    </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>Edit Order</TooltipContent>
+                            </Tooltip>
+                        </TooltipProvider>
+                        <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50">
+                            <XCircle className="h-4 w-4" />
+                        </Button>
+                    </>
+                )}
+
+                {/* Production Actions (Locked) */}
+                {order.status === 'printing' && (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground cursor-not-allowed bg-muted/20">
+                                    <Lock className="h-4 w-4" />
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>Order is locked for production</TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                )}
+
+                {/* Delivered Actions */}
+                {order.status === 'delivered' && (
+                    <Button variant="outline" size="sm" className="h-8 text-xs border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800">
+                        <Download className="h-3 w-3 mr-1" /> Bill
+                    </Button>
+                )}
+            </div>
+        );
+    };
+
     return (
         <div className="space-y-6 animate-in fade-in duration-500">
             <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
                 <div>
-                    <h2 className="text-2xl font-bold tracking-tight">Active Orders</h2>
-                    <p className="text-muted-foreground">Manage ongoing jobs and view order history.</p>
+                    <h2 className="text-2xl font-bold tracking-tight">My Orders</h2>
+                    <p className="text-muted-foreground">Manage and track all your orders in one place.</p>
                 </div>
-
+                <div className="flex items-center gap-2">
+                    <div className="relative">
+                        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+                        <Input placeholder="Search job name..." className="pl-9 w-[200px]" />
+                    </div>
+                    <Button variant="outline" size="icon">
+                        <Filter className="h-4 w-4" />
+                    </Button>
+                </div>
             </div>
 
-            <Card>
-                <CardHeader>
-                    <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
-                        <CardTitle className="text-lg flex items-center gap-2">
-                            <LayoutList className="h-5 w-5 text-primary" />
-                            Order List
-                        </CardTitle>
-                        <div className="flex items-center gap-2 w-full sm:w-auto">
-                            <div className="relative w-full sm:w-[250px]">
-                                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-                                <Input placeholder="Search job name..." className="pl-9" />
-                            </div>
-                        </div>
+            <Tabs defaultValue="pending" className="w-full" onValueChange={setFilter}>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <TabsList>
+                        <TabsTrigger value="pending">Pending</TabsTrigger>
+                        <TabsTrigger value="processing">In Production</TabsTrigger>
+                        <TabsTrigger value="delivered">Delivered</TabsTrigger>
+                        <TabsTrigger value="all">All Orders</TabsTrigger>
+                    </TabsList>
+                    <div className="flex gap-2">
+                        <Button variant="outline" size="sm" onClick={expandAll}>
+                            <ChevronDown className="w-4 h-4 mr-1" /> Expand All
+                        </Button>
+                        <Button variant="outline" size="sm" onClick={collapseAll}>
+                            <ChevronUp className="w-4 h-4 mr-1" /> Collapse All
+                        </Button>
                     </div>
-                </CardHeader>
-                <CardContent>
-                    <Tabs defaultValue="all" className="w-full" onValueChange={setFilter}>
-                        <TabsList className="mb-4">
-                            <TabsTrigger value="all">All Orders</TabsTrigger>
-                            <TabsTrigger value="processing">In Production</TabsTrigger>
-                            <TabsTrigger value="delivered">Delivered</TabsTrigger>
-                        </TabsList>
+                </div>
 
-                        <div className="rounded-md border">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead>Job Name</TableHead>
-                                        <TableHead>Service</TableHead>
-                                        <TableHead>Date</TableHead>
-                                        <TableHead>Status</TableHead>
-                                        <TableHead className="text-right">Cost</TableHead>
-                                        <TableHead className="text-right">Actions</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredOrders.length > 0 ? (
-                                        filteredOrders.map((order, index) => (
-                                            <TableRow key={index} className="hover:bg-muted/30 transition-colors">
-                                                <TableCell className="font-medium text-foreground">
-                                                    {order.jobName}
-                                                    {order.goodsType && <div className="text-xs text-muted-foreground capitalize">{order.goodsType}</div>}
-                                                </TableCell>
-                                                <TableCell>
-                                                    <Badge variant="secondary" className="font-normal">{order.type}</Badge>
-                                                </TableCell>
-                                                <TableCell className="text-muted-foreground text-sm">{order.date}</TableCell>
-                                                <TableCell>{getStatusBadge(order.status)}</TableCell>
-                                                <TableCell className="text-right font-semibold">₹{order.cost}</TableCell>
-                                                <TableCell className="text-right">
-                                                    <div className="flex justify-end gap-2">
-                                                        {/* Pending Actions */}
-                                                        {order.status === 'pending' && (
-                                                            <>
-                                                                <TooltipProvider>
-                                                                    <Tooltip>
-                                                                        <TooltipTrigger asChild>
-                                                                            <Button variant="ghost" size="icon" className="h-8 w-8 text-blue-600 hover:text-blue-700 hover:bg-blue-50">
-                                                                                <Edit className="h-4 w-4" />
-                                                                            </Button>
-                                                                        </TooltipTrigger>
-                                                                        <TooltipContent>Edit Order</TooltipContent>
-                                                                    </Tooltip>
-                                                                </TooltipProvider>
-                                                                <Button variant="ghost" size="icon" className="h-8 w-8 text-red-600 hover:text-red-700 hover:bg-red-50">
-                                                                    <XCircle className="h-4 w-4" />
-                                                                </Button>
-                                                            </>
-                                                        )}
-
-                                                        {/* Production Actions (Locked) */}
-                                                        {order.status === 'printing' && (
-                                                            <TooltipProvider>
-                                                                <Tooltip>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground cursor-not-allowed bg-muted/20">
-                                                                            <Lock className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>Order is locked for production</TooltipContent>
-                                                                </Tooltip>
-                                                            </TooltipProvider>
-                                                        )}
-
-                                                        {/* Delivered Actions */}
-                                                        {order.status === 'delivered' && (
-                                                            <Button variant="outline" size="sm" className="h-8 text-xs border-green-200 text-green-700 hover:bg-green-50 hover:text-green-800">
-                                                                <Download className="h-3 w-3 mr-1" /> Challan
-                                                            </Button>
-                                                        )}
+                <div className="space-y-3 mt-4">
+                    {filteredOrders.length > 0 ? (
+                        filteredOrders.map((order) => (
+                            <Collapsible
+                                key={order.id}
+                                open={expandedOrders.includes(order.id)}
+                                onOpenChange={() => toggleOrder(order.id)}
+                            >
+                                <Card className="overflow-hidden">
+                                    <CollapsibleTrigger asChild>
+                                        <div className="cursor-pointer hover:bg-muted/50 transition-colors">
+                                            <div className="p-4">
+                                                <div className="flex flex-col sm:flex-row justify-between gap-3">
+                                                    <div className="flex items-center gap-3">
+                                                        <div className="p-2 rounded-lg bg-primary/10">
+                                                            {order.type === 'PRINT' ? (
+                                                                <PrinterIcon className="w-5 h-5 text-primary" />
+                                                            ) : order.type === 'PAN' ? (
+                                                                <FileText className="w-5 h-5 text-primary" />
+                                                            ) : (
+                                                                <Package className="w-5 h-5 text-primary" />
+                                                            )}
+                                                        </div>
+                                                        <div>
+                                                            <h3 className="font-semibold">{order.jobName}</h3>
+                                                            <div className="flex items-center gap-2 mt-1">
+                                                                {getTypeBadge(order.type)}
+                                                                <span className="text-sm text-muted-foreground flex items-center gap-1">
+                                                                    <Calendar className="w-3 h-3" /> {order.date}
+                                                                </span>
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        ))
-                                    ) : (
-                                        <TableRow>
-                                            <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
-                                                No orders found matching the selected filter.
-                                            </TableCell>
-                                        </TableRow>
-                                    )}
-                                </TableBody>
-                            </Table>
-                        </div>
-                    </Tabs>
-                </CardContent>
-            </Card>
+                                                    <div className="flex items-center gap-4">
+                                                        <div className="text-right">
+                                                            <p className="font-semibold flex items-center justify-end gap-1">
+                                                                <IndianRupee className="w-4 h-4" /> {order.cost}
+                                                            </p>
+                                                            <div className="mt-1">
+                                                                {getStatusBadge(order.status)}
+                                                            </div>
+                                                        </div>
+                                                        {renderOrderActions(order)}
+                                                        <div className="flex items-center">
+                                                            {expandedOrders.includes(order.id) ? (
+                                                                <ChevronUp className="w-5 h-5 text-muted-foreground" />
+                                                            ) : (
+                                                                <ChevronDown className="w-5 h-5 text-muted-foreground" />
+                                                            )}
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </CollapsibleTrigger>
+                                    <CollapsibleContent>
+                                        <CardContent className="pt-0 pb-4 border-t bg-muted/20">
+                                            <div className="pt-4">
+                                                {renderOrderDetails(order)}
+                                            </div>
+                                        </CardContent>
+                                    </CollapsibleContent>
+                                </Card>
+                            </Collapsible>
+                        ))
+                    ) : (
+                        <Card>
+                            <CardContent className="py-12 text-center">
+                                <Package className="w-12 h-12 mx-auto text-muted-foreground mb-4" />
+                                <p className="text-muted-foreground">No orders found under this filter.</p>
+                            </CardContent>
+                        </Card>
+                    )}
+                </div>
+            </Tabs>
         </div>
     );
 }

@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import { CURRENT_DEALER } from '@/data/mockMarketplaceData';
 import NewOrder from './NewOrder';
-import Tracking from './Tracking';
 import Profile from './Profile';
 import DashboardHome from './DashboardHome';
 import OrdersPage from './OrdersPage';
@@ -66,8 +65,6 @@ export default function MarketplaceDashboard() {
                         return <NewPanCard onNavigate={onTabChange} />;
                     case 'new-rubber-seal':
                         return <NewRubberSeal onNavigate={onTabChange} />;
-                    case 'tracking':
-                        return <Tracking />;
                     case 'profile':
                         return <Profile />;
                     default:
