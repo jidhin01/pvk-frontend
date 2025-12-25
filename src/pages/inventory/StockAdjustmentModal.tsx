@@ -20,21 +20,33 @@ import {
 import { InventoryItem } from '@/data/mockInventoryData';
 import { ClipboardEdit, AlertOctagon } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface StockAdjustmentModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     inventory: InventoryItem[];
     onSubmit: (data: any) => void;
+    role?: 'ADMIN' | 'STOCK_KEEPER';
 }
 
-export function StockAdjustmentModal({ open, onOpenChange, inventory, onSubmit }: StockAdjustmentModalProps) {
+export function StockAdjustmentModal({ open, onOpenChange, inventory, onSubmit, role = 'STOCK_KEEPER' }: StockAdjustmentModalProps) {
     const [selectedItemId, setSelectedItemId] = useState<string>('');
     const [adjustmentType, setAdjustmentType] = useState<'ADD' | 'REMOVE'>('REMOVE');
     const [quantity, setQuantity] = useState('');
     const [reason, setReason] = useState('');
     const [unitType, setUnitType] = useState<'BASE' | 'PURCHASE'>('BASE');
     const [targetLoc, setTargetLoc] = useState<'GODOWN' | 'SHOP'>('GODOWN');
+    const [requestApproval, setRequestApproval] = useState(false);
+
+    // Auto-check approval for stock keeper on damage removal
+    React.useEffect(() => {
+        if (role === 'STOCK_KEEPER' && adjustmentType === 'REMOVE') {
+            setRequestApproval(true);
+        } else {
+            setRequestApproval(false);
+        }
+    }, [role, adjustmentType]);
 
     // Find the current selected item to show current stock
     const currentItem = inventory.find(i => i.id === selectedItemId);
@@ -52,7 +64,8 @@ export function StockAdjustmentModal({ open, onOpenChange, inventory, onSubmit }
             targetLoc: targetLoc, // Logic param
             type: adjustmentType === 'REMOVE' ? 'DAMAGE_LOSS' : 'INWARD',
             quantity: finalQty,
-            reason
+            reason,
+            requestApproval
         });
         onOpenChange(false);
     };
@@ -180,6 +193,19 @@ export function StockAdjustmentModal({ open, onOpenChange, inventory, onSubmit }
                             </p>
                         )}
                     </div>
+
+                    {role === 'STOCK_KEEPER' && adjustmentType === 'REMOVE' && (
+                        <div className="flex items-center space-x-2 bg-yellow-50 p-3 rounded border border-yellow-200">
+                            <Checkbox
+                                id="approval"
+                                checked={requestApproval}
+                                onCheckedChange={(c) => setRequestApproval(c as boolean)}
+                            />
+                            <Label htmlFor="approval" className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-yellow-800">
+                                Submit for Admin Approval
+                            </Label>
+                        </div>
+                    )}
                 </div>
 
                 <DialogFooter>
@@ -189,7 +215,7 @@ export function StockAdjustmentModal({ open, onOpenChange, inventory, onSubmit }
                         variant={adjustmentType === 'REMOVE' ? 'destructive' : 'default'}
                         disabled={!selectedItemId || !quantity || (adjustmentType === 'REMOVE' && !reason)}
                     >
-                        Confirm Adjustment
+                        {requestApproval ? 'Submit Request' : 'Confirm Adjustment'}
                     </Button>
                 </DialogFooter>
             </DialogContent>

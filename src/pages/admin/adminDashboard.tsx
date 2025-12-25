@@ -21,6 +21,7 @@ import FinanceOverview from './FinanceOverview';
 import AdminSettings from './adminSettings';
 import AdminActivityLogs from './adminActivityLogs';
 import RoleManagement from './RoleManagement';
+import InventoryModule from './inventory/InventoryModule';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -82,13 +83,7 @@ export default function AdminDashboard() {
             return <AdminOverview />;
 
           case 'manage-stock':
-            return (
-              <RoleManagement
-                roleId="stock"
-                roleName="Stock Keeper"
-                roleIcon={<Package className="h-6 w-6 text-primary" />}
-              />
-            );
+            return <InventoryModule />;
 
           case 'manage-pancard':
             return (

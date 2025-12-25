@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
     ShoppingCart,
     Users,
@@ -48,6 +49,7 @@ const MOCK_RECENT_ACTIVITY = [
 ];
 
 const AdminOverview = () => {
+    const navigate = useNavigate();
     return (
         <div className="space-y-6">
             {/* Header */}
@@ -127,6 +129,11 @@ const AdminOverview = () => {
                             {MOCK_DEPARTMENT_STATUS.map((dept) => (
                                 <div
                                     key={dept.name}
+                                    onClick={() => {
+                                        if (dept.name === 'Stock Keeper') {
+                                            navigate('/admin', { state: { activeTab: 'manage-stock' } });
+                                        }
+                                    }}
                                     className="flex items-center justify-between p-3 rounded-lg border hover:bg-muted/50 transition-colors cursor-pointer"
                                 >
                                     <div className="flex items-center gap-3">
@@ -156,9 +163,9 @@ const AdminOverview = () => {
                             {MOCK_RECENT_ACTIVITY.map((activity) => (
                                 <div key={activity.id} className="flex items-start gap-3 text-sm">
                                     <div className={`mt-0.5 p-1 rounded-full ${activity.type === 'success' ? 'bg-green-100 dark:bg-green-900' :
-                                            activity.type === 'warning' ? 'bg-orange-100 dark:bg-orange-900' :
-                                                activity.type === 'pending' ? 'bg-blue-100 dark:bg-blue-900' :
-                                                    'bg-muted'
+                                        activity.type === 'warning' ? 'bg-orange-100 dark:bg-orange-900' :
+                                            activity.type === 'pending' ? 'bg-blue-100 dark:bg-blue-900' :
+                                                'bg-muted'
                                         }`}>
                                         {activity.type === 'success' ? <CheckCircle className="h-3 w-3 text-green-600" /> :
                                             activity.type === 'warning' ? <AlertCircle className="h-3 w-3 text-orange-600" /> :
@@ -193,9 +200,9 @@ const AdminOverview = () => {
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Review Dealers
                         </Button>
-                        <Button variant="outline" size="sm">
+                        <Button variant="outline" size="sm" onClick={() => navigate('/admin', { state: { activeTab: 'manage-stock' } })}>
                             <Package className="h-4 w-4 mr-2" />
-                            Stock Alert
+                            Inventory Control
                         </Button>
                         <Button variant="outline" size="sm">
                             <DollarSign className="h-4 w-4 mr-2" />
