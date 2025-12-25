@@ -15,12 +15,15 @@ export type UserRole =
   | 'seal_team'
   | 'customer';
 
+export type DesignerType = 'normal' | 'pvc';
+
 export interface User {
   id: string;
   email: string;
   name: string;
   role: UserRole;
   avatar?: string;
+  designerType?: DesignerType;
 }
 
 interface AuthContextType {
@@ -64,6 +67,7 @@ const MOCK_USERS: Record<string, User> = {
     email: 'designer@pvk.com',
     name: 'Designer',
     role: 'designer',
+    designerType: 'normal',
   },
   'printer@pvk.com': {
     id: '6',
@@ -112,6 +116,7 @@ const MOCK_USERS: Record<string, User> = {
     email: 'pvcdesigner@pvk.com',
     name: 'PVC Designer',
     role: 'designer',
+    designerType: 'pvc',
   },
 };
 

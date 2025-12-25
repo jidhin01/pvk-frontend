@@ -22,7 +22,9 @@ import AdminSettings from './adminSettings';
 import AdminActivityLogs from './adminActivityLogs';
 import RoleManagement from './RoleManagement';
 import PartnersManagement from './PartnersManagement';
+import DesignerManagement from './DesignerManagement';
 import InventoryModule from './inventory/InventoryModule';
+
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -44,13 +46,7 @@ export default function AdminDashboard() {
 
           // Role Management Pages
           case 'manage-designer':
-            return (
-              <RoleManagement
-                roleId="designer"
-                roleName="Designer"
-                roleIcon={<Palette className="h-6 w-6 text-primary" />}
-              />
-            );
+            return <DesignerManagement />;
 
           case 'manage-printer':
             return (
