@@ -34,9 +34,9 @@ export function BulkUploadModal({ open, onOpenChange, onImport }: BulkUploadModa
         // Simulate file processing delay
         setTimeout(() => {
             const mockData = [
-                { name: 'Glossy Card Paper 300gsm', category: 'Paper', shopQty: 0, godownQty: 500, cost: 450 },
-                { name: 'Canon Ink Bottle - Black', category: 'Ink', shopQty: 10, godownQty: 40, cost: 650 },
-                { name: 'Lamination Roll 100mic', category: 'Lamination', shopQty: 5, godownQty: 20, cost: 1200 },
+                { name: 'Glossy Card Paper 300gsm', category: 'PAPER', quantity: 500, location: 'Shelf A1', cost: 450 },
+                { name: 'Canon Ink Bottle - Black', category: 'INK', quantity: 50, location: 'Cabinet C2', cost: 650 },
+                { name: 'Lamination Roll 100mic', category: 'HARDWARE', quantity: 25, location: 'Rack R1', cost: 1200 },
             ];
             setPreviewData(mockData);
             setFileState('preview');
@@ -107,7 +107,7 @@ export function BulkUploadModal({ open, onOpenChange, onImport }: BulkUploadModa
                                             <TableRow key={i}>
                                                 <TableCell className="font-medium">{row.name}</TableCell>
                                                 <TableCell>{row.category}</TableCell>
-                                                <TableCell className="text-right">{row.shopQty + row.godownQty}</TableCell>
+                                                <TableCell className="text-right">{row.quantity}</TableCell>
                                                 <TableCell className="text-right">₹{row.cost}</TableCell>
                                             </TableRow>
                                         ))}

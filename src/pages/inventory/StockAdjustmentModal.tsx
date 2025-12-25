@@ -30,21 +30,28 @@ interface StockAdjustmentModalProps {
 
 export function StockAdjustmentModal({ open, onOpenChange, inventory, onSubmit }: StockAdjustmentModalProps) {
     const [selectedItemId, setSelectedItemId] = useState<string>('');
-    const [location, setLocation] = useState<'shop' | 'godown'>('shop');
     const [adjustmentType, setAdjustmentType] = useState<'ADD' | 'REMOVE'>('REMOVE');
     const [quantity, setQuantity] = useState('');
     const [reason, setReason] = useState('');
+    const [unitType, setUnitType] = useState<'BASE' | 'PURCHASE'>('BASE');
+    const [targetLoc, setTargetLoc] = useState<'GODOWN' | 'SHOP'>('GODOWN');
 
     // Find the current selected item to show current stock
     const currentItem = inventory.find(i => i.id === selectedItemId);
-    const currentStock = currentItem ? (location === 'shop' ? currentItem.shopQty : currentItem.godownQty) : 0;
+    const currentStock = currentItem ? currentItem.stockLevels[targetLoc.toLowerCase() as 'godown' | 'shop'] : 0;
 
     const handleSubmit = () => {
+        let finalQty = Number(quantity);
+        if (unitType === 'PURCHASE' && currentItem) {
+            finalQty = finalQty * currentItem.conversionRatio;
+        }
+
         onSubmit({
             itemId: selectedItemId,
-            location,
-            type: adjustmentType === 'REMOVE' ? 'DAMAGE_LOSS' : 'INWARD', // Map to movement types
-            quantity: Number(quantity),
+            location: targetLoc, // Logging string
+            targetLoc: targetLoc, // Logic param
+            type: adjustmentType === 'REMOVE' ? 'DAMAGE_LOSS' : 'INWARD',
+            quantity: finalQty,
             reason
         });
         onOpenChange(false);
@@ -67,7 +74,7 @@ export function StockAdjustmentModal({ open, onOpenChange, inventory, onSubmit }
                             <SelectTrigger>
                                 <SelectValue placeholder="Search item..." />
                             </SelectTrigger>
-                            <SelectContent>
+                            <SelectContent className="max-h-[200px]">
                                 {inventory.map(item => (
                                     <SelectItem key={item.id} value={item.id}>{item.name}</SelectItem>
                                 ))}
@@ -75,26 +82,30 @@ export function StockAdjustmentModal({ open, onOpenChange, inventory, onSubmit }
                         </Select>
                     </div>
 
-                    {selectedItemId && (
-                        <div className="p-2 bg-muted/40 rounded text-xs flex justify-between">
-                            <span>Current System Stock ({location}):</span>
-                            <span className="font-mono font-bold">{currentStock}</span>
-                        </div>
-                    )}
-
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Location</Label>
-                            <Select value={location} onValueChange={(v: any) => setLocation(v)}>
+                            <Select value={targetLoc} onValueChange={(v: any) => setTargetLoc(v)}>
                                 <SelectTrigger>
                                     <SelectValue />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    <SelectItem value="shop">Shop Floor</SelectItem>
-                                    <SelectItem value="godown">Godown</SelectItem>
+                                    <SelectItem value="GODOWN">Godown</SelectItem>
+                                    <SelectItem value="SHOP">Note: Shop</SelectItem>
                                 </SelectContent>
                             </Select>
                         </div>
+                        {selectedItemId && (
+                            <div className="space-y-2">
+                                <Label>Current Stock</Label>
+                                <div className="p-2 bg-muted/40 rounded text-sm font-mono font-bold border h-10 flex items-center">
+                                    {currentStock}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label>Type</Label>
                             <Select value={adjustmentType} onValueChange={(v: any) => setAdjustmentType(v)}>
@@ -109,17 +120,51 @@ export function StockAdjustmentModal({ open, onOpenChange, inventory, onSubmit }
                         </div>
                     </div>
 
-                    <div className="space-y-2">
+                    <div className="space-y-4">
                         <Label>Adjustment Quantity</Label>
-                        <div className="relative">
-                            <Input
-                                type="number"
-                                value={quantity}
-                                onChange={(e) => setQuantity(e.target.value)}
-                                className={adjustmentType === 'REMOVE' ? 'text-red-600 font-bold' : 'text-emerald-600 font-bold'}
-                            />
-                            <span className="absolute right-3 top-2.5 text-xs text-muted-foreground">Units</span>
+                        <div className="flex gap-2">
+                            <div className="flex-1 relative">
+                                <Input
+                                    type="number"
+                                    value={quantity}
+                                    onChange={(e) => setQuantity(e.target.value)}
+                                    className={adjustmentType === 'REMOVE' ? 'text-red-600 font-bold' : 'text-emerald-600 font-bold'}
+                                />
+                            </div>
+                            <div className="w-[140px]">
+                                <Select
+                                    value={unitType}
+                                    onValueChange={(val: 'PURCHASE' | 'BASE') => setUnitType(val)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="BASE">{currentItem?.baseUnit || 'Base'}</SelectItem>
+                                        {currentItem?.purchaseUnit && (
+                                            <SelectItem value="PURCHASE">{currentItem.purchaseUnit}</SelectItem>
+                                        )}
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
+
+                        {unitType === 'PURCHASE' && currentItem && quantity && (
+                            <p className="text-xs text-muted-foreground text-right">
+                                = {Number(quantity) * currentItem.conversionRatio} {currentItem.baseUnit}
+                            </p>
+                        )}
+
+                        {adjustmentType === 'REMOVE' && currentItem && quantity && (
+                            <div className="p-2 bg-red-50 text-red-700 rounded text-xs flex items-center justify-between border border-red-100">
+                                <span>Estimated Financial Loss:</span>
+                                <span className="font-bold">
+                                    ₹{Math.round((
+                                        (unitType === 'PURCHASE' ? Number(quantity) * currentItem.conversionRatio : Number(quantity)) / currentItem.conversionRatio
+                                    ) * currentItem.purchasePrice).toLocaleString()}
+                                </span>
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-2">

@@ -10,13 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@/components/ui/select';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { InventoryItem } from '@/data/mockInventoryData';
 import { IndianRupee } from 'lucide-react';
 
@@ -24,142 +18,176 @@ interface StockEntryModalProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     item: InventoryItem;
-    mode: 'INWARD' | 'TRANSFER' | 'EXCHANGE';
+    mode: 'INWARD' | 'TRANSFER' | 'EXCHANGE'; // Keeping types to avoid breaking parent passing strings, though EXCHANGE is deprecated
     onSubmit: (data: any) => void;
 }
 
+const MOCK_SUPPLIERS = ["Paper Mart", "Techno Colors", "PrintColors Inc", "RollMaster", "Flex World", "Local Stationers", "Tech Fix", "Stamp Makers Inc"];
+
 export function StockEntryModal({ open, onOpenChange, item, mode, onSubmit }: StockEntryModalProps) {
+    const isTransfer = mode === 'TRANSFER';
+
     const [formData, setFormData] = useState({
         quantity: '',
-        location: mode === 'INWARD' ? 'godown' : 'shop', // Default to godown for inward, shop for transfer target
-        vendor: '',
-        purchasePrice: item.purchasePrice.toString(),
-        batchNumber: '',
+        location: item.location,
+        targetLoc: 'GODOWN',
+        supplier: item.lastSupplier || '',
+        invoiceNo: '',
+        unitCost: item.purchasePrice.toString(),
         notes: ''
     });
 
-    const isExchange = mode === 'EXCHANGE';
+    const [unitType, setUnitType] = useState<'PURCHASE' | 'BASE'>('PURCHASE');
+
+    const currentQty = item.stockLevels ? (item.stockLevels.godown + item.stockLevels.shop) : 0;
 
     const handleSubmit = () => {
-        // Validation could go here
-        onSubmit(formData);
+        let finalQty = Number(formData.quantity);
+        if (unitType === 'PURCHASE') {
+            finalQty = finalQty * item.conversionRatio;
+        }
+
+        onSubmit({
+            ...formData,
+            quantity: finalQty,
+            purchasePrice: formData.unitCost, // mapping for compatibility if needed, but StockDashboard should change
+            vendor: formData.supplier // mapping
+        });
+        onOpenChange(false);
     };
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="w-[95%] sm:max-w-[425px] rounded-lg">
+            <DialogContent className="sm:max-w-[500px]">
                 <DialogHeader>
-                    <DialogTitle>
-                        {mode === 'INWARD' ? 'Add New Stock' : mode === 'EXCHANGE' ? 'Swap / Exchange Stock' : 'Transfer Stock'}
-                    </DialogTitle>
+                    <DialogTitle>{isTransfer ? 'Transfer Stock' : 'Receive Goods (Inward)'}</DialogTitle>
                 </DialogHeader>
-
                 <div className="grid gap-4 py-4">
-                    <div className="font-medium text-sm text-muted-foreground pb-2 border-b">
-                        {item.name} <span className="text-xs text-slate-400">({item.id})</span>
+                    <div className="space-y-2">
+                        <Label>Details</Label>
+                        <div className="p-2 bg-slate-50 dark:bg-slate-900 rounded text-sm text-muted-foreground">
+                            <span className="font-semibold text-slate-900 dark:text-slate-100">{item.name}</span> <br />
+                            Current: {currentQty} {item.baseUnit}
+                            {item.conversionRatio > 1 && ` (≈ ${(currentQty / item.conversionRatio).toFixed(1)} ${item.purchaseUnit})`}
+                        </div>
                     </div>
 
-                    {mode === 'INWARD' && (
-                        <>
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Vendor Name</Label>
-                                    <Input
-                                        className="h-12"
-                                        placeholder="Supplier..."
-                                        value={formData.vendor}
-                                        onChange={(e) => setFormData({ ...formData, vendor: e.target.value })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Batch No.</Label>
-                                    <Input
-                                        className="h-12"
-                                        placeholder="Optional"
-                                        value={formData.batchNumber}
-                                        onChange={(e) => setFormData({ ...formData, batchNumber: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-2">
-                                <Label className="flex items-center gap-1">
-                                    Purchase Price (Per Unit)
-                                    <IndianRupee className="h-3 w-3 text-muted-foreground" />
-                                </Label>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                            <Label>Quantity</Label>
+                            <div className="flex gap-2">
                                 <Input
                                     type="number"
-                                    className="h-12 text-lg font-bold tabular-nums"
-                                    value={formData.purchasePrice}
-                                    onChange={(e) => setFormData({ ...formData, purchasePrice: e.target.value })}
-                                />
-                                <p className="text-[10px] text-muted-foreground">Current cost: ₹{item.purchasePrice}</p>
-                            </div>
-                        </>
-                    )}
-
-                    {!isExchange && (
-                        <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                                <Label>Quantity</Label>
-                                <Input
-                                    type="number"
-                                    className="h-12 text-lg font-bold tabular-nums"
                                     value={formData.quantity}
-                                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                                     placeholder="0"
+                                    className="h-10 text-lg font-bold"
+                                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
                                 />
+                                <div className="w-[120px]">
+                                    <Select
+                                        value={unitType}
+                                        onValueChange={(v: 'PURCHASE' | 'BASE') => setUnitType(v)}
+                                    >
+                                        <SelectTrigger className="px-2 h-10">
+                                            <SelectValue />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="PURCHASE">{item.purchaseUnit}</SelectItem>
+                                            <SelectItem value="BASE">{item.baseUnit}</SelectItem>
+                                        </SelectContent>
+                                    </Select>
+                                </div>
                             </div>
-                            <div className="space-y-2">
-                                <Label>{mode === 'INWARD' ? 'Target Location' : 'Transfer To'}</Label>
+                            {unitType === 'PURCHASE' && formData.quantity && (
+                                <p className="text-[10px] text-muted-foreground text-right">
+                                    = {Number(formData.quantity) * item.conversionRatio} {item.baseUnit}
+                                </p>
+                            )}
+                        </div>
+                        <div className="space-y-2">
+                            <Label>{isTransfer ? 'From Location' : 'Target Location'}</Label>
+                            {isTransfer ? (
+                                <Input
+                                    value={formData.location} // Legacy
+                                    disabled
+                                    className="h-10 bg-slate-100"
+                                />
+                            ) : (
                                 <Select
-                                    defaultValue={mode === 'INWARD' ? 'godown' : 'shop'}
-                                    onValueChange={(v) => setFormData({ ...formData, location: v })}
+                                    value={formData.targetLoc}
+                                    onValueChange={(v) => setFormData({ ...formData, targetLoc: v })}
                                 >
-                                    <SelectTrigger className="h-12">
+                                    <SelectTrigger className="h-10">
                                         <SelectValue />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        <SelectItem value="godown">Godown</SelectItem>
-                                        <SelectItem value="shop">Shop</SelectItem>
+                                        <SelectItem value="GODOWN">Main Godown (Bulk)</SelectItem>
+                                        <SelectItem value="SHOP">Retail Shop (Daily)</SelectItem>
                                     </SelectContent>
                                 </Select>
-                            </div>
+                            )}
                         </div>
-                    )}
+                    </div>
 
-                    {isExchange && (
-                        <div className="p-4 bg-orange-50 border border-orange-100 rounded-md text-sm text-orange-800 space-y-3">
-                            <p className="font-medium">Exchange Plan:</p>
-                            <ul className="list-disc pl-4 space-y-1 text-xs text-orange-700">
-                                <li>Move <b>{item.shopQty} units</b> (Dead Stock) from Shop &rarr; Godown.</li>
-                                <li>Move <b>{Math.min(item.shopQty, item.godownQty)} fresh units</b> from Godown &rarr; Shop.</li>
-                            </ul>
-                            <div className="pt-2">
-                                <Label className="text-orange-900">Confirm Quantity to Swap</Label>
-                                <Input
-                                    type="number"
-                                    className="bg-white mt-1 h-12 text-lg font-bold tabular-nums border-orange-200 focus-visible:ring-orange-500"
-                                    defaultValue={Math.min(item.shopQty, item.godownQty)}
-                                    onChange={(e) => setFormData({ ...formData, quantity: e.target.value })}
-                                />
+                    {!isTransfer && (
+                        <>
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <Label>Supplier</Label>
+                                    <Select
+                                        value={formData.supplier}
+                                        onValueChange={(val) => setFormData({ ...formData, supplier: val })}
+                                    >
+                                        <SelectTrigger className="h-10">
+                                            <SelectValue placeholder="Select Supplier" />
+                                        </SelectTrigger>
+                                        <SelectContent>
+                                            <SelectItem value="_custom">Type Manually...</SelectItem>
+                                            {Array.from(new Set([item.lastSupplier, ...MOCK_SUPPLIERS].filter(Boolean))).map(s => (
+                                                <SelectItem key={s} value={s as string}>{s}</SelectItem>
+                                            ))}
+                                        </SelectContent>
+                                    </Select>
+                                    {/* Fallback to Input if needed or requested, but User asked for Select. */}
+                                </div>
+                                <div className="space-y-2">
+                                    <Label>Invoice No</Label>
+                                    <Input
+                                        value={formData.invoiceNo}
+                                        placeholder="INV-..."
+                                        className="h-10"
+                                        onChange={(e) => setFormData({ ...formData, invoiceNo: e.target.value })}
+                                    />
+                                </div>
                             </div>
-                        </div>
+                            <div className="space-y-2">
+                                <Label>Unit Cost (Per {item.purchaseUnit})</Label>
+                                <div className="relative">
+                                    <IndianRupee className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+                                    <Input
+                                        type="number"
+                                        className="pl-8 h-10"
+                                        value={formData.unitCost}
+                                        onChange={(e) => setFormData({ ...formData, unitCost: e.target.value })}
+                                    />
+                                </div>
+                            </div>
+                        </>
                     )}
 
                     <div className="space-y-2">
                         <Label>Notes</Label>
                         <Input
-                            className="h-12"
-                            placeholder="Reason for movement..."
                             value={formData.notes}
+                            className="h-10"
                             onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+                            placeholder="Optional remarks..."
                         />
                     </div>
                 </div>
-
-                <DialogFooter className="gap-2 sm:gap-0">
-                    <Button variant="outline" className="h-12 w-full sm:w-auto" onClick={() => onOpenChange(false)}>Cancel</Button>
-                    <Button className="h-12 w-full sm:w-auto" onClick={handleSubmit}>{mode === 'INWARD' ? 'Add Stock' : mode === 'EXCHANGE' ? 'Run Exchange' : 'Transfer'}</Button>
+                <DialogFooter>
+                    <Button variant="outline" onClick={() => onOpenChange(false)}>Cancel</Button>
+                    <Button onClick={handleSubmit}>{isTransfer ? 'Transfer Stock' : 'Receive Goods'}</Button>
                 </DialogFooter>
             </DialogContent>
         </Dialog>

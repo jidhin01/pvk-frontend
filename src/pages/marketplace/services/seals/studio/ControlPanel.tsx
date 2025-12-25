@@ -25,7 +25,7 @@ const ShapeSelector = () => {
         if (template?.shape === val) return;
         if (confirm("Switching shapes will reset your layout. Continue?")) {
             const newShape = val;
-            let newTemplate = { ...template, shape: newShape } as any;
+            const newTemplate = { ...template, shape: newShape } as any;
 
             if (newShape === 'ROUND') {
                 newTemplate.renderType = 'circular';

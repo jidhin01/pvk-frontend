@@ -1,5 +1,6 @@
+
 import { useState } from 'react';
-import { InventoryItem, StockMovement, MOCK_INVENTORY, MOCK_STOCK_MOVEMENTS } from '@/data/mockInventoryData';
+import { InventoryItem, StockMovement, PurchaseRequest, StockAudit, ScrapReport, StockTransaction, MOCK_INVENTORY, MOCK_STOCK_MOVEMENTS, MOCK_PURCHASE_REQUESTS, MOCK_AUDIT_LOGS, MOCK_SCRAP_REPORTS, LocationType } from '@/data/mockInventoryData';
 import { toast } from 'sonner';
 
 export interface StockOperationResult {
@@ -10,12 +11,17 @@ export interface StockOperationResult {
 export function useInventoryLogic() {
     const [inventory, setInventory] = useState<InventoryItem[]>(MOCK_INVENTORY);
     const [movements, setMovements] = useState<StockMovement[]>(MOCK_STOCK_MOVEMENTS);
+    const [transactions, setTransactions] = useState<StockTransaction[]>([]);
+    const [purchaseRequests, setPurchaseRequests] = useState<PurchaseRequest[]>(MOCK_PURCHASE_REQUESTS);
+    const [auditLogs, setAuditLogs] = useState<StockAudit[]>(MOCK_AUDIT_LOGS);
+    const [scrapReports, setScrapReports] = useState<ScrapReport[]>(MOCK_SCRAP_REPORTS);
+
 
     const logMovement = (
         item: InventoryItem,
         type: StockMovement['type'],
         qty: number,
-        location: StockMovement['location'],
+        location: string,
         notes?: string
     ) => {
         const newMovement: StockMovement = {
@@ -32,26 +38,37 @@ export function useInventoryLogic() {
         setMovements(prev => [newMovement, ...prev]);
     };
 
-    const handleAddStock = (itemId: string, qty: number, location: 'shop' | 'godown', cost: number, vendor?: string, batch?: string) => {
+    const getTotalQty = (item: InventoryItem) => item.stockLevels.godown + item.stockLevels.shop;
+
+    const handleAddStock = (itemId: string, qty: number, location: string, cost: number, vendor?: string, batch?: string) => {
         setInventory(prev => prev.map(item => {
             if (item.id === itemId) {
-                // Weighted Average Cost Logic (Simplified)
-                const currentTotalValue = (item.shopQty + item.godownQty) * item.purchasePrice;
-                const newStockValue = qty * cost;
-                const totalQty = item.shopQty + item.godownQty + qty;
-                const newAvgCost = totalQty > 0 ? (currentTotalValue + newStockValue) / totalQty : cost;
+                const currentTotal = getTotalQty(item);
+                const currentTotalValue = (currentTotal / item.conversionRatio) * item.purchasePrice;
+                // purchasePrice is per Purchase Unit. 
 
-                const updatedItem = {
+                const addedPurchaseUnits = qty / item.conversionRatio;
+                const newStockValue = addedPurchaseUnits * cost; // cost should be per Purchase Unit
+
+                const totalBaseQty = currentTotal + qty;
+                const totalPurchaseUnits = totalBaseQty / item.conversionRatio;
+
+                const newAvgCostPerPurchaseUnit = totalPurchaseUnits > 0 ? (currentTotalValue + newStockValue) / totalPurchaseUnits : cost;
+
+                const updatedItem: InventoryItem = {
                     ...item,
-                    shopQty: location === 'shop' ? item.shopQty + qty : item.shopQty,
-                    godownQty: location === 'godown' ? item.godownQty + qty : item.godownQty,
-                    purchasePrice: Math.round(newAvgCost),
-                    lastMovedDate: new Date().toISOString()
+                    stockLevels: {
+                        ...item.stockLevels,
+                        godown: item.stockLevels.godown + qty // Legacy Add -> Godown
+                    },
+                    purchasePrice: Math.round(newAvgCostPerPurchaseUnit),
+                    lastMovedDate: new Date().toISOString(),
+                    lastSupplier: vendor || item.lastSupplier,
+                    location: location || item.location
                 };
 
-                const locLabel = location === 'shop' ? 'Shop' : 'Godown';
                 const note = `Vendor: ${vendor || 'N/A'}, Batch: ${batch || 'N/A'}`;
-                logMovement(updatedItem, 'INWARD', qty, locLabel as any, note);
+                logMovement(updatedItem, 'INWARD', qty, location, note);
 
                 return updatedItem;
             }
@@ -60,60 +77,15 @@ export function useInventoryLogic() {
         return { success: true };
     };
 
-    const handleTransfer = (itemId: string, from: 'shop' | 'godown', to: 'shop' | 'godown', qty: number, notes?: string) => {
-        let error = '';
-        setInventory(prev => {
-            const item = prev.find(i => i.id === itemId);
-            if (!item) return prev;
-
-            const sourceQty = from === 'shop' ? item.shopQty : item.godownQty;
-            if (sourceQty < qty) {
-                error = `Insufficient stock in ${from}. Available: ${sourceQty}`;
-                return prev;
-            }
-
-            return prev.map(i => {
-                if (i.id === itemId) {
-                    const updated = {
-                        ...i,
-                        shopQty: from === 'shop' ? i.shopQty - qty : i.shopQty + qty,
-                        godownQty: from === 'godown' ? i.godownQty - qty : i.godownQty + qty,
-                        lastMovedDate: new Date().toISOString()
-                    };
-
-                    const locLabel = `${from === 'shop' ? 'Shop' : 'Godown'} -> ${to === 'shop' ? 'Shop' : 'Godown'}`;
-                    logMovement(updated, 'TRANSFER', qty, locLabel as any, notes);
-                    return updated;
-                }
-                return i;
-            });
-        });
-
-        if (error) {
-            toast.error(error);
-            return { success: false, message: error };
-        }
-        return { success: true };
-    };
-
-    const handleAdjustment = (itemId: string, location: 'shop' | 'godown', type: 'ADD' | 'REMOVE', qty: number, reason: string) => {
+    const handleTransfer = (itemId: string, from: string, to: string, qty: number, notes?: string) => {
         setInventory(prev => prev.map(item => {
             if (item.id === itemId) {
-                const isAdd = type === 'ADD';
                 const updated = {
                     ...item,
-                    shopQty: location === 'shop'
-                        ? (isAdd ? item.shopQty + qty : Math.max(0, item.shopQty - qty))
-                        : item.shopQty,
-                    godownQty: location === 'godown'
-                        ? (isAdd ? item.godownQty + qty : Math.max(0, item.godownQty - qty))
-                        : item.godownQty,
+                    location: to,
+                    lastMovedDate: new Date().toISOString()
                 };
-
-                const movementType = isAdd ? 'INWARD' : 'DAMAGE_LOSS';
-                const locLabel = location === 'shop' ? 'Shop' : 'Godown';
-                logMovement(updated, movementType, qty, locLabel as any, `Adjustment: ${reason}`);
-
+                logMovement(updated, 'TRANSFER', qty, `${from} -> ${to}`, notes);
                 return updated;
             }
             return item;
@@ -121,48 +93,302 @@ export function useInventoryLogic() {
         return { success: true };
     };
 
-    const handleBulkImport = (newItems: any[]) => {
-        // Logic to simulate merging items
-        const newInventoryItems = newItems.map((raw, idx) => ({
+    // New: Internal Shifting
+    const handleStockTransfer = (itemId: string, fromArg: LocationType, toArg: LocationType, qty: number) => {
+        let success = false;
+        let currentItem: InventoryItem | undefined;
+        setInventory(prev => prev.map(item => {
+            if (item.id === itemId) {
+                const fromKey = fromArg.toLowerCase() as 'godown' | 'shop';
+                const toKey = toArg.toLowerCase() as 'godown' | 'shop';
+
+                if (item.stockLevels[fromKey] < qty) {
+                    toast.error(`Insufficient stock in ${fromArg}`);
+                    return item;
+                }
+
+                success = true;
+                currentItem = {
+                    ...item,
+                    stockLevels: {
+                        ...item.stockLevels,
+                        [fromKey]: item.stockLevels[fromKey] - qty,
+                        [toKey]: item.stockLevels[toKey] + qty
+                    },
+                    lastMovedDate: new Date().toISOString()
+                };
+                return currentItem;
+            }
+            return item;
+        }));
+
+        if (success && currentItem) {
+            const tx: StockTransaction = {
+                id: `TX-${Date.now()}`,
+                itemId,
+                type: 'TRANSFER',
+                quantity: qty,
+                location: toArg, // Context?
+                date: new Date().toISOString(),
+                performedBy: 'Stock Keeper',
+                reason: `Shifted: ${fromArg} -> ${toArg}`
+            };
+            setTransactions(p => [tx, ...p]);
+            logMovement(currentItem, 'TRANSFER', qty, `${fromArg} -> ${toArg}`, `Internal transfer from ${fromArg} to ${toArg}`);
+        }
+        return { success };
+    };
+
+    const handleAdjustment = (itemId: string, location: string, type: 'ADD' | 'REMOVE', qty: number, reason: string, targetLoc: LocationType = 'GODOWN') => {
+        let currentItem: InventoryItem | undefined;
+        let adjustmentSuccess = false;
+
+        setInventory(prev => prev.map(item => {
+            if (item.id === itemId) {
+
+                // Determine which level to adjust. Default Godown if not specified.
+                // We map 'location' string to LocationType if possible, else default Godown.
+                const locKey = targetLoc.toLowerCase() as 'godown' | 'shop';
+
+                const newQty = (type === 'ADD')
+                    ? item.stockLevels[locKey] + qty
+                    : item.stockLevels[locKey] - qty;
+
+                if (newQty < 0) {
+                    toast.error("Adjusted quantity cannot be negative");
+                    return item;
+                }
+                adjustmentSuccess = true;
+                currentItem = {
+                    ...item,
+                    stockLevels: {
+                        ...item.stockLevels,
+                        [locKey]: newQty
+                    },
+                    lastMovedDate: new Date().toISOString()
+                };
+                return currentItem;
+            }
+            return item;
+        }));
+
+        // Logging...
+        if (adjustmentSuccess && currentItem) {
+            const movementType = type === 'ADD' ? 'INWARD' : 'DAMAGE_LOSS';
+            logMovement(currentItem, movementType, qty, targetLoc, `Adjustment: ${reason} (${type} ${qty} in ${targetLoc})`);
+
+            if (type === 'REMOVE') {
+                const cost = (qty / currentItem.conversionRatio) * currentItem.purchasePrice;
+                const report: ScrapReport = {
+                    id: `SCRAP-${Date.now()}`,
+                    itemId: itemId,
+                    quantity: qty,
+                    reason: 'OTHER', // Defaulting, ideally passed from modal
+                    costOfWaste: cost,
+                    reportedBy: 'Stock Keeper',
+                    date: new Date().toISOString().split('T')[0]
+                };
+                // Mapp reason if it matches specific types or just keep string in note
+                if (['PRODUCTION_ERROR', 'MATERIAL_DEFECT', 'EXPIRED', 'MOUNTING_BREAKAGE'].includes(reason)) {
+                    report.reason = reason as any;
+                }
+                setScrapReports(prev => [report, ...prev]);
+            }
+        }
+        return { success: adjustmentSuccess };
+    };
+
+    const handleBulkImport = (items: any[]) => {
+        const newInventoryItems: InventoryItem[] = items.map((raw, idx) => ({
             id: `IMP-${Date.now()}-${idx}`,
             name: raw.name,
-            category: raw.category,
-            shopQty: raw.shopQty || 0,
-            godownQty: raw.godownQty || 0,
-            minStockLimit: 10,
+            category: raw.category || 'PAPER',
+            stockLevels: {
+                godown: raw.quantity || 0, // Assume bulk import goes to godown
+                shop: 0
+            },
+            baseUnit: raw.baseUnit || 'Sheet',
+            purchaseUnit: raw.purchaseUnit || 'Ream',
+            conversionRatio: raw.conversionRatio || 1,
+            minLevel: raw.minLevel || 0,
+            location: raw.location || 'Godown', // Display field
+            lastSupplier: raw.supplier || '',
             lastMovedDate: new Date().toISOString(),
             deadStockDuration: 90,
-            unit: 'Units',
-            purchasePrice: raw.cost || 0
-        } as InventoryItem));
+            purchasePrice: raw.purchasePrice || 0
+        }));
 
         setInventory(prev => [...prev, ...newInventoryItems]);
 
-        // Log bulk inward
         newInventoryItems.forEach(item => {
-            logMovement(item, 'INWARD', item.shopQty + item.godownQty, 'Godown', 'Bulk Import');
+            logMovement(item, 'INWARD', item.stockLevels.godown, item.location, 'Bulk Import');
         });
+
+        toast.info("Bulk import processed");
+        return { success: true };
+    };
+
+    const handleReceiveGoods = (itemId: string, qty: number, supplier: string, invoiceNo: string, cost: number, targetLoc: LocationType = 'GODOWN') => {
+        let updatedItem: InventoryItem | undefined;
+        setInventory(prev => prev.map(item => {
+            if (item.id === itemId) {
+                const currentTotal = getTotalQty(item);
+
+                const currentTotalValue = (currentTotal / item.conversionRatio) * item.purchasePrice; // Approximate
+                const addedPurchaseUnits = qty / item.conversionRatio;
+                const newStockValue = addedPurchaseUnits * cost;
+
+                const totalBaseQty = currentTotal + qty;
+                const totalPurchaseUnits = totalBaseQty > 0 ? totalBaseQty / item.conversionRatio : 1;
+
+                // only update average if we actually have stock
+                const newAvgCost = totalPurchaseUnits > 0 ? (currentTotalValue + newStockValue) / totalPurchaseUnits : cost;
+
+                const locKey = targetLoc.toLowerCase() as 'godown' | 'shop';
+
+                updatedItem = {
+                    ...item,
+                    stockLevels: {
+                        ...item.stockLevels,
+                        [locKey]: item.stockLevels[locKey] + qty
+                    },
+                    lastSupplier: supplier,
+                    purchasePrice: Math.round(newAvgCost),
+                    lastCost: cost,
+                    lastMovedDate: new Date().toISOString()
+                };
+                return updatedItem;
+            }
+            return item;
+        }));
+
+        if (updatedItem) {
+            const transaction: StockTransaction = {
+                id: `TX-${Date.now()}`,
+                itemId,
+                type: 'INWARD',
+                quantity: qty,
+                location: targetLoc,
+                date: new Date().toISOString(),
+                refId: invoiceNo,
+                cost: cost,
+                performedBy: 'Stock Keeper'
+            };
+            setTransactions(prev => [transaction, ...prev]);
+
+            logMovement(updatedItem, 'INWARD', qty, targetLoc, `Invoice: ${invoiceNo}`);
+        }
 
         return { success: true };
     };
 
-    const handleSwap = (itemId: string, qty: number) => {
-        // Swap logic: Dead Stock (Shop) -> Godown, Fresh Stock (Godown) -> Shop
-        // Effectively 2 transfers.
-        const res1 = handleTransfer(itemId, 'shop', 'godown', qty, 'Swap Out (Dead Stock)');
-        if (!res1.success) return res1;
+    const handleIssueMaterial = (itemId: string, qty: number, to: string, type: 'PRODUCTION' | 'WASTAGE', reason?: string, sourceLoc: LocationType = 'SHOP') => {
+        let success = false;
+        let currentItem: InventoryItem | undefined;
+        const locKey = sourceLoc.toLowerCase() as 'godown' | 'shop';
 
-        const res2 = handleTransfer(itemId, 'godown', 'shop', qty, 'Swap In (Fresh Stock)');
-        return res2;
+        setInventory(prev => prev.map(item => {
+            if (item.id === itemId) {
+                if (item.stockLevels[locKey] < qty) {
+                    toast.error(`Insufficient stock in ${sourceLoc}! Available: ${item.stockLevels[locKey]}`);
+                    return item;
+                }
+                currentItem = {
+                    ...item,
+                    stockLevels: {
+                        ...item.stockLevels,
+                        [locKey]: item.stockLevels[locKey] - qty
+                    },
+                    lastMovedDate: new Date().toISOString()
+                };
+                success = true;
+                return currentItem;
+            }
+            return item;
+        }));
+
+        if (success && currentItem) {
+            const transaction: StockTransaction = {
+                id: `TX-${Date.now()}`,
+                itemId,
+                type: 'ISSUE',
+                quantity: qty,
+                location: sourceLoc,
+                date: new Date().toISOString(),
+                refId: to,
+                reason: type === 'WASTAGE' ? reason : undefined,
+                performedBy: 'Stock Keeper'
+            };
+            setTransactions(prev => [transaction, ...prev]);
+
+            logMovement(currentItem, type === 'WASTAGE' ? 'DAMAGE_LOSS' : 'OUTWARD', qty, to, reason || `To: ${to} (from ${sourceLoc})`);
+        }
+        return { success };
+    };
+
+    const handleReturnMaterial = (itemId: string, qty: number, from: string, targetLoc: LocationType = 'GODOWN') => {
+        let currentItem: InventoryItem | undefined;
+        const locKey = targetLoc.toLowerCase() as 'godown' | 'shop';
+
+        setInventory(prev => prev.map(item => {
+            if (item.id === itemId) {
+                currentItem = {
+                    ...item,
+                    stockLevels: {
+                        ...item.stockLevels,
+                        [locKey]: item.stockLevels[locKey] + qty
+                    },
+                    lastMovedDate: new Date().toISOString()
+                };
+                return currentItem;
+            }
+            return item;
+        }));
+
+        if (currentItem) {
+            const transaction: StockTransaction = {
+                id: `TX-${Date.now()}`,
+                itemId,
+                type: 'RETURN',
+                quantity: qty,
+                location: targetLoc,
+                date: new Date().toISOString(),
+                refId: from,
+                performedBy: 'Stock Keeper'
+            };
+            setTransactions(prev => [transaction, ...prev]);
+            logMovement(currentItem, 'INWARD', qty, targetLoc, `Return from ${from}`);
+        }
+        return { success: true };
+    };
+
+    const handleSwap = (itemId: string, qty: number) => {
+        toast.error("Exchange feature deprecated.");
+        return { success: false };
+    };
+
+    const handleAuditLog = (audit: StockAudit) => {
+        setAuditLogs(prev => [audit, ...prev]);
     };
 
     return {
         inventory,
         movements,
+        transactions,
+        auditLogs,
+        scrapReports,
         handleAddStock,
         handleTransfer,
+        handleStockTransfer,
         handleAdjustment,
         handleBulkImport,
-        handleSwap
+        handleSwap,
+        handleAuditLog,
+        // New
+        handleReceiveGoods,
+        handleIssueMaterial,
+        handleReturnMaterial,
+        purchaseRequests,
+        setPurchaseRequests
     };
 }
