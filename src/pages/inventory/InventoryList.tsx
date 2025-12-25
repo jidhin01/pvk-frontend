@@ -11,20 +11,19 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-    ArrowRightLeft,
     ArrowUpCircle,
-    AlertTriangle,
     Store,
     CalendarClock,
     TrendingDown,
     IndianRupee,
-    RefreshCw,
-    Box
+    Box,
+    Building2,
+    ShoppingBag,
+    ArrowRightLeft
 } from 'lucide-react';
 import { InventoryItem } from '@/data/mockInventoryData';
 import { cn } from '@/lib/utils';
 import { StockEntryModal } from '@/pages/inventory/StockEntryModal';
-import { toast } from 'sonner';
 
 interface InventoryListProps {
     data: InventoryItem[];
@@ -35,11 +34,12 @@ interface InventoryListProps {
 
 export function InventoryList({ data, filterType = 'all', onAction, variant = 'default' }: InventoryListProps) {
     const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
-    const [modalMode, setModalMode] = useState<'INWARD' | 'TRANSFER' | 'EXCHANGE'>('TRANSFER');
+    const [modalMode, setModalMode] = useState<'INWARD' | 'TRANSFER' | 'EXCHANGE'>('INWARD');
 
     // Helper to calculate stock health
     const getStockStatus = (item: InventoryItem) => {
-        const isLowShop = item.shopQty < item.minStockLimit;
+        const totalQty = item.stockLevels ? (item.stockLevels.godown + item.stockLevels.shop) : 0;
+        const isLow = totalQty < item.minLevel;
 
         // Dead Stock Calculation
         const lastMoved = new Date(item.lastMovedDate);
@@ -48,7 +48,7 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
         const isDead = daysSinceMove > item.deadStockDuration;
 
         if (isDead) return { label: 'Dead Stock', color: 'bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-400', icon: CalendarClock, days: daysSinceMove };
-        if (isLowShop) return { label: 'Low in Shop', color: 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400', icon: TrendingDown };
+        if (isLow) return { label: 'Low Stock', color: 'bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-400', icon: TrendingDown };
 
         return { label: 'Healthy', color: 'bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400', icon: Store };
     };
@@ -56,11 +56,9 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
     const handleActionClick = (item: InventoryItem, action: string) => {
         setSelectedItem(item);
         if (action === 'inward') setModalMode('INWARD');
-        if (action === 'transfer') setModalMode('TRANSFER');
-        if (action === 'exchange') setModalMode('EXCHANGE');
     };
 
-    // --- WIDGET VIEW (No Tables, No Scrollbars) ---
+    // --- WIDGET VIEW ---
     if (variant === 'widget') {
         return (
             <>
@@ -68,8 +66,7 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
                     {data.map((item) => {
                         const status = getStockStatus(item);
                         const isDead = status.label === 'Dead Stock';
-                        const total = item.shopQty + item.godownQty;
-                        const shopPercent = total > 0 ? (item.shopQty / total) * 100 : 0;
+                        const totalQty = item.stockLevels ? (item.stockLevels.godown + item.stockLevels.shop) : 0;
 
                         return (
                             <div
@@ -90,33 +87,30 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
                                         </div>
                                     </div>
 
-                                    {isDead ? (
-                                        <Button size="sm" variant="outline" className="h-8 text-xs border-orange-200 text-orange-700 dark:border-orange-900 dark:text-orange-400" onClick={() => handleActionClick(item, 'exchange')}>
-                                            Swap
-                                        </Button>
-                                    ) : (
-                                        <div className="flex gap-1">
-                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-emerald-600" onClick={() => handleActionClick(item, 'inward')}>
-                                                <ArrowUpCircle className="h-4 w-4" />
-                                            </Button>
-                                            <Button size="icon" variant="ghost" className="h-8 w-8 text-blue-600" onClick={() => handleActionClick(item, 'transfer')}>
-                                                <ArrowRightLeft className="h-4 w-4" />
-                                            </Button>
-                                        </div>
-                                    )}
+                                    <Button size="icon" variant="ghost" className="h-8 w-8 text-emerald-600" onClick={() => handleActionClick(item, 'inward')}>
+                                        <ArrowUpCircle className="h-4 w-4" />
+                                    </Button>
                                 </div>
 
-                                {/* Mini Stock Meter */}
-                                <div className="space-y-1.5">
-                                    <div className="flex justify-between text-[11px] font-medium text-muted-foreground">
-                                        <span>Shop: <span className={item.shopQty < item.minStockLimit ? "text-red-500 font-bold" : "text-slate-700 dark:text-slate-300"}>{item.shopQty}</span></span>
-                                        <span>Godown: <span className="text-slate-700 dark:text-slate-300">{item.godownQty}</span></span>
-                                    </div>
-                                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
-                                        <div
-                                            className={cn("h-full transition-all", item.shopQty < item.minStockLimit ? "bg-red-500" : "bg-blue-500")}
-                                            style={{ width: `${shopPercent}%` }}
-                                        />
+                                {/* Stock Info */}
+                                <div className="flex justify-between items-center text-xs text-muted-foreground mt-2">
+                                    <div className="flex flex-col gap-1 w-full">
+                                        <div className="flex justify-between items-center mb-1">
+                                            <span className="font-semibold text-slate-700 dark:text-slate-200">
+                                                Total: {totalQty} {item.baseUnit}
+                                            </span>
+                                            <Button size="icon" variant="ghost" className="h-6 w-6 text-blue-600" onClick={() => onAction?.('OPEN_SHIFT_MODAL', { itemId: item.id })}>
+                                                <ArrowRightLeft className="h-3 w-3" />
+                                            </Button>
+                                        </div>
+                                        <div className="flex gap-2 text-[10px]">
+                                            <Badge variant="outline" className="flex items-center gap-1 bg-blue-50 text-blue-700 border-blue-200 px-1.5 h-6">
+                                                <Building2 className="h-3 w-3" /> G: {item.stockLevels?.godown || 0}
+                                            </Badge>
+                                            <Badge variant="outline" className="flex items-center gap-1 bg-purple-50 text-purple-700 border-purple-200 px-1.5 h-6">
+                                                <ShoppingBag className="h-3 w-3" /> S: {item.stockLevels?.shop || 0}
+                                            </Badge>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -129,7 +123,6 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
                         </div>
                     )}
                 </div>
-                {/* Modals are shared */}
                 {selectedItem && (
                     <StockEntryModal
                         open={!!selectedItem}
@@ -155,7 +148,8 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
                         <TableRow>
                             <TableHead className="min-w-[200px] text-slate-800 dark:text-slate-200">Item Details</TableHead>
                             <TableHead className="hidden md:table-cell">Cost</TableHead>
-                            <TableHead className="min-w-[120px] text-right">Stock Levels</TableHead>
+                            <TableHead className="min-w-[150px] text-right">Stock Breakdown</TableHead>
+                            <TableHead className="hidden md:table-cell">Location Notes</TableHead>
                             <TableHead className="hidden md:table-cell">Status</TableHead>
                             <TableHead className="hidden md:table-cell">Last Moved</TableHead>
                             <TableHead className="text-right">Action</TableHead>
@@ -164,9 +158,8 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
                     <TableBody>
                         {data.map((item) => {
                             const status = getStockStatus(item);
-                            const total = item.shopQty + item.godownQty;
-                            const shopPercent = total > 0 ? (item.shopQty / total) * 100 : 0;
                             const isDead = status.label === 'Dead Stock';
+                            const totalQty = item.stockLevels ? (item.stockLevels.godown + item.stockLevels.shop) : 0;
 
                             return (
                                 <TableRow key={item.id} className={cn("group", isDead ? "bg-red-50/50 dark:bg-red-900/10" : "")}>
@@ -176,7 +169,7 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
                                             <span className="text-xs text-muted-foreground">{item.id} • {item.category}</span>
                                             {/* Mobile Only Alerts */}
                                             <div className="md:hidden flex gap-2 mt-1">
-                                                {item.shopQty < item.minStockLimit && (
+                                                {totalQty < item.minLevel && (
                                                     <Badge variant="outline" className="text-[10px] h-5 border-red-200 text-red-600 bg-red-50">Low Stock</Badge>
                                                 )}
                                             </div>
@@ -189,34 +182,35 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        {/* Mobile View: Stacked */}
-                                        <div className="flex flex-col gap-1 md:hidden items-end">
-                                            <div className="flex items-center gap-1.5">
-                                                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Shop</span>
-                                                <span className={cn("text-lg font-bold tabular-nums", item.shopQty < item.minStockLimit ? "text-red-600" : "text-blue-600")}>
-                                                    {item.shopQty}
-                                                </span>
+                                        <div className="flex flex-col items-end gap-1">
+                                            <span className={cn("text-sm font-bold tabular-nums", totalQty < item.minLevel ? "text-red-600" : "")}>
+                                                Total: {totalQty} {item.baseUnit}
+                                            </span>
+                                            <div className="flex items-center gap-1.5 mt-1">
+                                                <Badge variant="outline" className="bg-blue-50 text-blue-700 border-blue-200 h-5 text-[10px] px-1.5" title="Main Godown">
+                                                    G: {item.stockLevels?.godown || 0}
+                                                </Badge>
+                                                <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 h-5 text-[10px] px-1.5" title="Retail Shop">
+                                                    S: {item.stockLevels?.shop || 0}
+                                                </Badge>
                                             </div>
-                                            <div className="flex items-center gap-1.5">
-                                                <span className="text-[10px] text-muted-foreground uppercase tracking-wider">Godown</span>
-                                                <span className="text-sm font-medium text-slate-500 tabular-nums">
-                                                    {item.godownQty}
+                                            {item.conversionRatio > 1 && (
+                                                <span className="text-[10px] text-muted-foreground mt-0.5">
+                                                    ≈ {(totalQty / item.conversionRatio).toFixed(1)} {item.purchaseUnit}
                                                 </span>
-                                            </div>
+                                            )}
                                         </div>
-
-                                        {/* Desktop View: Progress Bar */}
-                                        <div className="hidden md:block space-y-2 min-w-[200px]">
-                                            <div className="flex justify-between text-xs font-medium">
-                                                <span className="flex items-center gap-1 text-blue-600 dark:text-blue-400"><Store className="h-3 w-3" /> Shop: <span className="tabular-nums text-sm font-bold">{item.shopQty}</span></span>
-                                                <span className="flex items-center gap-1 text-slate-600 dark:text-slate-400 px-2 py-0.5 bg-slate-100 dark:bg-slate-800 rounded">Godown: <span className="tabular-nums font-bold">{item.godownQty}</span></span>
-                                            </div>
-                                            <div className="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden flex">
-                                                <div
-                                                    className={cn("h-full transition-all", item.shopQty < item.minStockLimit ? "bg-red-500" : "bg-blue-500")}
-                                                    style={{ width: `${shopPercent}%` }}
-                                                />
-                                            </div>
+                                    </TableCell>
+                                    <TableCell className="hidden md:table-cell">
+                                        <div className="flex flex-col gap-1">
+                                            <Badge variant="outline" className="font-mono text-xs w-fit max-w-[100px] truncate" title={item.location}>
+                                                {item.location}
+                                            </Badge>
+                                            {item.binLocation && (
+                                                <span className="text-[10px] text-muted-foreground font-mono">
+                                                    {item.binLocation}
+                                                </span>
+                                            )}
                                         </div>
                                     </TableCell>
                                     <TableCell className="hidden md:table-cell">
@@ -230,27 +224,13 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
                                         <span className="text-sm text-muted-foreground">{item.lastMovedDate}</span>
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <div className="flex justify-end gap-3">
-                                            {isDead ? (
-                                                <Button
-                                                    variant="outline"
-                                                    size="sm"
-                                                    className="h-9 md:h-8 w-full md:w-auto text-orange-700 border-orange-200 hover:bg-orange-50 dark:border-orange-900/50 dark:text-orange-400 dark:hover:bg-orange-900/20"
-                                                    disabled={item.godownQty === 0}
-                                                    onClick={() => handleActionClick(item, 'exchange')}
-                                                >
-                                                    <RefreshCw className="mr-2 h-4 w-4" /> Swap Stock
-                                                </Button>
-                                            ) : (
-                                                <>
-                                                    <Button variant="ghost" size="icon" className="h-10 w-10 md:h-8 md:w-8 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => handleActionClick(item, 'inward')}>
-                                                        <ArrowUpCircle className="h-5 w-5 md:h-4 md:w-4 text-emerald-600" />
-                                                    </Button>
-                                                    <Button variant="ghost" size="icon" className="h-10 w-10 md:h-8 md:w-8 hover:bg-slate-100 dark:hover:bg-slate-800" onClick={() => handleActionClick(item, 'transfer')}>
-                                                        <ArrowRightLeft className="h-5 w-5 md:h-4 md:w-4 text-blue-600" />
-                                                    </Button>
-                                                </>
-                                            )}
+                                        <div className="flex justify-end gap-2">
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800 text-blue-600" onClick={() => onAction?.('OPEN_SHIFT_MODAL', { itemId: item.id })} title="Transfer Stock">
+                                                <ArrowRightLeft className="h-4 w-4" />
+                                            </Button>
+                                            <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-slate-100 dark:hover:bg-slate-800 text-emerald-600" onClick={() => handleActionClick(item, 'inward')} title="Inward Stock">
+                                                <ArrowUpCircle className="h-4 w-4" />
+                                            </Button>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -267,7 +247,6 @@ export function InventoryList({ data, filterType = 'all', onAction, variant = 'd
                     item={selectedItem}
                     mode={modalMode}
                     onSubmit={(formData) => {
-                        // Pass the raw form data combined with itemId up to the parent
                         onAction?.(modalMode, { itemId: selectedItem.id, ...formData });
                         setSelectedItem(null);
                     }}

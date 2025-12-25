@@ -193,6 +193,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       { id: 'inventory', label: 'Inventory', icon: Package },
       { id: 'dead-stock', label: 'Dead Stock', icon: AlertCircle },
       { id: 'alerts', label: 'Alerts', icon: Activity },
+      { id: 'purchase', label: 'Purchase Indents', icon: ShoppingCart },
     ],
   },
   {
