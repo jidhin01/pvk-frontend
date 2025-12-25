@@ -16,7 +16,12 @@ import {
     Calendar,
     FileText,
     Layers,
-    IndianRupee
+    IndianRupee,
+    User,
+    UserCheck,
+    Palette,
+    Truck,
+    Box
 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -127,6 +132,49 @@ export default function OrdersPage() {
         }
     };
 
+    const getRoleIcon = (role: string) => {
+        switch (role) {
+            case 'Customer':
+                return <User className="h-4 w-4 text-blue-600" />;
+            case 'Manager':
+                return <UserCheck className="h-4 w-4 text-purple-600" />;
+            case 'Designer':
+                return <Palette className="h-4 w-4 text-pink-600" />;
+            case 'Printer':
+                return <PrinterIcon className="h-4 w-4 text-orange-600" />;
+            case 'PAN Team':
+                return <FileText className="h-4 w-4 text-amber-600" />;
+            case 'Seal Team':
+                return <Package className="h-4 w-4 text-teal-600" />;
+            case 'Stock Keeper':
+                return <Box className="h-4 w-4 text-indigo-600" />;
+            case 'Line Staff':
+                return <Truck className="h-4 w-4 text-cyan-600" />;
+            default:
+                return <User className="h-4 w-4 text-gray-600" />;
+        }
+    };
+
+    const getRoleBadgeColor = (role: string) => {
+        const colors: Record<string, string> = {
+            'Customer': 'bg-blue-100 text-blue-700',
+            'Manager': 'bg-purple-100 text-purple-700',
+            'Designer': 'bg-pink-100 text-pink-700',
+            'Printer': 'bg-orange-100 text-orange-700',
+            'PAN Team': 'bg-amber-100 text-amber-700',
+            'Seal Team': 'bg-teal-100 text-teal-700',
+            'Stock Keeper': 'bg-indigo-100 text-indigo-700',
+            'Line Staff': 'bg-cyan-100 text-cyan-700',
+        };
+        return colors[role] || 'bg-gray-100 text-gray-700';
+    };
+
+    const getProgress = (timeline: TimelineStep[] | undefined) => {
+        if (!timeline || timeline.length === 0) return 0;
+        const completed = timeline.filter(t => t.completed).length;
+        return (completed / timeline.length) * 100;
+    };
+
     const renderOrderDetails = (order: Order) => {
         if (order.type === 'PRINT') {
             const printOrder = order as PrintOrder;
@@ -197,6 +245,74 @@ export default function OrdersPage() {
                 </div>
             );
         }
+    };
+
+    const renderOrderTimeline = (order: Order) => {
+        if (!order.timeline || order.timeline.length === 0) return null;
+
+        return (
+            <div className="space-y-4 mt-4">
+                {/* Progress Bar */}
+                <div className="space-y-2">
+                    <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Progress</span>
+                        <span className="font-medium">{Math.round(getProgress(order.timeline))}%</span>
+                    </div>
+                    <Progress value={getProgress(order.timeline)} className="h-2" />
+                </div>
+
+                {/* Timeline with Role Info */}
+                <div className="space-y-3">
+                    <h4 className="text-sm font-semibold text-muted-foreground flex items-center gap-2">
+                        <Layers className="w-4 h-4" /> Order Timeline
+                    </h4>
+                    <div className="relative pl-4">
+                        {order.timeline.map((step, index) => (
+                            <div key={index} className="relative pb-4 last:pb-0">
+                                {/* Connector line */}
+                                {index < order.timeline!.length - 1 && (
+                                    <div className={`absolute left-[7px] top-[20px] w-0.5 h-full ${step.completed ? 'bg-green-500' : 'bg-muted'}`} />
+                                )}
+                                <div className="flex items-start gap-3">
+                                    <div className={`mt-1 w-4 h-4 rounded-full flex items-center justify-center ${step.completed ? 'bg-green-500' : 'bg-muted border-2 border-muted-foreground/30'}`}>
+                                        {step.completed && <CheckCircle2 className="w-3 h-3 text-white" />}
+                                    </div>
+                                    <div className="flex-1">
+                                        <div className="flex items-center gap-2 flex-wrap">
+                                            <p className={`text-sm font-medium ${step.completed ? 'text-foreground' : 'text-muted-foreground'}`}>
+                                                {step.stage}
+                                            </p>
+                                            {/* Role Badge */}
+                                            <Badge variant="outline" className={`text-xs gap-1 ${getRoleBadgeColor(step.role)}`}>
+                                                {getRoleIcon(step.role)}
+                                                {step.role}
+                                            </Badge>
+                                        </div>
+                                        {/* Person and Action */}
+                                        <div className="text-xs text-muted-foreground mt-0.5">
+                                            {step.person ? (
+                                                <span className="font-medium text-foreground">{step.person}</span>
+                                            ) : (
+                                                <span className="italic">Pending</span>
+                                            )}
+                                            {step.action && (
+                                                <span> — {step.action}</span>
+                                            )}
+                                        </div>
+                                        {step.date && (
+                                            <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
+                                                <Clock className="w-3 h-3" />
+                                                {step.date}
+                                            </p>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
     };
 
     const renderOrderActions = (order: Order) => {
@@ -340,6 +456,7 @@ export default function OrdersPage() {
                                         <CardContent className="pt-0 pb-4 border-t bg-muted/20">
                                             <div className="pt-4">
                                                 {renderOrderDetails(order)}
+                                                {renderOrderTimeline(order)}
                                             </div>
                                         </CardContent>
                                     </CollapsibleContent>
@@ -359,3 +476,4 @@ export default function OrdersPage() {
         </div>
     );
 }
+

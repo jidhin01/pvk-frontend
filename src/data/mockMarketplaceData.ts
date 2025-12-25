@@ -11,6 +11,15 @@ export type OrderStatus = 'printing' | 'pending' | 'delivered';
 export type GoodsType = 'finished' | 'unfinished';
 export type PrintType = 'pvc' | 'laser' | 'offset';
 
+export interface TimelineStep {
+    stage: string;
+    completed: boolean;
+    date: string | null;
+    role: string;
+    person: string | null;
+    action: string;
+}
+
 export interface BaseOrder {
     id: string;
     jobName: string;
@@ -19,6 +28,7 @@ export interface BaseOrder {
     date: string;
     goodsType?: GoodsType; // New field
     printType?: PrintType; // New field
+    timeline?: TimelineStep[];
 }
 
 export interface PrintOrder extends BaseOrder {
@@ -58,7 +68,15 @@ export const RECENT_ORDERS: Order[] = [
         fileUrl: "#",
         specs: { dimensions: "10x4 ft", mediaType: "Flex Star", quality: "High" },
         goodsType: 'unfinished',
-        printType: 'laser'
+        printType: 'laser',
+        timeline: [
+            { stage: 'Order Placed', completed: true, date: '2023-10-25 09:30 AM', role: 'Customer', person: 'You', action: 'Uploaded design file' },
+            { stage: 'Manager Review', completed: true, date: '2023-10-25 10:00 AM', role: 'Manager', person: 'Suresh M.', action: 'Approved order' },
+            { stage: 'Designer Assigned', completed: true, date: '2023-10-25 10:15 AM', role: 'Designer', person: 'Rajan K.', action: 'Picked from pool' },
+            { stage: 'Design Completed', completed: true, date: '2023-10-25 11:30 AM', role: 'Designer', person: 'Rajan K.', action: 'Submitted design' },
+            { stage: 'Printing', completed: false, date: null, role: 'Printer', person: 'Manoj P.', action: 'In progress' },
+            { stage: 'Ready for Delivery', completed: false, date: null, role: 'Line Staff', person: null, action: 'Pending' },
+        ]
     },
     {
         id: "ORD-002",
@@ -67,7 +85,15 @@ export const RECENT_ORDERS: Order[] = [
         status: "pending",
         cost: 120,
         date: "2023-10-26",
-        details: { name: "John Doe", type: "Individual" }
+        details: { name: "John Doe", type: "Individual" },
+        timeline: [
+            { stage: 'Order Placed', completed: true, date: '2023-10-26 02:00 PM', role: 'Customer', person: 'You', action: 'Submitted PAN request' },
+            { stage: 'Document Verification', completed: false, date: null, role: 'PAN Team', person: null, action: 'Pending verification' },
+            { stage: 'PAN Generation', completed: false, date: null, role: 'PAN Team', person: null, action: 'Pending' },
+            { stage: 'Printing', completed: false, date: null, role: 'Printer', person: null, action: 'Pending' },
+            { stage: 'Quality Check', completed: false, date: null, role: 'Printer', person: null, action: 'Pending' },
+            { stage: 'Ready for Delivery', completed: false, date: null, role: 'Line Staff', person: null, action: 'Pending' },
+        ]
     },
     {
         id: "ORD-003",
@@ -76,7 +102,15 @@ export const RECENT_ORDERS: Order[] = [
         status: "delivered",
         cost: 250,
         date: "2023-10-22",
-        details: { text: "APPROVED", type: "Self Inking" }
+        details: { text: "APPROVED", type: "Self Inking" },
+        timeline: [
+            { stage: 'Order Placed', completed: true, date: '2023-10-22 10:00 AM', role: 'Customer', person: 'You', action: 'Submitted seal request' },
+            { stage: 'Design Approved', completed: true, date: '2023-10-22 10:30 AM', role: 'Seal Team', person: 'Vijay R.', action: 'Approved seal text' },
+            { stage: 'Production', completed: true, date: '2023-10-22 02:00 PM', role: 'Seal Team', person: 'Vijay R.', action: 'Seal manufactured' },
+            { stage: 'Packed', completed: true, date: '2023-10-22 03:00 PM', role: 'Seal Team', person: 'Vijay R.', action: 'Ready for dispatch' },
+            { stage: 'Picked by Staff', completed: true, date: '2023-10-23 08:00 AM', role: 'Line Staff', person: 'Anil K.', action: 'Out for delivery' },
+            { stage: 'Delivered', completed: true, date: '2023-10-23 11:00 AM', role: 'Line Staff', person: 'Anil K.', action: 'Delivered successfully' },
+        ]
     }
 ];
 

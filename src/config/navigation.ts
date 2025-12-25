@@ -115,6 +115,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { id: 'work-pool', label: 'Work Pool', icon: Layers },
       { id: 'my-work', label: 'My Work', icon: FolderOpen },
+      { id: 'completed', label: 'Completed', icon: CheckCircle },
       { id: 'earnings', label: 'Earnings', icon: Coins },
     ],
   },

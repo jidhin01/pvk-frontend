@@ -22,9 +22,11 @@ import AdminSettings from './adminSettings';
 import AdminActivityLogs from './adminActivityLogs';
 import RoleManagement from './RoleManagement';
 import PartnersManagement from './PartnersManagement';
+import DesignerManagement from './DesignerManagement';
 import InventoryModule from './inventory/InventoryModule';
 import PrinterManager from './printer/PrinterManager';
 import AdminPancardManager from './pancard/AdminPancardManager';
+
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -46,13 +48,7 @@ export default function AdminDashboard() {
 
           // Role Management Pages
           case 'manage-designer':
-            return (
-              <RoleManagement
-                roleId="designer"
-                roleName="Designer"
-                roleIcon={<Palette className="h-6 w-6 text-primary" />}
-              />
-            );
+            return <DesignerManagement />;
 
           case 'manage-printer':
             return <PrinterManager />;
@@ -67,15 +63,9 @@ export default function AdminDashboard() {
             );
 
           case 'manage-finance':
-            // Only show finance for admin
+            // Show comprehensive Finance Management for admin
             if (isAdmin) {
-              return (
-                <RoleManagement
-                  roleId="finance"
-                  roleName="Finance"
-                  roleIcon={<Coins className="h-6 w-6 text-primary" />}
-                />
-              );
+              return <FinanceOverview />;
             }
             return <AdminOverview />;
 
