@@ -1,11 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DashboardLayout } from '@/components/layout/DashboardLayout';
 import PrinterQueue from './PrinterQueue';
 import PrinterHistory from './PrinterHistory';
 import PrinterRejections from './PrinterRejections';
+import DashboardOverview from './DashboardOverview';
+import HandoverQueue from './HandoverQueue';
 import { Printer } from 'lucide-react';
+import { MOCK_PRINTER_JOBS, PrinterJob } from '@/data/mockPrinterData';
+import { toast } from 'sonner';
 
 export default function PrinterLayout() {
+    const [jobs, setJobs] = useState<PrinterJob[]>(MOCK_PRINTER_JOBS);
+
+    const handleJobUpdate = (jobId: string, updates: Partial<PrinterJob>) => {
+        setJobs(prev => prev.map(j => j.id === jobId ? { ...j, ...updates } : j) as PrinterJob[]);
+    };
+
     return (
         <DashboardLayout>
             {({ activeTab }) => {
@@ -27,11 +37,13 @@ export default function PrinterLayout() {
 
                         <div>
                             {/* Render Main Content */}
-                            {activeTab === 'dashboard' && <PrinterQueue />}
+                            {activeTab === 'overview' && <DashboardOverview jobs={jobs} />}
+                            {activeTab === 'dashboard' && <PrinterQueue jobs={jobs} onUpdateJob={handleJobUpdate} />}
+                            {activeTab === 'handover' && <HandoverQueue jobs={jobs} onUpdateJob={handleJobUpdate} />}
                             {activeTab === 'history' && <PrinterHistory />}
                             {activeTab === 'rejected' && <PrinterRejections />}
 
-                            {!['dashboard', 'history', 'rejected'].includes(activeTab) && (
+                            {!['overview', 'dashboard', 'handover', 'history', 'rejected'].includes(activeTab) && (
                                 <div className="p-8 text-center text-muted-foreground border-2 border-dashed rounded-xl">
                                     Feature coming soon: {activeTab}
                                 </div>

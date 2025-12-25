@@ -23,6 +23,7 @@ import AdminActivityLogs from './adminActivityLogs';
 import RoleManagement from './RoleManagement';
 import PartnersManagement from './PartnersManagement';
 import InventoryModule from './inventory/InventoryModule';
+import PrinterManager from './printer/PrinterManager';
 
 export default function AdminDashboard() {
   const { user } = useAuth();
@@ -53,13 +54,7 @@ export default function AdminDashboard() {
             );
 
           case 'manage-printer':
-            return (
-              <RoleManagement
-                roleId="printer"
-                roleName="Printer"
-                roleIcon={<Printer className="h-6 w-6 text-primary" />}
-              />
-            );
+            return <PrinterManager />;
 
           case 'manage-sales':
             return (

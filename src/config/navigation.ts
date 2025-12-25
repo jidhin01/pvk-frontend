@@ -123,8 +123,10 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     label: 'Printer',
     icon: PrinterIcon,
     tabs: [
+      { id: 'overview', label: 'Overview', icon: LayoutDashboard },
       { id: 'dashboard', label: 'Job Queue', icon: PrinterIcon },
-      { id: 'history', label: 'Completed History', icon: CheckCircle },
+      { id: 'handover', label: 'Handover', icon: Package },
+      { id: 'history', label: 'History', icon: History },
       { id: 'rejected', label: 'Rejected Log', icon: AlertTriangle },
     ],
   },
