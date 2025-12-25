@@ -24,6 +24,7 @@ import RoleManagement from './RoleManagement';
 import PartnersManagement from './PartnersManagement';
 import DesignerManagement from './DesignerManagement';
 import InventoryModule from './inventory/InventoryModule';
+import PrinterManager from './printer/PrinterManager';
 
 
 export default function AdminDashboard() {
@@ -49,13 +50,7 @@ export default function AdminDashboard() {
             return <DesignerManagement />;
 
           case 'manage-printer':
-            return (
-              <RoleManagement
-                roleId="printer"
-                roleName="Printer"
-                roleIcon={<Printer className="h-6 w-6 text-primary" />}
-              />
-            );
+            return <PrinterManager />;
 
           case 'manage-sales':
             return (

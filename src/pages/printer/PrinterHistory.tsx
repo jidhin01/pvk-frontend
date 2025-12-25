@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { CheckCircle, Calendar, Package } from 'lucide-react';
+import { CheckCircle, Calendar, Package, Building, User } from 'lucide-react';
 import { MOCK_HISTORY_LOGS, LogEntry } from '@/data/mockPrinterData';
 
 export default function PrinterHistory() {
@@ -44,6 +44,7 @@ export default function PrinterHistory() {
                                     <TableHead className="hidden sm:table-cell">Technology</TableHead>
                                     <TableHead className="hidden lg:table-cell">Material</TableHead>
                                     <TableHead>Quantity</TableHead>
+                                    <TableHead className="hidden md:table-cell">Dealer</TableHead>
                                     <TableHead className="text-right whitespace-nowrap">Completed At</TableHead>
                                 </TableRow>
                             </TableHeader>
@@ -65,6 +66,16 @@ export default function PrinterHistory() {
                                             <div className="flex items-center gap-1 font-medium">
                                                 <Package className="h-3 w-3 text-muted-foreground" />
                                                 {log.qty}
+                                            </div>
+                                        </TableCell>
+                                        <TableCell className="hidden md:table-cell">
+                                            <div className="flex items-center gap-2">
+                                                <div className={`p-1 rounded-full ${
+                                                    log.dealerType === 'dealer' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+                                                }`}>
+                                                    {log.dealerType === 'dealer' ? <Building className="h-3 w-3" /> : <User className="h-3 w-3" />}
+                                                </div>
+                                                <span className="text-sm">{log.dealerName}</span>
                                             </div>
                                         </TableCell>
                                         <TableCell className="text-right text-muted-foreground tabular-nums whitespace-nowrap">
