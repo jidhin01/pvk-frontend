@@ -38,13 +38,46 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { RECENT_ORDERS, Order, PrintOrder, ServiceOrder } from '@/data/mockMarketplaceData';
+import { RECENT_ORDERS, Order, PrintOrder, ServiceOrder, OrderStatus } from '@/data/mockMarketplaceData';
+import { MOCK_PANCARD_ORDERS } from '@/data/mockPancardData';
 
 export default function OrdersPage() {
     const [filter, setFilter] = useState('pending');
     const [expandedOrders, setExpandedOrders] = useState<string[]>([]);
 
-    const filteredOrders = RECENT_ORDERS.filter(order => {
+    // Convert and Merge Pancard Orders
+    const pancardOrders: Order[] = MOCK_PANCARD_ORDERS.map(pan => {
+        let mappedStatus: OrderStatus = 'pending';
+        // Map Pancard statuses to Marketplace Order statuses
+        if (['SENT_TO_PRINTER', 'PROCESSING'].includes(pan.status)) {
+            mappedStatus = 'printing';
+        } else if (['COMPLETED', 'HANDED_OVER', 'PRINTED'].includes(pan.status)) {
+            mappedStatus = 'delivered';
+        } else {
+            // PENDING, REJECTED, or others default to pending
+            mappedStatus = 'pending';
+        }
+
+        return {
+            id: pan.id,
+            jobName: `PAN Application - ${pan.applicantName}`,
+            type: 'PAN',
+            status: mappedStatus,
+            cost: pan.type === 'EMERGENCY' ? 250 : 107,
+            date: new Date(pan.submittedAt).toISOString().split('T')[0],
+            details: {
+                name: pan.applicantName,
+                type: pan.type === 'EMERGENCY' ? 'Emergency (Tatkal)' : 'Normal',
+                aadhar: pan.aadharNumber,
+                statusDetail: pan.status // Keep original status in details for reference
+            }
+        };
+    });
+
+    // Combine static marketplace orders with dynamic PANCARD orders
+    const allOrders = [...RECENT_ORDERS, ...pancardOrders];
+
+    const filteredOrders = allOrders.filter(order => {
         if (filter === 'all') return true;
         if (filter === 'pending') return order.status === 'pending';
         if (filter === 'processing') return ['printing', 'processing'].includes(order.status);

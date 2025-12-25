@@ -44,44 +44,52 @@ export default function NewPanCard({ onNavigate }: NewPanCardProps) {
             </div>
 
             {/* Quick Info Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <Card className="bg-blue-50/50 dark:bg-blue-950/20 border-blue-100 dark:border-blue-900/30">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <Card className="bg-gradient-to-br from-blue-50 to-blue-100/50 dark:from-blue-950/30 dark:to-blue-900/10 border-blue-100 dark:border-blue-900/30 transition-all hover:shadow-md hover:-translate-y-1">
                     <CardContent className="pt-6">
-                        <div className="flex items-start gap-3">
-                            <div className="p-2 bg-blue-100 dark:bg-blue-900/50 rounded-lg">
-                                <Clock className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-blue-100 dark:bg-blue-900/50 rounded-xl shadow-sm">
+                                <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-blue-900 dark:text-blue-100">Fast Processing</h3>
-                                <p className="text-sm text-blue-700/80 dark:text-blue-300/80 mt-1">Normal: 7-10 days<br />Emergency: 2-3 days</p>
+                                <h3 className="font-bold text-blue-900 dark:text-blue-100">Fast Processing</h3>
+                                <div className="mt-2 space-y-1 text-sm text-blue-700/80 dark:text-blue-300/80">
+                                    <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-blue-400"></span> Normal: 7-10 days</p>
+                                    <p className="flex items-center gap-2"><span className="w-1.5 h-1.5 rounded-full bg-red-400"></span> Emergency: 2-3 days</p>
+                                </div>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-100 dark:border-emerald-900/30">
+                <Card className="bg-gradient-to-br from-emerald-50 to-emerald-100/50 dark:from-emerald-950/30 dark:to-emerald-900/10 border-emerald-100 dark:border-emerald-900/30 transition-all hover:shadow-md hover:-translate-y-1">
                     <CardContent className="pt-6">
-                        <div className="flex items-start gap-3">
-                            <div className="p-2 bg-emerald-100 dark:bg-emerald-900/50 rounded-lg">
-                                <FileText className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-emerald-100 dark:bg-emerald-900/50 rounded-xl shadow-sm">
+                                <FileText className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-emerald-900 dark:text-emerald-100">Required Documents</h3>
-                                <p className="text-sm text-emerald-700/80 dark:text-emerald-300/80 mt-1">Aadhaar (Front & Back)<br />Passport Photo</p>
+                                <h3 className="font-bold text-emerald-900 dark:text-emerald-100">Required Documents</h3>
+                                <p className="text-sm text-emerald-700/80 dark:text-emerald-300/80 mt-2 leading-relaxed">
+                                    Ensure you have clear scans of <strong>Aadhaar (Front & Back)</strong> and a recent <strong>Passport Photo</strong>.
+                                </p>
                             </div>
                         </div>
                     </CardContent>
                 </Card>
 
-                <Card className="bg-amber-50/50 dark:bg-amber-950/20 border-amber-100 dark:border-amber-900/30">
+                <Card className="bg-gradient-to-br from-amber-50 to-amber-100/50 dark:from-amber-950/30 dark:to-amber-900/10 border-amber-100 dark:border-amber-900/30 transition-all hover:shadow-md hover:-translate-y-1">
                     <CardContent className="pt-6">
-                        <div className="flex items-start gap-3">
-                            <div className="p-2 bg-amber-100 dark:bg-amber-900/50 rounded-lg">
-                                <CheckCircle2 className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        <div className="flex items-start gap-4">
+                            <div className="p-3 bg-amber-100 dark:bg-amber-900/50 rounded-xl shadow-sm">
+                                <CheckCircle2 className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-amber-900 dark:text-amber-100">Competitive Pricing</h3>
-                                <p className="text-sm text-amber-700/80 dark:text-amber-300/80 mt-1">Normal: ₹107<br />Emergency: ₹250</p>
+                                <h3 className="font-bold text-amber-900 dark:text-amber-100">Competitive Pricing</h3>
+                                <div className="mt-2 flex items-center gap-4 text-sm font-medium">
+                                    <div className="px-2 py-1 bg-amber-100/50 rounded text-amber-800 dark:text-amber-200">Normal: ₹107</div>
+                                    <div className="px-2 py-1 bg-red-100/50 rounded text-red-800 dark:text-red-200">Emergency: ₹250</div>
+                                </div>
                             </div>
                         </div>
                     </CardContent>

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import {
     Table,
@@ -10,32 +9,65 @@ import {
 } from "@/components/ui/table";
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Clock, Calendar, CheckCircle2, XCircle, RotateCcw } from 'lucide-react';
-import { PanApplication } from '@/data/mockPanData';
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import {
+    Eye,
+    Clock,
+    Calendar,
+    CheckCircle2,
+    XCircle,
+    RotateCcw,
+    User,
+    AlertTriangle
+} from 'lucide-react';
+import { PancardOrder } from '@/data/mockPancardData';
 import { cn } from '@/lib/utils';
 import { VerificationModal } from '@/pages/pan-team/VerificationModal';
-import { toast } from 'sonner';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface PanVerificationListProps {
-    data: PanApplication[];
-    onStatusChange: (id: string, newStatus: PanApplication['status'], rejectionReason?: string) => void;
+    data: PancardOrder[];
+    onStatusChange: (id: string, newStatus: PancardOrder['status'], rejectionReason?: string) => void;
 }
 
 export function PanVerificationList({ data, onStatusChange }: PanVerificationListProps) {
-    const [selectedApp, setSelectedApp] = useState<PanApplication | null>(null);
+    const [selectedApp, setSelectedApp] = useState<PancardOrder | null>(null);
 
-    const getStatusBadge = (app: PanApplication) => {
+    const getStatusBadge = (app: PancardOrder) => {
         switch (app.status) {
-            case 'pending_verification':
-                return <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200"><Clock className="w-3 h-3 mr-1" /> Pending</Badge>;
-            case 'sent_to_printer':
-                return <Badge variant="outline" className="bg-green-50 text-green-700 border-green-200"><CheckCircle2 className="w-3 h-3 mr-1" /> Sent to Print</Badge>;
-            case 'completed':
-                return <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200"><CheckCircle2 className="w-3 h-3 mr-1" /> Digital Complete</Badge>;
-            case 'reupload_requested':
-                return <Badge variant="outline" className="bg-orange-50 text-orange-700 border-orange-200"><RotateCcw className="w-3 h-3 mr-1" /> Re-upload: {app.rejectionReason}</Badge>;
-            case 'rejected':
-                return <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200"><XCircle className="w-3 h-3 mr-1" /> Rejected</Badge>;
+            case 'PENDING':
+                return (
+                    <Badge variant="outline" className="bg-yellow-50 text-yellow-700 border-yellow-200 gap-1.5 shadow-sm">
+                        <Clock className="w-3 h-3" /> Pending
+                    </Badge>
+                );
+            case 'SENT_TO_PRINTER':
+                return (
+                    <Badge variant="outline" className="bg-emerald-50 text-emerald-700 border-emerald-200 gap-1.5 shadow-sm">
+                        <CheckCircle2 className="w-3 h-3" /> Sent to Print
+                    </Badge>
+                );
+            case 'COMPLETED':
+                return (
+                    <Badge variant="outline" className="bg-purple-50 text-purple-700 border-purple-200 gap-1.5 shadow-sm">
+                        <CheckCircle2 className="w-3 h-3" /> Digital Complete
+                    </Badge>
+                );
+            case 'REJECTED':
+                return (
+                    <TooltipProvider>
+                        <Tooltip>
+                            <TooltipTrigger>
+                                <Badge variant="outline" className="bg-red-50 text-red-700 border-red-200 gap-1.5 shadow-sm cursor-help">
+                                    <XCircle className="w-3 h-3" /> Rejected
+                                </Badge>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Reason: {app.rejectionReason || 'No reason provided'}</p>
+                            </TooltipContent>
+                        </Tooltip>
+                    </TooltipProvider>
+                );
             default:
                 return <Badge variant="outline">{app.status}</Badge>;
         }
@@ -44,32 +76,42 @@ export function PanVerificationList({ data, onStatusChange }: PanVerificationLis
     const handleVerificationAction = (action: 'print' | 'complete' | 'reject' | 'reupload', reason?: string) => {
         if (!selectedApp) return;
 
-        let newStatus: PanApplication['status'] = 'pending_verification'; // Default fallback
+        let newStatus: PancardOrder['status'] = 'PENDING';
 
         if (action === 'print') {
-            newStatus = 'sent_to_printer';
+            newStatus = 'SENT_TO_PRINTER';
         } else if (action === 'complete') {
-            newStatus = 'completed';
+            newStatus = 'COMPLETED';
         } else if (action === 'reject') {
-            newStatus = 'rejected';
+            newStatus = 'REJECTED';
         } else if (action === 'reupload') {
-            newStatus = 'reupload_requested';
+            // newStatus = 'reupload_requested'; // Not supported in PancardOrder yet
+            newStatus = 'PENDING';
         }
 
         onStatusChange(selectedApp.id, newStatus, reason);
         setSelectedApp(null);
     };
 
+    const getInitials = (name: string) => {
+        return name
+            .split(' ')
+            .map(n => n[0])
+            .slice(0, 2)
+            .join('')
+            .toUpperCase();
+    };
+
     return (
         <>
-            <div className="rounded-md border bg-card">
+            <div className="rounded-xl border bg-card shadow-sm overflow-hidden">
                 <Table>
-                    <TableHeader>
+                    <TableHeader className="bg-muted/30">
                         <TableRow>
-                            <TableHead>Application ID</TableHead>
+                            <TableHead className="w-[120px]">App ID</TableHead>
                             <TableHead>Applicant</TableHead>
                             <TableHead>Type</TableHead>
-                            <TableHead>Submission</TableHead>
+                            <TableHead>Submitted</TableHead>
                             <TableHead>Status</TableHead>
                             <TableHead className="text-right">Action</TableHead>
                         </TableRow>
@@ -77,45 +119,91 @@ export function PanVerificationList({ data, onStatusChange }: PanVerificationLis
                     <TableBody>
                         {data.length === 0 ? (
                             <TableRow>
-                                <TableCell colSpan={6} className="h-24 text-center text-muted-foreground">
-                                    No applications found.
+                                <TableCell colSpan={6} className="h-32 text-center">
+                                    <div className="flex flex-col items-center justify-center text-muted-foreground gap-2">
+                                        <div className="p-3 bg-muted/50 rounded-full">
+                                            <Calendar className="h-6 w-6" />
+                                        </div>
+                                        <p>No applications found in this queue.</p>
+                                    </div>
                                 </TableCell>
                             </TableRow>
                         ) : (
                             data.map((app) => (
-                                <TableRow key={app.id} className="group hover:bg-muted/40 transition-colors">
-                                    <TableCell className="font-medium">{app.id}</TableCell>
+                                <TableRow
+                                    key={app.id}
+                                    className="group hover:bg-muted/40 transition-all cursor-pointer"
+                                    onClick={() => app.status === 'PENDING' && setSelectedApp(app)}
+                                >
+                                    <TableCell className="font-mono text-xs text-muted-foreground">
+                                        {app.id}
+                                    </TableCell>
                                     <TableCell>
-                                        <div className="flex flex-col">
-                                            <span className="font-medium">{app.applicantName}</span>
-                                            <span className="text-xs text-muted-foreground">S/o {app.fatherName}</span>
+                                        <div className="flex items-center gap-3">
+                                            <Avatar className="h-9 w-9 border-2 border-background shadow-sm">
+                                                <AvatarFallback className={cn(
+                                                    "text-white font-semibold text-xs",
+                                                    app.type === 'EMERGENCY' ? "bg-gradient-to-br from-red-500 to-orange-500" : "bg-gradient-to-br from-blue-500 to-indigo-500"
+                                                )}>
+                                                    {getInitials(app.applicantName)}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                            <div className="flex flex-col">
+                                                <span className="font-semibold text-sm text-foreground group-hover:text-primary transition-colors">
+                                                    {app.applicantName}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground flex items-center gap-1">
+                                                    <User className="h-3 w-3" /> S/o {app.fatherName}
+                                                </span>
+                                            </div>
                                         </div>
                                     </TableCell>
                                     <TableCell>
-                                        <div className="flex flex-col gap-1 items-start">
-                                            <Badge className={cn(
-                                                app.type === 'EMERGENCY' ? "bg-red-100 text-red-700 hover:bg-red-200 border-red-200" : "bg-blue-100 text-blue-700 hover:bg-blue-200 border-blue-200"
+                                        <div className="flex flex-col items-start gap-1">
+                                            <Badge variant="secondary" className={cn(
+                                                "font-medium border shadow-sm",
+                                                app.type === 'EMERGENCY'
+                                                    ? "bg-red-50 text-red-700 border-red-200 hover:bg-red-100"
+                                                    : "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100"
                                             )}>
+                                                {app.type === 'EMERGENCY' && <AlertTriangle className="h-3 w-3 mr-1" />}
                                                 {app.type}
                                             </Badge>
-                                            {!app.isPrintRequired && <span className="text-[10px] text-muted-foreground px-1 border rounded">No Print</span>}
                                         </div>
                                     </TableCell>
                                     <TableCell>
                                         <div className="flex items-center text-muted-foreground text-sm">
-                                            <Calendar className="mr-2 h-3 w-3" />
-                                            {new Date(app.submittedAt).toLocaleDateString()}
+                                            <Clock className="mr-2 h-3.5 w-3.5" />
+                                            {new Date(app.submittedAt).toLocaleDateString(undefined, {
+                                                month: 'short',
+                                                day: 'numeric'
+                                            })}
+                                            <span className="text-xs ml-1 text-muted-foreground/50">
+                                                {new Date(app.submittedAt).toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' })}
+                                            </span>
                                         </div>
                                     </TableCell>
                                     <TableCell>{getStatusBadge(app)}</TableCell>
                                     <TableCell className="text-right">
-                                        {app.status === 'pending_verification' ? (
-                                            <Button size="sm" onClick={() => setSelectedApp(app)}>
+                                        {app.status === 'PENDING' ? (
+                                            <Button
+                                                size="sm"
+                                                onClick={(e) => {
+                                                    e.stopPropagation();
+                                                    setSelectedApp(app);
+                                                }}
+                                                className={cn(
+                                                    "transition-all shadow-sm",
+                                                    app.type === 'EMERGENCY'
+                                                        ? "bg-red-600 hover:bg-red-700 text-white"
+                                                        : "bg-primary hover:bg-primary/90"
+                                                )}
+                                            >
                                                 <Eye className="mr-2 h-4 w-4" /> Verify
                                             </Button>
                                         ) : (
-                                            <Button variant="ghost" size="sm" disabled>
-                                                Processed
+                                            <Button variant="ghost" size="sm" disabled className="opacity-50">
+                                                <CheckCircle2 className="mr-2 h-4 w-4" /> Processed
                                             </Button>
                                         )}
                                     </TableCell>

@@ -219,6 +219,21 @@ export const MOCK_HISTORY_LOGS: LogEntry[] = [
     }
 ];
 
+type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
+
+export const addPrinterJob = (job: DistributiveOmit<PrinterJob, 'id' | 'createdAt' | 'status'>) => {
+    // Basic ID generation
+    const newId = `J-${Math.floor(Math.random() * 10000)}`;
+    const newJob: PrinterJob = {
+        id: newId,
+        status: 'ready_for_print',
+        createdAt: new Date().toISOString(),
+        ...job
+    } as PrinterJob;
+    MOCK_PRINTER_JOBS.unshift(newJob);
+    return newJob;
+};
+
 export const MOCK_REJECTED_LOGS: LogEntry[] = [
     {
         id: 'J-105',
