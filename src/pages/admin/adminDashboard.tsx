@@ -23,6 +23,8 @@ import AdminActivityLogs from './adminActivityLogs';
 import RoleManagement from './RoleManagement';
 import PartnersManagement from './PartnersManagement';
 import DesignerManagement from './DesignerManagement';
+import SealTeamManagement from './SealTeamManagement';
+import SalesManagement from './SalesManagement';
 import InventoryModule from './inventory/InventoryModule';
 
 
@@ -58,13 +60,7 @@ export default function AdminDashboard() {
             );
 
           case 'manage-sales':
-            return (
-              <RoleManagement
-                roleId="sales"
-                roleName="Sales / Line Staff"
-                roleIcon={<Briefcase className="h-6 w-6 text-primary" />}
-              />
-            );
+            return <SalesManagement />;
 
           case 'manage-finance':
             // Show comprehensive Finance Management for admin
@@ -86,13 +82,7 @@ export default function AdminDashboard() {
             );
 
           case 'manage-seal':
-            return (
-              <RoleManagement
-                roleId="seal"
-                roleName="Seal Team"
-                roleIcon={<Stamp className="h-6 w-6 text-primary" />}
-              />
-            );
+            return <SealTeamManagement />;
 
           case 'manage-partners':
             return <PartnersManagement />;

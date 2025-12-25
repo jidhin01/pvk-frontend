@@ -213,6 +213,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       { id: 'floor', label: 'Work Floor', icon: Factory },
       { id: 'materials', label: 'Materials', icon: Package },
       { id: 'archives', label: 'Archives', icon: FolderArchive },
+      { id: 'earnings', label: 'Earnings', icon: Coins },
     ],
   },
 ];

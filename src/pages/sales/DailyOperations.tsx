@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ClipboardList, PackageCheck, Undo2, Plus } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { ClipboardList, PackageCheck, Undo2, Plus, Truck, CheckCircle, MapPin, Clock } from 'lucide-react';
 import {
     Select,
     SelectContent,
@@ -16,7 +17,11 @@ import {
     MOCK_DELIVERIES,
     MOCK_TODAY_FINANCIALS,
     MOCK_EXPENSES,
+    MOCK_LINE_STAFF,
     Expense,
+    getStatusColor,
+    getRouteLabel,
+    getRouteColor,
 } from '@/data/mockSalesData';
 
 type ExpenseType = 'salary' | 'fuel' | 'food' | 'travel' | 'other';
@@ -27,19 +32,23 @@ const DailyOperations = () => {
     const [expenseAmount, setExpenseAmount] = useState('');
     const [expenseDescription, setExpenseDescription] = useState('');
 
+    const staffInfo = MOCK_LINE_STAFF;
     const financials = MOCK_TODAY_FINANCIALS;
+
+    // Only show deliveries from assigned route
+    const myDeliveries = MOCK_DELIVERIES.filter(d => d.route === staffInfo.assignedRoute);
+    const itemsTaken = myDeliveries.filter(d => d.takenForDelivery);
+    const delivered = myDeliveries.filter(d => d.status === 'delivered');
+    const returned = myDeliveries.filter(d => d.status === 'returned');
+
     const totalSalary = expenses.filter(e => e.type === 'salary').reduce((sum, e) => sum + e.amount, 0);
     const totalExpenses = expenses.filter(e => e.type !== 'salary').reduce((sum, e) => sum + e.amount, 0);
     const cashToDeposit = financials.cashCollected - totalSalary - totalExpenses;
 
-    const itemsTaken = MOCK_DELIVERIES.length;
-    const delivered = MOCK_DELIVERIES.filter(d => d.status === 'delivered').length;
-    const returned = MOCK_DELIVERIES.filter(d => d.status === 'returned').length;
-
     const handleAddExpense = () => {
         const amount = parseFloat(expenseAmount);
         if (!expenseType || isNaN(amount) || amount <= 0) {
-            toast.error('Please select type and enter valid amount');
+            toast.error('Select type and enter amount');
             return;
         }
         const newExpense: Expense = {
@@ -48,6 +57,7 @@ const DailyOperations = () => {
             amount,
             description: expenseDescription || expenseType,
             createdAt: new Date().toISOString(),
+            verifiedByFinance: false,
         };
         setExpenses(prev => [newExpense, ...prev]);
         setExpenseType('');
@@ -57,142 +67,127 @@ const DailyOperations = () => {
     };
 
     return (
-        <div className="space-y-6">
-            <div>
-                <h1 className="text-3xl font-bold tracking-tight">Daily Operations</h1>
-                <p className="text-muted-foreground">Manage items, salary, and expenses.</p>
+        <div className="space-y-5 max-w-4xl mx-auto">
+            {/* Header */}
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-xl font-bold">Operations</h1>
+                    <p className="text-sm text-muted-foreground">Today's summary</p>
+                </div>
+                <Badge className={`${getRouteColor(staffInfo.assignedRoute)}`}>
+                    <MapPin className="h-3 w-3 mr-1" />
+                    {getRouteLabel(staffInfo.assignedRoute)}
+                </Badge>
             </div>
 
             {/* Stats */}
-            <div className="grid gap-4 md:grid-cols-3">
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Items Taken</CardTitle>
-                        <ClipboardList className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{itemsTaken}</div>
-                        <p className="text-xs text-muted-foreground">For today's delivery</p>
+            <div className="grid grid-cols-3 gap-3">
+                <Card className="text-center">
+                    <CardContent className="pt-4 pb-3">
+                        <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mx-auto mb-2">
+                            <Truck className="h-5 w-5 text-blue-600" />
+                        </div>
+                        <p className="text-2xl font-bold">{itemsTaken.length}</p>
+                        <p className="text-xs text-muted-foreground">Taken</p>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Delivered</CardTitle>
-                        <PackageCheck className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{delivered}</div>
-                        <p className="text-xs text-muted-foreground">Successfully delivered</p>
+                <Card className="text-center">
+                    <CardContent className="pt-4 pb-3">
+                        <div className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-2">
+                            <PackageCheck className="h-5 w-5 text-green-600" />
+                        </div>
+                        <p className="text-2xl font-bold">{delivered.length}</p>
+                        <p className="text-xs text-muted-foreground">Delivered</p>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                        <CardTitle className="text-sm font-medium">Sales Return</CardTitle>
-                        <Undo2 className="h-4 w-4 text-muted-foreground" />
-                    </CardHeader>
-                    <CardContent>
-                        <div className="text-2xl font-bold">{returned}</div>
-                        <p className="text-xs text-muted-foreground">Items returned</p>
+                <Card className="text-center">
+                    <CardContent className="pt-4 pb-3">
+                        <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center mx-auto mb-2">
+                            <Undo2 className="h-5 w-5 text-red-600" />
+                        </div>
+                        <p className="text-2xl font-bold">{returned.length}</p>
+                        <p className="text-xs text-muted-foreground">Returns</p>
                     </CardContent>
                 </Card>
             </div>
 
-            {/* Add Expense Form */}
+            {/* Items List */}
+            {itemsTaken.length > 0 && (
+                <Card>
+                    <CardHeader className="pb-2">
+                        <CardTitle className="text-lg">Items Taken</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-2">
+                        {itemsTaken.slice(0, 3).map((item) => (
+                            <div key={item.id} className="flex items-center justify-between p-3 rounded-lg border">
+                                <div className="flex items-center gap-3">
+                                    <div className={`w-2.5 h-2.5 rounded-full ${item.status === 'delivered' ? 'bg-green-500' :
+                                            item.status === 'in-transit' ? 'bg-blue-500' : 'bg-amber-500'
+                                        }`} />
+                                    <div>
+                                        <p className="font-medium">{item.customerName}</p>
+                                        <p className="text-xs text-muted-foreground truncate max-w-[200px]">{item.itemDescription}</p>
+                                    </div>
+                                </div>
+                                <Badge className={getStatusColor(item.status)}>
+                                    {item.status === 'in-transit' ? 'On way' : item.status}
+                                </Badge>
+                            </div>
+                        ))}
+                    </CardContent>
+                </Card>
+            )}
+
+            {/* Add Expense */}
             <Card>
-                <CardHeader>
-                    <CardTitle>Add Expense</CardTitle>
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Add Expense</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3">
                     <div className="grid grid-cols-2 gap-3">
-                        <div>
-                            <Label className="text-xs text-muted-foreground">Type</Label>
-                            <Select value={expenseType} onValueChange={(v) => setExpenseType(v as ExpenseType)}>
-                                <SelectTrigger className="mt-1">
-                                    <SelectValue placeholder="Select type" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    <SelectItem value="salary">Salary</SelectItem>
-                                    <SelectItem value="fuel">Fuel</SelectItem>
-                                    <SelectItem value="food">Food</SelectItem>
-                                    <SelectItem value="travel">Travel</SelectItem>
-                                    <SelectItem value="other">Other</SelectItem>
-                                </SelectContent>
-                            </Select>
-                        </div>
-                        <div>
-                            <Label className="text-xs text-muted-foreground">Amount (₹)</Label>
-                            <Input
-                                type="number"
-                                placeholder="0"
-                                value={expenseAmount}
-                                onChange={(e) => setExpenseAmount(e.target.value)}
-                                className="mt-1"
-                            />
-                        </div>
-                    </div>
-                    <div>
-                        <Label className="text-xs text-muted-foreground">Description (optional)</Label>
+                        <Select value={expenseType} onValueChange={(v) => setExpenseType(v as ExpenseType)}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Type" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                <SelectItem value="salary">Salary</SelectItem>
+                                <SelectItem value="fuel">Fuel</SelectItem>
+                                <SelectItem value="food">Food</SelectItem>
+                                <SelectItem value="travel">Travel</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                        </Select>
                         <Input
-                            placeholder="e.g., Petrol"
-                            value={expenseDescription}
-                            onChange={(e) => setExpenseDescription(e.target.value)}
-                            className="mt-1"
+                            type="number"
+                            placeholder="Amount ₹"
+                            value={expenseAmount}
+                            onChange={(e) => setExpenseAmount(e.target.value)}
                         />
                     </div>
                     <Button className="w-full" onClick={handleAddExpense}>
-                        <Plus className="h-4 w-4 mr-2" /> Add Expense
+                        <Plus className="h-4 w-4 mr-1" /> Add
                     </Button>
                 </CardContent>
             </Card>
 
-            {/* Daily Summary */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Daily Summary</CardTitle>
+            {/* Cash Summary */}
+            <Card className="bg-primary/5">
+                <CardHeader className="pb-2">
+                    <CardTitle className="text-lg">Cash Summary</CardTitle>
                 </CardHeader>
-                <CardContent>
-                    <div className="space-y-2 text-sm">
-                        <div className="flex justify-between py-2 border-b">
-                            <span>Cash Collected</span>
-                            <span className="font-medium">₹{financials.cashCollected.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between py-2 border-b">
-                            <span>Salary Taken</span>
-                            <span className="font-medium">- ₹{totalSalary.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between py-2 border-b">
-                            <span>Expenses</span>
-                            <span className="font-medium">- ₹{totalExpenses.toLocaleString()}</span>
-                        </div>
-                        <div className="flex justify-between py-2 font-semibold text-base">
-                            <span>Cash to Deposit</span>
-                            <span className="text-primary">₹{cashToDeposit.toLocaleString()}</span>
-                        </div>
+                <CardContent className="space-y-2">
+                    <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Collected</span>
+                        <span className="font-semibold text-green-600">₹{financials.cashCollected.toLocaleString()}</span>
                     </div>
-                </CardContent>
-            </Card>
-
-            {/* Expenses List */}
-            <Card>
-                <CardHeader>
-                    <CardTitle>Today's Expenses</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    {expenses.length === 0 ? (
-                        <div className="text-center py-8 text-muted-foreground">No expenses recorded</div>
-                    ) : (
-                        <div className="space-y-2">
-                            {expenses.map((exp) => (
-                                <div key={exp.id} className="flex items-center justify-between p-3 rounded border">
-                                    <div>
-                                        <p className="font-medium capitalize">{exp.description}</p>
-                                        <p className="text-xs text-muted-foreground capitalize">{exp.type}</p>
-                                    </div>
-                                    <span className="font-semibold">₹{exp.amount.toLocaleString()}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
+                    <div className="flex justify-between py-2 border-b">
+                        <span className="text-muted-foreground">Expenses</span>
+                        <span className="font-semibold text-orange-600">-₹{(totalSalary + totalExpenses).toLocaleString()}</span>
+                    </div>
+                    <div className="flex justify-between py-2">
+                        <span className="font-semibold">To Deposit</span>
+                        <span className="font-bold text-lg text-primary">₹{cashToDeposit.toLocaleString()}</span>
+                    </div>
                 </CardContent>
             </Card>
         </div>

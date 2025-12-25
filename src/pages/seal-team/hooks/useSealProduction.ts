@@ -52,9 +52,30 @@ export const useSealProduction = () => {
     // --- Order Actions ---
 
     const updateStatus = (orderId: string, newStatus: SealOrder['status']) => {
-        setOrders(prev => prev.map(o =>
-            o.id === orderId ? { ...o, status: newStatus } : o
-        ));
+        setOrders(prev => prev.map(o => {
+            if (o.id !== orderId) return o;
+
+            // Update timeline
+            const updatedTimeline = o.timeline.map(step => {
+                if (newStatus === 'exposure_done' && step.stage === 'Exposure Done') {
+                    return { ...step, completed: true, date: new Date().toISOString() };
+                }
+                if (newStatus === 'mounting' && step.stage === 'Mounting') {
+                    return { ...step, completed: true, date: new Date().toISOString() };
+                }
+                if (newStatus === 'completed' && step.stage === 'Completed') {
+                    return { ...step, completed: true, date: new Date().toISOString(), description: 'Ready for delivery' };
+                }
+                return step;
+            });
+
+            return {
+                ...o,
+                status: newStatus,
+                timeline: updatedTimeline,
+                completedDate: newStatus === 'completed' ? new Date().toISOString() : o.completedDate
+            };
+        }));
 
         // Stock Deduction Logic on Completion
         if (newStatus === 'completed') {
@@ -64,6 +85,7 @@ export const useSealProduction = () => {
                 if (deductedItemName) {
                     toast.success(`Stock Updated: -1 ${deductedItemName}`);
                 }
+                toast.success(`Dealer ${order.dealerName} notified - Order ready!`);
             }
         }
     };
@@ -71,9 +93,23 @@ export const useSealProduction = () => {
     const createBatch = (batchOrders: SealOrder[]) => {
         // Move all to 'exposure_done' (simulating printing and exposure)
         const ids = new Set(batchOrders.map(o => o.id));
-        setOrders(prev => prev.map(o =>
-            ids.has(o.id) ? { ...o, status: 'exposure_done' } : o
-        ));
+        setOrders(prev => prev.map(o => {
+            if (!ids.has(o.id)) return o;
+
+            // Update timeline for batch processing
+            const updatedTimeline = o.timeline.map(step => {
+                if (step.stage === 'Pending Batch') {
+                    return { ...step, completed: true, date: new Date().toISOString() };
+                }
+                if (step.stage === 'Exposure Done') {
+                    return { ...step, completed: true, date: new Date().toISOString(), description: 'Polymer exposed and cured' };
+                }
+                return step;
+            });
+
+            return { ...o, status: 'exposure_done' as const, timeline: updatedTimeline };
+        }));
+
         toast.success(`Batch Created with ${batchOrders.length} orders`, {
             description: "Orders moved to Assembly Station"
         });

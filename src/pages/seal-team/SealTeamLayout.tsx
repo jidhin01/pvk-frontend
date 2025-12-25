@@ -4,6 +4,7 @@ import { SealDashboard } from './tabs/SealDashboard';
 import { WorkFloorTab } from './tabs/WorkFloorTab';
 import { MaterialsTab } from './tabs/MaterialsTab';
 import { ArchivesTab } from './tabs/ArchivesTab';
+import { EarningsTab } from './tabs/EarningsTab';
 
 const SealTeamLayout = () => {
     return (
@@ -20,6 +21,8 @@ const SealTeamLayout = () => {
                     {activeTab === 'materials' && <MaterialsTab />}
 
                     {activeTab === 'archives' && <ArchivesTab />}
+
+                    {activeTab === 'earnings' && <EarningsTab />}
                 </div>
             )}
         </DashboardLayout>
