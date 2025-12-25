@@ -67,15 +67,9 @@ export default function AdminDashboard() {
             );
 
           case 'manage-finance':
-            // Only show finance for admin
+            // Show comprehensive Finance Management for admin
             if (isAdmin) {
-              return (
-                <RoleManagement
-                  roleId="finance"
-                  roleName="Finance"
-                  roleIcon={<Coins className="h-6 w-6 text-primary" />}
-                />
-              );
+              return <FinanceOverview />;
             }
             return <AdminOverview />;
 

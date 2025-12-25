@@ -12,11 +12,14 @@ import {
     Calendar,
     FileText,
     Image,
-    Navigation
+    Navigation,
+    Search,
+    Filter
 } from 'lucide-react';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import {
     Dialog,
@@ -35,9 +38,9 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { Route, ROUTES, getRouteLabel } from '@/data/mockSalesData';
+import { Route, ROUTES } from '@/data/mockSalesData';
 
-// Mock pending dealer requests
+// Mock data
 const MOCK_PENDING_DEALERS = [
     {
         id: '1',
@@ -45,11 +48,10 @@ const MOCK_PENDING_DEALERS = [
         ownerName: 'Ramesh Kumar',
         email: 'ramesh@abcprints.com',
         phone: '+91 98765 43210',
-        address: '123, Industrial Area, Kochi, Kerala - 682024',
+        address: '123, Industrial Area, Kochi, Kerala',
         gstNumber: '32AABCU9603R1ZX',
         requestedAt: '2024-12-23',
         documents: ['GST Certificate', 'Business Registration'],
-        shopImage: '/placeholder-shop.jpg',
     },
     {
         id: '2',
@@ -57,11 +59,10 @@ const MOCK_PENDING_DEALERS = [
         ownerName: 'Lakshmi Nair',
         email: 'lakshmi@printmaster.in',
         phone: '+91 98765 43211',
-        address: '456, Commercial Complex, Trivandrum, Kerala - 695001',
+        address: '456, Commercial Complex, Trivandrum',
         gstNumber: '32BBBCU9703R1ZY',
         requestedAt: '2024-12-22',
         documents: ['GST Certificate', 'PAN Card'],
-        shopImage: '/placeholder-shop.jpg',
     },
     {
         id: '3',
@@ -69,51 +70,24 @@ const MOCK_PENDING_DEALERS = [
         ownerName: 'Arun Menon',
         email: 'arun@digitaledge.co',
         phone: '+91 98765 43212',
-        address: '789, Tech Park, Kozhikode, Kerala - 673001',
+        address: '789, Tech Park, Kozhikode',
         gstNumber: '32CCCCU9803R1ZZ',
         requestedAt: '2024-12-20',
         documents: ['Business Registration'],
-        shopImage: '/placeholder-shop.jpg',
     },
 ];
 
-// Mock approved dealers
 const MOCK_APPROVED_DEALERS = [
-    {
-        id: '4',
-        companyName: 'Quick Print Hub',
-        ownerName: 'Suresh Pillai',
-        email: 'suresh@quickprint.in',
-        phone: '+91 98765 43213',
-        address: '101, Market Road, Thrissur, Kerala - 680001',
-        approvedAt: '2024-12-15',
-        totalOrders: 45,
-    },
-    {
-        id: '5',
-        companyName: 'Express Graphics',
-        ownerName: 'Maya Thomas',
-        email: 'maya@expressgfx.com',
-        phone: '+91 98765 43214',
-        address: '202, Main Street, Kannur, Kerala - 670001',
-        approvedAt: '2024-12-10',
-        totalOrders: 32,
-    },
+    { id: '4', companyName: 'Quick Print Hub', ownerName: 'Suresh Pillai', email: 'suresh@quickprint.in', approvedAt: '2024-12-15', totalOrders: 45 },
+    { id: '5', companyName: 'Express Graphics', ownerName: 'Maya Thomas', email: 'maya@expressgfx.com', approvedAt: '2024-12-10', totalOrders: 32 },
 ];
 
-// Mock rejected dealers
 const MOCK_REJECTED_DEALERS = [
-    {
-        id: '6',
-        companyName: 'Fake Company',
-        ownerName: 'Unknown',
-        email: 'fake@test.com',
-        rejectedAt: '2024-12-18',
-        reason: 'Invalid GST number and incomplete documentation',
-    },
+    { id: '6', companyName: 'Fake Company', ownerName: 'Unknown', email: 'fake@test.com', rejectedAt: '2024-12-18', reason: 'Invalid GST number' },
 ];
 
 const DealerApprovals = () => {
+    const [searchQuery, setSearchQuery] = useState('');
     const [selectedDealer, setSelectedDealer] = useState<any>(null);
     const [isViewModalOpen, setIsViewModalOpen] = useState(false);
     const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
@@ -128,21 +102,17 @@ const DealerApprovals = () => {
     };
 
     const confirmApproval = () => {
-        if (!selectedRoute) {
-            return;
-        }
-        console.log('Approving dealer:', selectedDealer, 'with route:', selectedRoute);
+        if (!selectedRoute) return;
+        console.log('Approving:', selectedDealer, 'Route:', selectedRoute);
         setIsApproveModalOpen(false);
         setIsViewModalOpen(false);
         setSelectedRoute('');
-        // Mock approval - in real implementation, this would call an API
     };
 
     const handleReject = () => {
-        console.log('Rejecting dealer:', selectedDealer, 'Reason:', rejectReason);
+        console.log('Rejecting:', selectedDealer, 'Reason:', rejectReason);
         setIsRejectModalOpen(false);
         setRejectReason('');
-        // Mock rejection
     };
 
     const openRejectModal = (dealer: any) => {
@@ -155,46 +125,57 @@ const DealerApprovals = () => {
         setIsViewModalOpen(true);
     };
 
+    // Filter pending dealers
+    const filteredPending = MOCK_PENDING_DEALERS.filter(d =>
+        d.companyName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        d.ownerName.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+
     return (
         <div className="space-y-6">
             {/* Header */}
-            <div>
-                <h1 className="text-2xl font-bold tracking-tight">Dealer Approvals</h1>
-                <p className="text-muted-foreground">Review and manage dealer registration requests</p>
+            <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-lg bg-orange-100 dark:bg-orange-900/30">
+                    <Store className="h-5 w-5 text-orange-600" />
+                </div>
+                <div>
+                    <h1 className="text-2xl font-bold">Dealer Approvals</h1>
+                    <p className="text-sm text-muted-foreground">Review dealer registration requests</p>
+                </div>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <Card className="border-orange-200 dark:border-orange-800">
-                    <CardContent className="pt-4">
+            <div className="grid grid-cols-3 gap-4">
+                <Card>
+                    <CardContent className="pt-5">
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-orange-500">{MOCK_PENDING_DEALERS.length}</div>
-                                <p className="text-xs text-muted-foreground">Pending Requests</p>
+                                <p className="text-2xl font-bold text-orange-600">{MOCK_PENDING_DEALERS.length}</p>
+                                <p className="text-sm text-muted-foreground">Pending</p>
                             </div>
-                            <Clock className="h-8 w-8 text-orange-500 opacity-50" />
+                            <Clock className="h-8 w-8 text-orange-500/30" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-green-200 dark:border-green-800">
-                    <CardContent className="pt-4">
+                <Card>
+                    <CardContent className="pt-5">
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-green-500">{MOCK_APPROVED_DEALERS.length}</div>
-                                <p className="text-xs text-muted-foreground">Approved Dealers</p>
+                                <p className="text-2xl font-bold text-green-600">{MOCK_APPROVED_DEALERS.length}</p>
+                                <p className="text-sm text-muted-foreground">Approved</p>
                             </div>
-                            <CheckCircle className="h-8 w-8 text-green-500 opacity-50" />
+                            <CheckCircle className="h-8 w-8 text-green-500/30" />
                         </div>
                     </CardContent>
                 </Card>
-                <Card className="border-red-200 dark:border-red-800">
-                    <CardContent className="pt-4">
+                <Card>
+                    <CardContent className="pt-5">
                         <div className="flex items-center justify-between">
                             <div>
-                                <div className="text-2xl font-bold text-red-500">{MOCK_REJECTED_DEALERS.length}</div>
-                                <p className="text-xs text-muted-foreground">Rejected</p>
+                                <p className="text-2xl font-bold text-red-600">{MOCK_REJECTED_DEALERS.length}</p>
+                                <p className="text-sm text-muted-foreground">Rejected</p>
                             </div>
-                            <XCircle className="h-8 w-8 text-red-500 opacity-50" />
+                            <XCircle className="h-8 w-8 text-red-500/30" />
                         </div>
                     </CardContent>
                 </Card>
@@ -202,168 +183,154 @@ const DealerApprovals = () => {
 
             {/* Tabs */}
             <Tabs defaultValue="pending" className="space-y-4">
-                <TabsList>
-                    <TabsTrigger value="pending" className="gap-2">
-                        <Clock className="h-4 w-4" />
-                        Pending ({MOCK_PENDING_DEALERS.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="approved" className="gap-2">
-                        <CheckCircle className="h-4 w-4" />
-                        Approved ({MOCK_APPROVED_DEALERS.length})
-                    </TabsTrigger>
-                    <TabsTrigger value="rejected" className="gap-2">
-                        <XCircle className="h-4 w-4" />
-                        Rejected ({MOCK_REJECTED_DEALERS.length})
-                    </TabsTrigger>
-                </TabsList>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                    <TabsList>
+                        <TabsTrigger value="pending" className="gap-2">
+                            <Clock className="h-4 w-4" />
+                            Pending ({MOCK_PENDING_DEALERS.length})
+                        </TabsTrigger>
+                        <TabsTrigger value="approved" className="gap-2">
+                            <CheckCircle className="h-4 w-4" />
+                            Approved
+                        </TabsTrigger>
+                        <TabsTrigger value="rejected" className="gap-2">
+                            <XCircle className="h-4 w-4" />
+                            Rejected
+                        </TabsTrigger>
+                    </TabsList>
+
+                    <div className="relative w-full sm:w-64">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                        <Input
+                            placeholder="Search dealers..."
+                            className="pl-9"
+                            value={searchQuery}
+                            onChange={(e) => setSearchQuery(e.target.value)}
+                        />
+                    </div>
+                </div>
 
                 {/* Pending Tab */}
-                <TabsContent value="pending" className="space-y-4">
-                    {MOCK_PENDING_DEALERS.map((dealer) => (
-                        <Card key={dealer.id} className="overflow-hidden">
-                            <div className="flex flex-col lg:flex-row">
-                                <div className="flex-1 p-6">
-                                    <div className="flex items-start justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                                <Store className="h-6 w-6 text-primary" />
+                <TabsContent value="pending" className="space-y-3">
+                    {filteredPending.map((dealer) => (
+                        <Card key={dealer.id}>
+                            <CardContent className="p-4">
+                                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                    <div className="flex items-start gap-4">
+                                        <div className="h-12 w-12 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
+                                            <Store className="h-6 w-6 text-primary" />
+                                        </div>
+                                        <div className="min-w-0">
+                                            <div className="flex items-center gap-2 flex-wrap">
+                                                <h3 className="font-semibold">{dealer.companyName}</h3>
+                                                <Badge variant="outline" className="text-orange-600 border-orange-300">
+                                                    Pending
+                                                </Badge>
                                             </div>
-                                            <div>
-                                                <h3 className="font-semibold text-lg">{dealer.companyName}</h3>
-                                                <p className="text-sm text-muted-foreground">{dealer.ownerName}</p>
+                                            <p className="text-sm text-muted-foreground mt-0.5">{dealer.ownerName}</p>
+                                            <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-xs text-muted-foreground">
+                                                <span className="flex items-center gap-1">
+                                                    <Mail className="h-3 w-3" />
+                                                    {dealer.email}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Phone className="h-3 w-3" />
+                                                    {dealer.phone}
+                                                </span>
+                                                <span className="flex items-center gap-1">
+                                                    <Calendar className="h-3 w-3" />
+                                                    {dealer.requestedAt}
+                                                </span>
                                             </div>
-                                        </div>
-                                        <Badge variant="outline" className="text-orange-500 border-orange-500">
-                                            <Clock className="h-3 w-3 mr-1" />
-                                            Pending
-                                        </Badge>
-                                    </div>
-
-                                    <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
-                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                            <Mail className="h-4 w-4" />
-                                            {dealer.email}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                            <Phone className="h-4 w-4" />
-                                            {dealer.phone}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-muted-foreground sm:col-span-2">
-                                            <MapPin className="h-4 w-4 flex-shrink-0" />
-                                            <span className="truncate">{dealer.address}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                            <Building2 className="h-4 w-4" />
-                                            GST: {dealer.gstNumber}
-                                        </div>
-                                        <div className="flex items-center gap-2 text-muted-foreground">
-                                            <Calendar className="h-4 w-4" />
-                                            Applied: {dealer.requestedAt}
+                                            <div className="flex items-center gap-2 mt-2">
+                                                {dealer.documents.map((doc) => (
+                                                    <Badge key={doc} variant="secondary" className="text-xs">
+                                                        {doc}
+                                                    </Badge>
+                                                ))}
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="mt-4 flex items-center gap-2">
-                                        <FileText className="h-4 w-4 text-muted-foreground" />
-                                        <span className="text-sm text-muted-foreground">Documents:</span>
-                                        {dealer.documents.map((doc) => (
-                                            <Badge key={doc} variant="secondary" className="text-xs">
-                                                {doc}
-                                            </Badge>
-                                        ))}
+                                    <div className="flex items-center gap-2 lg:flex-shrink-0">
+                                        <Button variant="outline" size="sm" onClick={() => openViewModal(dealer)}>
+                                            <Eye className="h-4 w-4 mr-1" />
+                                            View
+                                        </Button>
+                                        <Button size="sm" className="bg-green-600 hover:bg-green-700" onClick={() => openApproveModal(dealer)}>
+                                            <CheckCircle className="h-4 w-4 mr-1" />
+                                            Approve
+                                        </Button>
+                                        <Button variant="destructive" size="sm" onClick={() => openRejectModal(dealer)}>
+                                            <XCircle className="h-4 w-4 mr-1" />
+                                            Reject
+                                        </Button>
                                     </div>
                                 </div>
-
-                                <div className="flex lg:flex-col gap-2 p-4 lg:p-6 bg-muted/30 border-t lg:border-t-0 lg:border-l">
-                                    <Button
-                                        variant="outline"
-                                        className="flex-1"
-                                        onClick={() => openViewModal(dealer)}
-                                    >
-                                        <Eye className="h-4 w-4 mr-2" />
-                                        View Details
-                                    </Button>
-                                    <Button
-                                        className="flex-1 bg-green-600 hover:bg-green-700"
-                                        onClick={() => openApproveModal(dealer)}
-                                    >
-                                        <CheckCircle className="h-4 w-4 mr-2" />
-                                        Approve
-                                    </Button>
-                                    <Button
-                                        variant="destructive"
-                                        className="flex-1"
-                                        onClick={() => openRejectModal(dealer)}
-                                    >
-                                        <XCircle className="h-4 w-4 mr-2" />
-                                        Reject
-                                    </Button>
-                                </div>
-                            </div>
+                            </CardContent>
                         </Card>
                     ))}
 
-                    {MOCK_PENDING_DEALERS.length === 0 && (
-                        <Card className="p-8">
-                            <div className="text-center text-muted-foreground">
-                                <CheckCircle className="h-12 w-12 mx-auto mb-3 text-green-500 opacity-50" />
-                                <p>No pending dealer requests</p>
-                            </div>
+                    {filteredPending.length === 0 && (
+                        <Card>
+                            <CardContent className="py-12 text-center">
+                                <CheckCircle className="h-12 w-12 mx-auto mb-3 text-green-500/50" />
+                                <p className="text-muted-foreground">No pending requests</p>
+                            </CardContent>
                         </Card>
                     )}
                 </TabsContent>
 
                 {/* Approved Tab */}
-                <TabsContent value="approved" className="space-y-4">
+                <TabsContent value="approved" className="space-y-3">
                     {MOCK_APPROVED_DEALERS.map((dealer) => (
-                        <Card key={dealer.id} className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-green-100 dark:bg-green-900 flex items-center justify-center">
-                                        <Store className="h-5 w-5 text-green-600" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-semibold">{dealer.companyName}</h3>
-                                        <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                                            <span>{dealer.ownerName}</span>
-                                            <span>•</span>
-                                            <span>{dealer.email}</span>
+                        <Card key={dealer.id}>
+                            <CardContent className="p-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-10 w-10 rounded-lg bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                                            <Store className="h-5 w-5 text-green-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold">{dealer.companyName}</h3>
+                                            <p className="text-sm text-muted-foreground">{dealer.ownerName} • {dealer.email}</p>
                                         </div>
                                     </div>
+                                    <div className="text-right">
+                                        <Badge className="bg-green-100 text-green-700 dark:bg-green-900/30">
+                                            <CheckCircle className="h-3 w-3 mr-1" />
+                                            Approved
+                                        </Badge>
+                                        <p className="text-xs text-muted-foreground mt-1">{dealer.totalOrders} orders</p>
+                                    </div>
                                 </div>
-                                <div className="text-right">
-                                    <Badge className="bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                                        <CheckCircle className="h-3 w-3 mr-1" />
-                                        Approved
-                                    </Badge>
-                                    <p className="text-xs text-muted-foreground mt-1">
-                                        {dealer.totalOrders} orders placed
-                                    </p>
-                                </div>
-                            </div>
+                            </CardContent>
                         </Card>
                     ))}
                 </TabsContent>
 
                 {/* Rejected Tab */}
-                <TabsContent value="rejected" className="space-y-4">
+                <TabsContent value="rejected" className="space-y-3">
                     {MOCK_REJECTED_DEALERS.map((dealer) => (
-                        <Card key={dealer.id} className="p-6">
-                            <div className="flex items-center justify-between">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-red-100 dark:bg-red-900 flex items-center justify-center">
-                                        <Store className="h-5 w-5 text-red-600" />
+                        <Card key={dealer.id}>
+                            <CardContent className="p-4">
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-4">
+                                        <div className="h-10 w-10 rounded-lg bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                                            <Store className="h-5 w-5 text-red-600" />
+                                        </div>
+                                        <div>
+                                            <h3 className="font-semibold">{dealer.companyName}</h3>
+                                            <p className="text-sm text-muted-foreground">{dealer.ownerName}</p>
+                                            <p className="text-xs text-red-500 mt-1">Reason: {dealer.reason}</p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h3 className="font-semibold">{dealer.companyName}</h3>
-                                        <p className="text-sm text-muted-foreground">{dealer.ownerName} • {dealer.email}</p>
-                                        <p className="text-sm text-red-500 mt-1">Reason: {dealer.reason}</p>
-                                    </div>
+                                    <Badge variant="destructive">
+                                        <XCircle className="h-3 w-3 mr-1" />
+                                        Rejected
+                                    </Badge>
                                 </div>
-                                <Badge variant="destructive">
-                                    <XCircle className="h-3 w-3 mr-1" />
-                                    Rejected
-                                </Badge>
-                            </div>
+                            </CardContent>
                         </Card>
                     ))}
                 </TabsContent>
@@ -371,59 +338,50 @@ const DealerApprovals = () => {
 
             {/* View Details Modal */}
             <Dialog open={isViewModalOpen} onOpenChange={setIsViewModalOpen}>
-                <DialogContent className="sm:max-w-[600px]">
+                <DialogContent className="sm:max-w-lg">
                     <DialogHeader>
-                        <DialogTitle>Dealer Application Details</DialogTitle>
-                        <DialogDescription>
-                            Review the complete application before approval
-                        </DialogDescription>
+                        <DialogTitle>Dealer Details</DialogTitle>
                     </DialogHeader>
                     {selectedDealer && (
                         <div className="space-y-4">
                             <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                                <Image className="h-12 w-12 text-muted-foreground opacity-50" />
-                                <span className="ml-2 text-muted-foreground">Shop Front Image</span>
+                                <Image className="h-10 w-10 text-muted-foreground/50" />
                             </div>
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-2 gap-4 text-sm">
                                 <div>
-                                    <Label className="text-muted-foreground">Company Name</Label>
+                                    <p className="text-muted-foreground text-xs">Company</p>
                                     <p className="font-medium">{selectedDealer.companyName}</p>
                                 </div>
                                 <div>
-                                    <Label className="text-muted-foreground">Owner Name</Label>
+                                    <p className="text-muted-foreground text-xs">Owner</p>
                                     <p className="font-medium">{selectedDealer.ownerName}</p>
                                 </div>
                                 <div>
-                                    <Label className="text-muted-foreground">Email</Label>
+                                    <p className="text-muted-foreground text-xs">Email</p>
                                     <p className="font-medium">{selectedDealer.email}</p>
                                 </div>
                                 <div>
-                                    <Label className="text-muted-foreground">Phone</Label>
+                                    <p className="text-muted-foreground text-xs">Phone</p>
                                     <p className="font-medium">{selectedDealer.phone}</p>
                                 </div>
                                 <div className="col-span-2">
-                                    <Label className="text-muted-foreground">Address</Label>
+                                    <p className="text-muted-foreground text-xs">Address</p>
                                     <p className="font-medium">{selectedDealer.address}</p>
                                 </div>
                                 <div>
-                                    <Label className="text-muted-foreground">GST Number</Label>
-                                    <p className="font-medium">{selectedDealer.gstNumber}</p>
+                                    <p className="text-muted-foreground text-xs">GST Number</p>
+                                    <p className="font-medium font-mono">{selectedDealer.gstNumber}</p>
                                 </div>
                                 <div>
-                                    <Label className="text-muted-foreground">Applied On</Label>
+                                    <p className="text-muted-foreground text-xs">Applied On</p>
                                     <p className="font-medium">{selectedDealer.requestedAt}</p>
                                 </div>
                             </div>
                         </div>
                     )}
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>
-                            Close
-                        </Button>
-                        <Button
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={() => openApproveModal(selectedDealer)}
-                        >
+                        <Button variant="outline" onClick={() => setIsViewModalOpen(false)}>Close</Button>
+                        <Button className="bg-green-600 hover:bg-green-700" onClick={() => openApproveModal(selectedDealer)}>
                             <CheckCircle className="h-4 w-4 mr-2" />
                             Approve
                         </Button>
@@ -433,99 +391,72 @@ const DealerApprovals = () => {
 
             {/* Reject Modal */}
             <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
-                <DialogContent className="sm:max-w-[425px]">
+                <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle>Reject Application</DialogTitle>
-                        <DialogDescription>
-                            Please provide a reason for rejecting this dealer application
-                        </DialogDescription>
+                        <DialogDescription>Provide a reason for rejection</DialogDescription>
                     </DialogHeader>
-                    <div className="space-y-4">
-                        <div>
-                            <Label>Rejection Reason</Label>
-                            <Textarea
-                                placeholder="Enter the reason for rejection..."
-                                value={rejectReason}
-                                onChange={(e) => setRejectReason(e.target.value)}
-                                className="mt-2"
-                            />
-                        </div>
+                    <div>
+                        <Label>Reason</Label>
+                        <Textarea
+                            placeholder="Enter rejection reason..."
+                            value={rejectReason}
+                            onChange={(e) => setRejectReason(e.target.value)}
+                            className="mt-2"
+                        />
                     </div>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsRejectModalOpen(false)}>
-                            Cancel
-                        </Button>
+                        <Button variant="outline" onClick={() => setIsRejectModalOpen(false)}>Cancel</Button>
                         <Button variant="destructive" onClick={handleReject}>
                             <XCircle className="h-4 w-4 mr-2" />
-                            Reject Application
+                            Reject
                         </Button>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>
 
-            {/* Approve Modal with Route Selection */}
+            {/* Approve Modal */}
             <Dialog open={isApproveModalOpen} onOpenChange={setIsApproveModalOpen}>
-                <DialogContent className="sm:max-w-[500px]">
+                <DialogContent className="sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2">
                             <CheckCircle className="h-5 w-5 text-green-600" />
-                            Approve Dealer Application
+                            Approve Dealer
                         </DialogTitle>
-                        <DialogDescription>
-                            Assign a delivery route to this dealer before approval
-                        </DialogDescription>
+                        <DialogDescription>Assign a delivery route</DialogDescription>
                     </DialogHeader>
                     {selectedDealer && (
                         <div className="space-y-4">
-                            <div className="bg-muted/50 rounded-lg p-4">
-                                <div className="flex items-center gap-3">
-                                    <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center">
-                                        <Store className="h-5 w-5 text-primary" />
-                                    </div>
-                                    <div>
-                                        <h4 className="font-semibold">{selectedDealer.companyName}</h4>
-                                        <p className="text-sm text-muted-foreground">{selectedDealer.ownerName}</p>
-                                    </div>
+                            <div className="bg-muted/50 rounded-lg p-3 flex items-center gap-3">
+                                <Store className="h-5 w-5 text-primary" />
+                                <div>
+                                    <p className="font-medium">{selectedDealer.companyName}</p>
+                                    <p className="text-sm text-muted-foreground">{selectedDealer.ownerName}</p>
                                 </div>
                             </div>
-
-                            <div className="space-y-2">
-                                <Label htmlFor="route-select" className="flex items-center gap-2">
+                            <div>
+                                <Label className="flex items-center gap-2">
                                     <Navigation className="h-4 w-4" />
-                                    Select Delivery Route *
+                                    Delivery Route
                                 </Label>
-                                <Select
-                                    value={selectedRoute}
-                                    onValueChange={(val) => setSelectedRoute(val as Route)}
-                                >
-                                    <SelectTrigger id="route-select" className="w-full">
-                                        <SelectValue placeholder="Choose a route for this dealer" />
+                                <Select value={selectedRoute} onValueChange={(val) => setSelectedRoute(val as Route)}>
+                                    <SelectTrigger className="mt-2">
+                                        <SelectValue placeholder="Select route" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {ROUTES.map((route) => (
-                                            <SelectItem key={route.id} value={route.id}>
-                                                {route.label}
-                                            </SelectItem>
+                                            <SelectItem key={route.id} value={route.id}>{route.label}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
-                                <p className="text-xs text-muted-foreground">
-                                    This route will be used for delivery assignments to this dealer's location.
-                                </p>
                             </div>
                         </div>
                     )}
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setIsApproveModalOpen(false)}>
-                            Cancel
-                        </Button>
-                        <Button
-                            className="bg-green-600 hover:bg-green-700"
-                            onClick={confirmApproval}
-                            disabled={!selectedRoute}
-                        >
+                        <Button variant="outline" onClick={() => setIsApproveModalOpen(false)}>Cancel</Button>
+                        <Button className="bg-green-600 hover:bg-green-700" onClick={confirmApproval} disabled={!selectedRoute}>
                             <CheckCircle className="h-4 w-4 mr-2" />
-                            Approve Dealer
+                            Approve
                         </Button>
                     </DialogFooter>
                 </DialogContent>
