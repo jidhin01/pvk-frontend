@@ -1,6 +1,6 @@
 
 export type PrintTechnology = 'PVC' | 'DIGITAL' | 'OFFSET';
-export type JobStatus = 'ready_for_print' | 'printing' | 'completed' | 'rejected';
+export type JobStatus = 'ready_for_print' | 'printing' | 'completed' | 'rejected' | 'handed_over';
 
 export interface BaseJob {
     id: string;
@@ -11,7 +11,26 @@ export interface BaseJob {
     createdAt: string;
     notes?: string;
     rejectionReason?: string;
+    dealerName?: string;  // Added dealer information
+    dealerType?: 'dealer' | 'customer'; // Added dealer type
+    assignedTo?: string; // Printer Team ID
 }
+
+export interface PrinterTeam {
+    id: string;
+    name: string;
+    location: string;
+    status: 'active' | 'inactive' | 'overloaded';
+    activeJobs: number;
+    completedToday: number;
+    performance: number; // 0-100
+}
+
+export const MOCK_PRINTER_TEAMS: PrinterTeam[] = [
+    { id: '1', name: 'Main Shop Team', location: 'Floor 1', status: 'active', activeJobs: 12, completedToday: 45, performance: 95 },
+    { id: '2', name: 'Annex Batching Unit', location: 'Annex Building', status: 'overloaded', activeJobs: 28, completedToday: 30, performance: 88 },
+    { id: '3', name: 'Night Shift Squad', location: 'Floor 1', status: 'inactive', activeJobs: 0, completedToday: 0, performance: 0 },
+];
 
 export interface PvcBatchJob extends BaseJob {
     technology: 'PVC';
@@ -51,6 +70,8 @@ export interface LogEntry {
     qty?: number | string; // Number for single, "10/10" for batch
     rejectionReason?: string;
     operator?: string;
+    dealerName?: string;  // Added dealer information
+    dealerType?: 'dealer' | 'customer'; // Added dealer type
 }
 
 export const MOCK_PRINTER_JOBS: PrinterJob[] = [
@@ -66,7 +87,10 @@ export const MOCK_PRINTER_JOBS: PrinterJob[] = [
         material: 'PVC Sheet',
         fileUrl: '#',
         createdAt: '2023-10-27 10:00 AM',
-        items: ['PAN-101', 'PAN-102', 'PAN-103', 'PAN-104', 'PAN-105', 'PAN-106', 'PAN-107', 'PAN-108', 'PAN-109', 'PAN-110']
+        items: ['PAN-101', 'PAN-102', 'PAN-103', 'PAN-104', 'PAN-105', 'PAN-106', 'PAN-107', 'PAN-108', 'PAN-109', 'PAN-110'],
+        dealerName: 'ABC Prints & Graphics',
+        dealerType: 'dealer',
+        assignedTo: '1'
     },
     {
         id: 'B-506',
@@ -79,7 +103,10 @@ export const MOCK_PRINTER_JOBS: PrinterJob[] = [
         material: 'Matte PVC',
         fileUrl: '#',
         createdAt: '2023-10-27 11:30 AM',
-        items: ['ID-201', 'ID-202', 'ID-203', 'ID-204', 'ID-205', 'ID-206', 'ID-207', 'ID-208', 'ID-209', 'ID-210']
+        items: ['ID-201', 'ID-202', 'ID-203', 'ID-204', 'ID-205', 'ID-206', 'ID-207', 'ID-208', 'ID-209', 'ID-210'],
+        dealerName: 'Quick Print Hub',
+        dealerType: 'dealer',
+        assignedTo: '1'
     },
     // Digital Jobs
     {
@@ -91,7 +118,10 @@ export const MOCK_PRINTER_JOBS: PrinterJob[] = [
         paperType: 'Matte 300gsm',
         quantity: 100,
         fileUrl: '#',
-        createdAt: '2023-10-27 09:00 AM'
+        createdAt: '2023-10-27 09:00 AM',
+        dealerName: 'StartUp Inc',
+        dealerType: 'dealer',
+        assignedTo: '2'
     },
     {
         id: 'J-102',
@@ -102,7 +132,10 @@ export const MOCK_PRINTER_JOBS: PrinterJob[] = [
         paperType: 'Glossy 170gsm',
         quantity: 50,
         fileUrl: '#',
-        createdAt: '2023-10-27 12:45 PM'
+        createdAt: '2023-10-27 12:45 PM',
+        dealerName: 'Local Business',
+        dealerType: 'customer',
+        assignedTo: '2'
     },
     // Offset Jobs
     {
@@ -116,7 +149,10 @@ export const MOCK_PRINTER_JOBS: PrinterJob[] = [
         finishing: ['Center Fold', 'Bundle Packing'],
         dueDate: '2023-11-01',
         fileUrl: '#',
-        createdAt: '2023-10-25 10:00 AM'
+        createdAt: '2023-10-25 10:00 AM',
+        dealerName: 'Corporate Client',
+        dealerType: 'dealer',
+        assignedTo: '2'
     },
     {
         id: 'O-302',
@@ -129,7 +165,10 @@ export const MOCK_PRINTER_JOBS: PrinterJob[] = [
         finishing: ['Perfect Binding', 'Matte Lamination'],
         dueDate: '2023-10-31',
         fileUrl: '#',
-        createdAt: '2023-10-26 02:00 PM'
+        createdAt: '2023-10-26 02:00 PM',
+        dealerName: 'Marketing Agency',
+        dealerType: 'dealer',
+        assignedTo: '1'
     }
 ];
 
@@ -141,7 +180,9 @@ export const MOCK_HISTORY_LOGS: LogEntry[] = [
         timestamp: '2023-10-27T09:15:00',
         status: 'completed',
         material: 'PVC Sheet',
-        qty: '10/10'
+        qty: '10/10',
+        dealerName: 'ABC Prints & Graphics',
+        dealerType: 'dealer'
     },
     {
         id: 'J-099',
@@ -150,7 +191,9 @@ export const MOCK_HISTORY_LOGS: LogEntry[] = [
         timestamp: '2023-10-27T10:00:00',
         status: 'completed',
         material: '300gsm Gloss',
-        qty: 50
+        qty: 50,
+        dealerName: 'Local Restaurant',
+        dealerType: 'dealer'
     },
     {
         id: 'O-299',
@@ -159,7 +202,9 @@ export const MOCK_HISTORY_LOGS: LogEntry[] = [
         timestamp: '2023-10-27T11:45:00',
         status: 'completed',
         material: '90gsm Art',
-        qty: 10000
+        qty: 10000,
+        dealerName: 'Event Organizer',
+        dealerType: 'dealer'
     },
     {
         id: 'B-502',
@@ -168,9 +213,26 @@ export const MOCK_HISTORY_LOGS: LogEntry[] = [
         timestamp: '2023-10-26T16:20:00',
         status: 'completed',
         material: 'Matte PVC',
-        qty: '10/10'
+        qty: '10/10',
+        dealerName: 'Educational Institute',
+        dealerType: 'dealer'
     }
 ];
+
+type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
+
+export const addPrinterJob = (job: DistributiveOmit<PrinterJob, 'id' | 'createdAt' | 'status'>) => {
+    // Basic ID generation
+    const newId = `J-${Math.floor(Math.random() * 10000)}`;
+    const newJob: PrinterJob = {
+        id: newId,
+        status: 'ready_for_print',
+        createdAt: new Date().toISOString(),
+        ...job
+    } as PrinterJob;
+    MOCK_PRINTER_JOBS.unshift(newJob);
+    return newJob;
+};
 
 export const MOCK_REJECTED_LOGS: LogEntry[] = [
     {
@@ -180,7 +242,9 @@ export const MOCK_REJECTED_LOGS: LogEntry[] = [
         timestamp: '2023-10-27T09:30:00',
         status: 'rejected',
         rejectionReason: 'Bleed area missing in original PDF. Text getting cut off.',
-        operator: 'Machine V-200'
+        operator: 'Machine V-200',
+        dealerName: 'New Business',
+        dealerType: 'customer'
     },
     {
         id: 'B-504',
@@ -189,6 +253,8 @@ export const MOCK_REJECTED_LOGS: LogEntry[] = [
         timestamp: '2023-10-26T14:10:00',
         status: 'rejected',
         rejectionReason: 'Corrupted image file for Card #4 (PAN-404). Unable to rip.',
-        operator: 'Machine V-200'
+        operator: 'Machine V-200',
+        dealerName: 'Government Office',
+        dealerType: 'dealer'
     }
 ];

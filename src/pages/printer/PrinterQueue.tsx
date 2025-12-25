@@ -4,11 +4,15 @@ import {
     Layers,
     Zap,
     Settings,
-    LayoutList
+    LayoutList,
+    User,
+    Building,
+    Calendar,
+    FileText
 } from 'lucide-react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { toast } from 'sonner';
-import { MOCK_PRINTER_JOBS, PrinterJob, PvcBatchJob, DigitalJob, OffsetJob } from '@/data/mockPrinterData';
+import { PrinterJob, PvcBatchJob, DigitalJob, OffsetJob } from '@/data/mockPrinterData';
 import RejectionModal from './RejectionModal';
 import PvcBatchCard from './components/PvcBatchCard';
 import DigitalJobCard from './components/DigitalJobCard';
@@ -21,8 +25,12 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from '@/components/ui/badge';
 
-export default function PrinterQueue() {
-    const [jobs, setJobs] = useState<PrinterJob[]>(MOCK_PRINTER_JOBS);
+interface PrinterQueueProps {
+    jobs: PrinterJob[];
+    onUpdateJob: (jobId: string, updates: Partial<PrinterJob>) => void;
+}
+
+export default function PrinterQueue({ jobs, onUpdateJob }: PrinterQueueProps) {
     const [rejectModalOpen, setRejectModalOpen] = useState(false);
     const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
     const [viewContentsOpen, setViewContentsOpen] = useState(false);
@@ -39,11 +47,11 @@ export default function PrinterQueue() {
     };
 
     const handleStatusChange = (jobId: string, newStatus: PrinterJob['status']) => {
-        setJobs(prev => prev.map(j => j.id === jobId ? { ...j, status: newStatus } : j));
+        onUpdateJob(jobId, { status: newStatus });
         if (newStatus === 'printing') {
             toast.info(`Job #${jobId} started.`);
         } else if (newStatus === 'completed') {
-            toast.success(`Job #${jobId} completed!`);
+            toast.success(`Job #${jobId} printed. Moved to Handover.`);
         }
     };
 
@@ -54,7 +62,7 @@ export default function PrinterQueue() {
 
     const confirmReject = (reason: string) => {
         if (selectedJobId) {
-            setJobs(prev => prev.map(j => j.id === selectedJobId ? { ...j, status: 'rejected', rejectionReason: reason } : j));
+            onUpdateJob(selectedJobId, { status: 'rejected', rejectionReason: reason });
             toast.error(`Job #${selectedJobId} rejected.`);
             setSelectedJobId(null);
         }
@@ -64,6 +72,8 @@ export default function PrinterQueue() {
         setViewBatch(batch);
         setViewContentsOpen(true);
     };
+
+
 
     // Generic Empty State
     const EmptyState = ({ label }: { label: string }) => (

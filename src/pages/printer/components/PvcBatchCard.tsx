@@ -3,7 +3,7 @@ import { PvcBatchJob } from '@/data/mockPrinterData';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { FileDown, Layers, Play, CheckCircle, AlertTriangle, Eye } from 'lucide-react';
+import { FileDown, Layers, Play, CheckCircle2, AlertTriangle, Eye, User, Building } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface PvcBatchCardProps {
@@ -16,19 +16,31 @@ interface PvcBatchCardProps {
 
 export default function PvcBatchCard({ batch, onDownload, onStatusChange, onReject, onViewContents }: PvcBatchCardProps) {
     return (
-        <Card className="flex flex-col shadow-sm hover:shadow-md transition-all border-l-4 border-l-primary bg-card text-card-foreground h-full">
-            <CardHeader className="pb-3">
+        <Card className="flex flex-col shadow-sm hover:shadow-md transition-all border-l-4 border-l-primary bg-card text-card-foreground">
+            <CardHeader className="pb-3 space-y-3">
                 <div className="flex justify-between items-start">
-                    <div>
-                        <div className="text-xs font-bold text-primary uppercase tracking-widest mb-1 flex items-center gap-2">
-                            <Layers className="h-3 w-3" />
-                            PVC Batch
-                        </div>
-                        <CardTitle className="text-lg leading-tight">{batch.jobName}</CardTitle>
+                    <div className="flex items-center gap-2">
+                        <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5">
+                            <Layers className="h-3 w-3 mr-1" /> PVC Batch
+                        </Badge>
+                        <Badge variant={batch.status === 'printing' ? 'default' : 'secondary'} className="capitalize">
+                            {batch.status.replace('_', ' ')}
+                        </Badge>
                     </div>
-                    <Badge className="bg-success hover:bg-success/90 text-success-foreground font-semibold px-3">
+                    <Badge className="bg-green-600 hover:bg-green-700 text-white border-0">
                         {batch.capacity} Items
                     </Badge>
+                </div>
+
+                <div>
+                    <CardTitle className="text-lg leading-tight mb-2">{batch.jobName}</CardTitle>
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground bg-muted/50 p-2 rounded-md">
+                        <div className={`p-1.5 rounded-full ${batch.dealerType === 'dealer' ? 'bg-orange-100 text-orange-700' : 'bg-blue-100 text-blue-700'
+                            }`}>
+                            {batch.dealerType === 'dealer' ? <Building className="h-3.5 w-3.5" /> : <User className="h-3.5 w-3.5" />}
+                        </div>
+                        <span className="font-medium text-foreground">{batch.dealerName || 'Unknown Dealer'}</span>
+                    </div>
                 </div>
             </CardHeader>
             <CardContent className="flex-1 space-y-4 pb-4">
@@ -53,7 +65,7 @@ export default function PvcBatchCard({ batch, onDownload, onStatusChange, onReje
                                     className="flex-1 h-10 text-sm border-dashed text-blue-700 border-blue-200 hover:bg-blue-50"
                                     onClick={() => onDownload(batch)}
                                 >
-                                    <FileDown className="mr-2 h-4 w-4" /> Download A4 Sheet
+                                    <FileDown className="mr-2 h-4 w-4" /> Download Sheet
                                 </Button>
                             </TooltipTrigger>
                             <TooltipContent><p>Download Merged Composition</p></TooltipContent>
@@ -73,8 +85,8 @@ export default function PvcBatchCard({ batch, onDownload, onStatusChange, onReje
                             <Play className="mr-2 h-4 w-4" /> Start Print
                         </Button>
                     ) : (
-                        <Button className="flex-1 bg-success hover:bg-success/90 text-success-foreground font-semibold" onClick={() => onStatusChange(batch.id, 'completed')}>
-                            <CheckCircle className="mr-2 h-4 w-4" /> Mark Complete
+                        <Button className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold" onClick={() => onStatusChange(batch.id, 'completed')}>
+                            <CheckCircle2 className="mr-2 h-4 w-4" /> Print Done
                         </Button>
                     )}
                     <Button variant="destructive" size="icon" onClick={() => onReject(batch.id)}>
