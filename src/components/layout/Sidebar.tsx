@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   LogOut,
@@ -62,6 +62,17 @@ export function Sidebar({
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
+  // Get navigation items based on user role
+  const isSuperAdmin = user?.role === 'super_admin';
+  const navItems = useMemo(() =>
+    isSuperAdmin
+      ? ROLE_CONFIGS  // Super admin can switch between all roles
+      : getRoleConfig(user?.role || 'admin')?.tabs || [],  // All other users see their own tabs
+    [isSuperAdmin, user?.role]
+  );
+
+
+
   // Get theme display name
   const getThemeLabel = () => {
     switch (theme) {
@@ -76,15 +87,6 @@ export function Sidebar({
     logout();
     navigate('/login');
   };
-
-  // Admin and Manager should see their own tabs, not all roles
-  // Only super_admin sees all ROLE_CONFIGS for role switching
-  const isSuperAdmin = user?.role === 'super_admin';
-
-  // Get navigation items based on user role
-  const navItems = isSuperAdmin
-    ? ROLE_CONFIGS  // Super admin can switch between all roles
-    : getRoleConfig(user?.role || 'admin')?.tabs || [];  // All other users see their own tabs
 
   const handleNavClick = (item: any) => {
     // Standard behavior
@@ -216,6 +218,8 @@ export function Sidebar({
                         <li key={child.id}>
                           <button
                             onClick={() => {
+                              // Collapse the parent menu when clicking a child page
+                              setExpandedItems(prev => prev.filter(id => id !== item.id));
                               if (onTabChange) {
                                 onTabChange(child.id);
                               }

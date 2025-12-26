@@ -104,7 +104,7 @@ export default function AdminPancardManager() {
                         <IdCard className="h-8 w-8 text-white" />
                     </div>
                     <div>
-                        <h1 className="text-3xl font-bold tracking-tight text-gray-900 dark:text-gray-100">PAN Card Department</h1>
+                        <h1 className="text-3xl font-bold tracking-tight">PAN Card Department</h1>
                         <p className="text-muted-foreground font-medium">Manage applications, track orders, and oversee team performance</p>
                     </div>
                 </div>

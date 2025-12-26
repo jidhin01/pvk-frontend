@@ -148,9 +148,9 @@ const DesignerManagement: React.FC = () => {
     // Render design card
     const renderDesignCard = (design: Design) => (
         <Card key={design.id} className={`group hover:shadow-sm transition-all border-l-4 ${design.priority === 'urgent' ? 'border-l-orange-500' :
-                design.workflowStatus === 'review-requested' ? 'border-l-red-500' :
-                    design.workflowStatus === 'approved' ? 'border-l-green-500' :
-                        'border-l-transparent'
+            design.workflowStatus === 'review-requested' ? 'border-l-red-500' :
+                design.workflowStatus === 'approved' ? 'border-l-green-500' :
+                    'border-l-transparent'
             }`}>
             <CardContent className="p-4">
                 <div className="flex flex-col sm:flex-row gap-4">
@@ -301,7 +301,7 @@ const DesignerManagement: React.FC = () => {
             {/* Header */}
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Design Workflow</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Design Workflow</h1>
                     <p className="text-muted-foreground mt-1">Manage and track design requests</p>
                 </div>
                 <div className="relative w-full sm:w-72">

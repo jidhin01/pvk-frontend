@@ -126,7 +126,7 @@ export default function PanDashboard() {
                                                         </div>
                                                     </div>
                                                     <div className="mt-4">
-                                                        <h3 className="font-semibold text-gray-900 dark:text-gray-100">{stat.label}</h3>
+                                                        <h3 className="font-semibold">{stat.label}</h3>
                                                         <p className="text-xs text-muted-foreground">{stat.description}</p>
                                                     </div>
                                                 </CardContent>

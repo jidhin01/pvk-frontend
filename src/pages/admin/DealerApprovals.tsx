@@ -137,7 +137,7 @@ const DealerApprovals = () => {
             {/* Header */}
             <div className="flex items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dealer Approvals</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Dealer Approvals</h1>
                     <p className="text-muted-foreground mt-1">Review dealer registration requests</p>
                 </div>
             </div>
@@ -155,17 +155,7 @@ const DealerApprovals = () => {
                         </div>
                     </CardContent>
                 </Card>
-                <Card>
-                    <CardContent className="p-4 flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-muted-foreground">Approved</p>
-                            <div className="text-2xl font-bold text-green-600">{MOCK_APPROVED_DEALERS.length}</div>
-                        </div>
-                        <div className="p-2 rounded-full bg-green-100">
-                            <CheckCircle className="h-4 w-4 text-green-600" />
-                        </div>
-                    </CardContent>
-                </Card>
+
                 <Card>
                     <CardContent className="p-4 flex items-center justify-between">
                         <div>
@@ -182,16 +172,12 @@ const DealerApprovals = () => {
             {/* Tabs */}
             <Tabs defaultValue="pending" className="space-y-4">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                    <TabsList className="grid w-full grid-cols-3 h-12 bg-muted/50 p-1">
-                        <TabsTrigger value="pending" className="gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                    <TabsList className="grid w-full grid-cols-2 h-12 bg-muted/50 p-1">
+                        <TabsTrigger value="pending" className="gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
                             <Clock className="h-4 w-4" />
                             Pending ({MOCK_PENDING_DEALERS.length})
                         </TabsTrigger>
-                        <TabsTrigger value="approved" className="gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
-                            <CheckCircle className="h-4 w-4" />
-                            Approved
-                        </TabsTrigger>
-                        <TabsTrigger value="rejected" className="gap-2 data-[state=active]:bg-white data-[state=active]:shadow-sm">
+                        <TabsTrigger value="rejected" className="gap-2 data-[state=active]:bg-background data-[state=active]:text-foreground data-[state=active]:shadow-sm">
                             <XCircle className="h-4 w-4" />
                             Rejected
                         </TabsTrigger>
@@ -269,32 +255,7 @@ const DealerApprovals = () => {
                     )}
                 </TabsContent>
 
-                {/* Approved Tab */}
-                <TabsContent value="approved" className="space-y-3">
-                    {MOCK_APPROVED_DEALERS.map((dealer) => (
-                        <Card key={dealer.id} className="border-l-4 border-l-green-500 shadow-sm hover:shadow-md transition-all">
-                            <CardContent className="p-4">
-                                <div className="flex items-center justify-between">
-                                    <div className="flex items-center gap-4">
-                                        <div className="p-2 rounded-full bg-green-50">
-                                            <Store className="h-5 w-5 text-green-600" />
-                                        </div>
-                                        <div>
-                                            <h3 className="font-bold">{dealer.companyName}</h3>
-                                            <p className="text-sm text-muted-foreground">{dealer.ownerName} • {dealer.email}</p>
-                                        </div>
-                                    </div>
-                                    <div className="text-right">
-                                        <div className="flex items-center justify-end gap-1 text-green-600 font-medium text-sm">
-                                            <CheckCircle className="h-4 w-4" /> Approved
-                                        </div>
-                                        <p className="text-xs text-muted-foreground mt-1">{dealer.totalOrders} orders completed</p>
-                                    </div>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    ))}
-                </TabsContent>
+
 
                 {/* Rejected Tab */}
                 <TabsContent value="rejected" className="space-y-3">

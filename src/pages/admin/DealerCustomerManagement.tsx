@@ -160,7 +160,7 @@ const DealerCustomerManagement: React.FC = () => {
             {/* Header */}
             <div className="flex items-center justify-between gap-4">
                 <div>
-                    <h1 className="text-3xl font-bold tracking-tight text-gray-900">Dealers & Customers</h1>
+                    <h1 className="text-3xl font-bold tracking-tight">Dealers & Customers</h1>
                     <p className="text-muted-foreground mt-1">Manage dealer and customer accounts</p>
                 </div>
             </div>

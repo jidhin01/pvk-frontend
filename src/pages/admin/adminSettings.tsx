@@ -469,7 +469,7 @@ const AdminSettings = () => {
                               </thead>
                               <tbody>
                                 {category.products.map((product, idx) => (
-                                  <tr key={product.id} className={idx % 2 === 0 ? 'bg-white' : 'bg-muted/20'}>
+                                  <tr key={product.id} className={idx % 2 === 0 ? 'bg-background' : 'bg-muted/20'}>
                                     <td className="p-3">
                                       <div className="flex items-center gap-3">
                                         <div className="w-10 h-10 bg-muted rounded-lg flex items-center justify-center">
