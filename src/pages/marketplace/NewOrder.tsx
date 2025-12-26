@@ -287,10 +287,6 @@ export default function NewOrder() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                 {/* Main Form */}
                 <div className="lg:col-span-2 space-y-5">
-                    <div className="text-center lg:text-left">
-                        <h2 className="text-xl font-bold mb-1">Order Details</h2>
-                        <p className="text-sm text-muted-foreground">Enter specifications for your print job</p>
-                    </div>
 
                     <Card>
                         <CardContent className="pt-6 space-y-5">
@@ -500,8 +496,8 @@ export default function NewOrder() {
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
                 <div>
-                    <h1 className="text-2xl font-bold tracking-tight">New Print Order</h1>
-                    <p className="text-sm text-muted-foreground">Create a new printing service request</p>
+                    <h1 className="text-2xl font-bold tracking-tight">Create Print Order</h1>
+                    <p className="text-sm text-muted-foreground">Configure your print job specifications and place your order</p>
                 </div>
             </div>
 

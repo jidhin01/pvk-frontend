@@ -43,7 +43,8 @@ import {
     CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { RECENT_ORDERS, Order, PrintOrder, ServiceOrder, OrderStatus } from '@/data/mockMarketplaceData';
+import { Progress } from "@/components/ui/progress";
+import { RECENT_ORDERS, Order, PrintOrder, ServiceOrder, OrderStatus, TimelineStep } from '@/data/mockMarketplaceData';
 import { MOCK_PANCARD_ORDERS } from '@/data/mockPancardData';
 
 export default function OrdersPage() {

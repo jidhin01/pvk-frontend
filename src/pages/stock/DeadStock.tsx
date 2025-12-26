@@ -40,25 +40,25 @@ const DeadStock = () => {
             <div
                 key={item.id}
                 className={`p-4 rounded-lg border ${severity === 'high'
-                        ? 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30'
-                        : severity === 'medium'
-                            ? 'border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950/30'
-                            : 'border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950/30'
+                    ? 'border-red-200 bg-red-50 dark:border-red-900 dark:bg-red-950/30'
+                    : severity === 'medium'
+                        ? 'border-orange-200 bg-orange-50 dark:border-orange-900 dark:bg-orange-950/30'
+                        : 'border-yellow-200 bg-yellow-50 dark:border-yellow-900 dark:bg-yellow-950/30'
                     }`}
             >
                 <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
                         <div className={`h-10 w-10 rounded-lg flex items-center justify-center ${severity === 'high'
-                                ? 'bg-red-100 dark:bg-red-900/50'
-                                : severity === 'medium'
-                                    ? 'bg-orange-100 dark:bg-orange-900/50'
-                                    : 'bg-yellow-100 dark:bg-yellow-900/50'
+                            ? 'bg-red-100 dark:bg-red-900/50'
+                            : severity === 'medium'
+                                ? 'bg-orange-100 dark:bg-orange-900/50'
+                                : 'bg-yellow-100 dark:bg-yellow-900/50'
                             }`}>
                             <AlertTriangle className={`h-5 w-5 ${severity === 'high'
-                                    ? 'text-red-600'
-                                    : severity === 'medium'
-                                        ? 'text-orange-600'
-                                        : 'text-yellow-600'
+                                ? 'text-red-600'
+                                : severity === 'medium'
+                                    ? 'text-orange-600'
+                                    : 'text-yellow-600'
                                 }`} />
                         </div>
                         <div>
