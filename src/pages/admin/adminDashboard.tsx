@@ -21,13 +21,28 @@ import FinanceOverview from './FinanceOverview';
 import AdminSettings from './adminSettings';
 import AdminActivityLogs from './adminActivityLogs';
 import RoleManagement from './RoleManagement';
-import PartnersManagement from './PartnersManagement';
 import DesignerManagement from './DesignerManagement';
 import SealTeamManagement from './SealTeamManagement';
 import SalesManagement from './SalesManagement';
+import DealerCustomerManagement from './DealerCustomerManagement';
 import InventoryModule from './inventory/InventoryModule';
 import PrinterManager from './printer/PrinterManager';
 import AdminPancardManager from './pancard/AdminPancardManager';
+import OrdersManagement from './OrdersManagement';
+
+// Import User Management Pages
+import {
+  ManagersPage,
+  DesignersPage,
+  PrintersPage,
+  SalesStaffPage,
+  StockKeepersPage,
+  PanCardTeamPage,
+  SealTeamPage,
+  FinanceTeamPage,
+  DealersPage,
+  CustomersPage
+} from './user-management';
 
 
 export default function AdminDashboard() {
@@ -42,8 +57,31 @@ export default function AdminDashboard() {
           case 'dashboard':
             return <AdminOverview />;
 
+          case 'orders':
+            return <OrdersManagement />;
+
           case 'users':
             return <UserManagement />;
+
+          // User Management by Role
+          case 'users-managers':
+            return <ManagersPage />;
+          case 'users-designers':
+            return <DesignersPage />;
+          case 'users-printers':
+            return <PrintersPage />;
+          case 'users-sales':
+            return <SalesStaffPage />;
+          case 'users-stock':
+            return <StockKeepersPage />;
+          case 'users-pancard':
+            return <PanCardTeamPage />;
+          case 'users-seal':
+            return <SealTeamPage />;
+          case 'users-finance':
+            return <FinanceTeamPage />;
+          case 'users-dealer-customer':
+            return <DealerCustomerManagement />;
 
           case 'dealer-approvals':
             return <DealerApprovals />;
@@ -73,9 +111,6 @@ export default function AdminDashboard() {
 
           case 'manage-seal':
             return <SealTeamManagement />;
-
-          case 'manage-partners':
-            return <PartnersManagement />;
 
           case 'finance-overview':
             // Only show finance for admin

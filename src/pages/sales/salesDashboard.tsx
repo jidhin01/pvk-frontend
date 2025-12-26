@@ -4,7 +4,6 @@ import DashboardOverview from './DashboardOverview';
 import DeliveryList from './DeliveryList';
 import PaymentCollection from './PaymentCollection';
 import DailyOperations from './DailyOperations';
-import Expenses from './Expenses';
 
 const SalesDashboard = () => {
   return (
@@ -19,8 +18,6 @@ const SalesDashboard = () => {
             return <PaymentCollection />;
           case 'daily-operations':
             return <DailyOperations />;
-          case 'expenses':
-            return <Expenses />;
           default:
             return <DashboardOverview />;
         }

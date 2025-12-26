@@ -6,6 +6,7 @@ import {
   Sun,
   Moon,
   X,
+  ChevronDown,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { getRoleConfig, ROLE_CONFIGS } from '@/config/navigation';
@@ -59,6 +60,7 @@ export function Sidebar({
   const { theme, setTheme } = useTheme();
   const isMobile = useIsMobile(); // System check, overrides 'mobile' prop if needed
   const [showLogoutDialog, setShowLogoutDialog] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<string[]>([]);
 
   // Get theme display name
   const getThemeLabel = () => {
@@ -166,24 +168,76 @@ export function Sidebar({
         </div>
         <ul className="space-y-1">
           {navItems.map((item) => {
+            const hasChildren = !isSuperAdmin && 'children' in item && item.children && item.children.length > 0;
+            const isExpanded = expandedItems.includes(item.id);
             const isActive = isSuperAdmin
               ? selectedRole === item.id
               : activeTab === item.id;
+            const isChildActive = hasChildren && item.children?.some(child => activeTab === child.id);
 
             return (
               <li key={item.id}>
                 <button
-                  onClick={() => handleNavClick(item)}
+                  onClick={() => {
+                    if (hasChildren) {
+                      // Toggle expand/collapse
+                      setExpandedItems(prev =>
+                        prev.includes(item.id)
+                          ? prev.filter(id => id !== item.id)
+                          : [...prev, item.id]
+                      );
+                    } else {
+                      handleNavClick(item);
+                    }
+                  }}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all duration-150 text-sm",
-                    isActive
+                    (isActive || isChildActive)
                       ? "bg-sidebar-primary text-sidebar-primary-foreground shadow-sm"
                       : "text-sidebar-foreground/70 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   )}
                 >
                   <item.icon className="h-5 w-5 flex-shrink-0" />
-                  <span className="truncate">{item.label}</span>
+                  <span className="truncate flex-1 text-left">{item.label}</span>
+                  {hasChildren && (
+                    <ChevronDown className={cn(
+                      "h-4 w-4 transition-transform duration-200",
+                      isExpanded ? "rotate-180" : ""
+                    )} />
+                  )}
                 </button>
+
+                {/* Collapsible Children */}
+                {hasChildren && isExpanded && (
+                  <ul className="mt-1 ml-4 space-y-1 border-l border-sidebar-border pl-2">
+                    {item.children?.map((child) => {
+                      const isChildItemActive = activeTab === child.id;
+                      return (
+                        <li key={child.id}>
+                          <button
+                            onClick={() => {
+                              if (onTabChange) {
+                                onTabChange(child.id);
+                              }
+                              if (isMobile && onMobileOpenChange) {
+                                onMobileOpenChange(false);
+                              }
+                            }}
+                            className={cn(
+                              "w-full flex items-center gap-2 px-2 py-2 rounded-md transition-all duration-150 text-sm",
+                              isChildItemActive
+                                ? "bg-sidebar-primary/80 text-sidebar-primary-foreground"
+                                : "text-sidebar-foreground/60 hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                            )}
+                          >
+                            <child.icon className="h-4 w-4 flex-shrink-0" />
+                            <span className="truncate">{child.label}</span>
+                          </button>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
               </li>
             );
           })}

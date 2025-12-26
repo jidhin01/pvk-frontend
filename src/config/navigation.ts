@@ -44,6 +44,7 @@ export interface NavTab {
   id: string;
   label: string;
   icon: LucideIcon;
+  children?: NavTab[]; // For collapsible submenus
 }
 
 export interface RoleConfig {
@@ -71,17 +72,31 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     icon: Shield,
     tabs: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-      { id: 'users', label: 'User Management', icon: Users },
-      { id: 'dealer-approvals', label: 'Dealer Approvals', icon: CheckSquare },
+      { id: 'orders', label: 'Orders', icon: ShoppingCart },
+      {
+        id: 'users',
+        label: 'User Management',
+        icon: Users,
+        children: [
+          { id: 'users-managers', label: 'Managers', icon: Crown },
+          { id: 'users-designers', label: 'Designers', icon: Palette },
+          { id: 'users-printers', label: 'Printers', icon: PrinterIcon },
+          { id: 'users-sales', label: 'Sales Staff', icon: Briefcase },
+          { id: 'users-stock', label: 'Stock Keepers', icon: Package },
+          { id: 'users-pancard', label: 'PAN Card Team', icon: IdCard },
+          { id: 'users-seal', label: 'Seal Team', icon: Stamp },
+          { id: 'users-finance', label: 'Finance Team', icon: Coins },
+          { id: 'users-dealer-customer', label: 'Dealers & Customers', icon: Store },
+        ]
+      },
       // Role Management Sections
-      { id: 'manage-designer', label: 'Designer', icon: Palette },
-      { id: 'manage-printer', label: 'Printer', icon: PrinterIcon },
+      { id: 'manage-designer', label: 'Design Workflow', icon: Palette },
+      { id: 'manage-printer', label: 'Printer Workflow', icon: PrinterIcon },
       { id: 'manage-sales', label: 'Sales / Line Staff', icon: Briefcase },
       { id: 'manage-finance', label: 'Finance', icon: Coins },
       { id: 'manage-stock', label: 'Stock Keeper', icon: Package },
       { id: 'manage-pancard', label: 'PAN Card Team', icon: IdCard },
       { id: 'manage-seal', label: 'Seal Team', icon: Stamp },
-      { id: 'manage-partners', label: 'Partners & Pricing', icon: Store },
       // System
       { id: 'settings', label: 'Settings', icon: Settings },
       { id: 'activity-logs', label: 'Activity Logs', icon: History },
@@ -93,16 +108,16 @@ export const ROLE_CONFIGS: RoleConfig[] = [
     icon: ClipboardList,
     tabs: [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
+      { id: 'orders', label: 'Orders', icon: ShoppingCart },
       { id: 'users', label: 'User Management', icon: Users },
       { id: 'dealer-approvals', label: 'Dealer Approvals', icon: CheckSquare },
       // Role Management Sections (No Finance for Manager)
-      { id: 'manage-designer', label: 'Designer', icon: Palette },
-      { id: 'manage-printer', label: 'Printer', icon: PrinterIcon },
+      { id: 'manage-designer', label: 'Design Workflow', icon: Palette },
+      { id: 'manage-printer', label: 'Printer Workflow', icon: PrinterIcon },
       { id: 'manage-sales', label: 'Sales / Line Staff', icon: Briefcase },
       { id: 'manage-stock', label: 'Stock Keeper', icon: Package },
       { id: 'manage-pancard', label: 'PAN Card Team', icon: IdCard },
       { id: 'manage-seal', label: 'Seal Team', icon: Stamp },
-      { id: 'manage-partners', label: 'Partners & Pricing', icon: Store },
       // System
       { id: 'settings', label: 'Settings', icon: Settings },
     ],
@@ -165,8 +180,7 @@ export const ROLE_CONFIGS: RoleConfig[] = [
       { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
       { id: 'delivery-list', label: 'Delivery List', icon: MapPin },
       { id: 'payment-collection', label: 'Payment', icon: CreditCard },
-      { id: 'daily-operations', label: 'Operations', icon: ClipboardList },
-      { id: 'expenses', label: 'Expenses', icon: Wallet },
+      { id: 'daily-operations', label: 'Operations & Expenses', icon: ClipboardList },
     ],
   },
   {

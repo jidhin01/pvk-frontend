@@ -198,8 +198,8 @@ const AdminOverview = () => {
                             {MOCK_ACTIVITY.map((item) => (
                                 <div key={item.id} className="flex items-start gap-3">
                                     <div className={`mt-0.5 p-1.5 rounded-full ${item.type === 'success' ? 'bg-green-100 dark:bg-green-900/30' :
-                                            item.type === 'warning' ? 'bg-orange-100 dark:bg-orange-900/30' :
-                                                'bg-blue-100 dark:bg-blue-900/30'
+                                        item.type === 'warning' ? 'bg-orange-100 dark:bg-orange-900/30' :
+                                            'bg-blue-100 dark:bg-blue-900/30'
                                         }`}>
                                         {item.type === 'success' ? <CheckCircle className="h-3 w-3 text-green-600" /> :
                                             item.type === 'warning' ? <AlertCircle className="h-3 w-3 text-orange-600" /> :
@@ -238,10 +238,6 @@ const AdminOverview = () => {
                         <Button variant="outline" size="sm" onClick={() => handleNavigate('manage-finance')}>
                             <Wallet className="h-4 w-4 mr-2" />
                             Finances
-                        </Button>
-                        <Button variant="outline" size="sm" onClick={() => handleNavigate('manage-partners')}>
-                            <Store className="h-4 w-4 mr-2" />
-                            Partners
                         </Button>
                     </div>
                 </CardContent>

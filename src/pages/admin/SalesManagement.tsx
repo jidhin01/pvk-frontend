@@ -1,32 +1,32 @@
 import React, { useState } from 'react';
 import {
-    Users,
-    Settings,
-    DollarSign,
-    Plus,
-    Edit,
-    Search,
-    MoreVertical,
-    Mail,
-    Phone,
-    UserCheck,
-    UserX,
-    CheckCircle,
-    Clock,
-    Save,
-    Activity,
     Truck,
-    MapPin,
-    Route,
     Eye,
     Wallet,
     Package,
-    Undo2,
+    Clock,
+    CheckCircle,
     AlertTriangle,
     Download,
     Filter,
+    Calendar,
+    Plus,
+    Search,
+    X,
+    User,
+    MapPin,
+    Palette,
+    PrinterIcon,
+    Printer,
+    ShoppingCart,
+    ChevronDown,
+    ChevronUp,
+    CreditCard,
+    Receipt,
     TrendingUp,
-    Calendar
+    TrendingDown,
+    DollarSign,
+    BadgeDollarSign,
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -34,7 +34,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Switch } from '@/components/ui/switch';
+import { Progress } from '@/components/ui/progress';
 import {
     Dialog,
     DialogContent,
@@ -42,15 +42,7 @@ import {
     DialogFooter,
     DialogHeader,
     DialogTitle,
-    DialogTrigger,
 } from '@/components/ui/dialog';
-import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import {
     Select,
     SelectContent,
@@ -67,6 +59,9 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { toast } from 'sonner';
+import { DatePickerWithRange } from '@/components/ui/date-range-picker';
+import { DateRange } from 'react-day-picker';
+import { format, isWithinInterval, parseISO, startOfDay, endOfDay } from 'date-fns';
 
 // Routes
 const ROUTES = [
@@ -76,118 +71,324 @@ const ROUTES = [
     { id: 'east_side', label: 'East Side', color: 'bg-orange-100 text-orange-700' },
 ];
 
-// Mock Sales Staff Data
-const MOCK_SALES_STAFF = [
+// Timeline step interface
+interface TimelineStep {
+    id: string;
+    stage: string;
+    status: 'completed' | 'in-progress' | 'pending';
+    date?: string;
+    time?: string;
+    role: string;
+    person?: string;
+    action?: string;
+}
+
+// Mock Delivery Orders with detailed timeline
+const MOCK_DELIVERIES = [
     {
-        id: '1',
-        name: 'Rajan Kumar',
-        email: 'rajan@pvk.com',
-        phone: '+91 98765 00001',
-        status: 'active',
-        assignedRoute: 'north_route',
-        todayDeliveries: 8,
-        todayCompleted: 5,
-        cashCollected: 15600,
-        pendingDeposit: 12000,
+        id: 'ORD-2024-001',
+        product: 'Business Cards - 1000 pcs',
+        productType: 'Print',
+        dealer: 'ABC Prints & Graphics',
+        dealerEmail: 'abc@prints.com',
+        partnerType: 'dealer',
+        amount: 2500,
+        status: 'pending',
+        date: '2024-12-24',
+        quantity: '1000 pcs',
+        route: 'north_route',
+        staff: 'Rajan Kumar',
+        progress: 17,
+        timeline: [
+            { id: '1', stage: 'Order Placed', status: 'completed', date: '2024-12-24', time: '10:30 AM', role: 'Dealer', person: 'ABC Prints', action: 'Uploaded order' },
+            { id: '2', stage: 'Manager Review', status: 'pending', role: 'Manager', action: 'Pending approval' },
+            { id: '3', stage: 'Designer Assigned', status: 'pending', role: 'Designer', action: 'Awaiting assignment' },
+            { id: '4', stage: 'Design Completed', status: 'pending', role: 'Designer', action: 'Pending design' },
+            { id: '5', stage: 'Printing', status: 'pending', role: 'Printer', action: 'Pending print' },
+            { id: '6', stage: 'Ready for Delivery', status: 'pending', role: 'Line Staff', action: 'Pending pickup' },
+        ] as TimelineStep[],
     },
     {
-        id: '2',
-        name: 'Suresh Menon',
-        email: 'suresh@pvk.com',
-        phone: '+91 98765 00002',
-        status: 'active',
-        assignedRoute: 'city_center',
-        todayDeliveries: 6,
-        todayCompleted: 6,
-        cashCollected: 8500,
-        pendingDeposit: 7500,
+        id: 'ORD-2024-002',
+        product: 'Visiting Cards - 500 pcs',
+        productType: 'Print',
+        dealer: 'XYZ Digital Hub',
+        dealerEmail: 'xyz@digital.com',
+        partnerType: 'dealer',
+        amount: 1800,
+        status: 'in-transit',
+        date: '2024-12-23',
+        quantity: '500 pcs',
+        route: 'city_center',
+        staff: 'Suresh Menon',
+        progress: 83,
+        timeline: [
+            { id: '1', stage: 'Order Placed', status: 'completed', date: '2024-12-23', time: '09:00 AM', role: 'Dealer', person: 'XYZ Digital', action: 'Uploaded order' },
+            { id: '2', stage: 'Manager Review', status: 'completed', date: '2024-12-23', time: '10:15 AM', role: 'Manager', person: 'Admin', action: 'Approved' },
+            { id: '3', stage: 'Designer Assigned', status: 'completed', date: '2024-12-23', time: '11:00 AM', role: 'Designer', person: 'Arun K', action: 'Assigned' },
+            { id: '4', stage: 'Design Completed', status: 'completed', date: '2024-12-23', time: '02:30 PM', role: 'Designer', person: 'Arun K', action: 'Design approved' },
+            { id: '5', stage: 'Printing', status: 'completed', date: '2024-12-24', time: '09:00 AM', role: 'Printer', person: 'Ram P', action: 'Printed' },
+            { id: '6', stage: 'Ready for Delivery', status: 'in-progress', date: '2024-12-24', time: '11:00 AM', role: 'Line Staff', person: 'Suresh Menon', action: 'Out for delivery' },
+        ] as TimelineStep[],
     },
     {
-        id: '3',
-        name: 'Vijay Nair',
-        email: 'vijay@pvk.com',
-        phone: '+91 98765 00003',
-        status: 'active',
-        assignedRoute: 'south_zone',
-        todayDeliveries: 5,
-        todayCompleted: 3,
-        cashCollected: 6200,
-        pendingDeposit: 5000,
+        id: 'ORD-2024-003',
+        product: 'Flex Banner - 10x5 ft',
+        productType: 'Print',
+        dealer: 'Quick Print Solutions',
+        dealerEmail: 'quick@prints.com',
+        partnerType: 'customer',
+        amount: 3200,
+        status: 'delivered',
+        date: '2024-12-22',
+        quantity: '1 pc',
+        route: 'south_zone',
+        staff: 'Vijay Nair',
+        progress: 100,
+        timeline: [
+            { id: '1', stage: 'Order Placed', status: 'completed', date: '2024-12-22', time: '08:00 AM', role: 'Customer', person: 'Quick Print', action: 'Uploaded order' },
+            { id: '2', stage: 'Manager Review', status: 'completed', date: '2024-12-22', time: '09:00 AM', role: 'Manager', person: 'Admin', action: 'Approved' },
+            { id: '3', stage: 'Designer Assigned', status: 'completed', date: '2024-12-22', time: '10:00 AM', role: 'Designer', person: 'Priya S', action: 'Assigned' },
+            { id: '4', stage: 'Design Completed', status: 'completed', date: '2024-12-22', time: '01:00 PM', role: 'Designer', person: 'Priya S', action: 'Design approved' },
+            { id: '5', stage: 'Printing', status: 'completed', date: '2024-12-22', time: '04:00 PM', role: 'Printer', person: 'Sam K', action: 'Printed' },
+            { id: '6', stage: 'Ready for Delivery', status: 'completed', date: '2024-12-23', time: '10:30 AM', role: 'Line Staff', person: 'Vijay Nair', action: 'Delivered' },
+        ] as TimelineStep[],
     },
     {
-        id: '4',
-        name: 'Anil Pillai',
-        email: 'anil@pvk.com',
-        phone: '+91 98765 00004',
-        status: 'inactive',
-        assignedRoute: 'east_side',
-        todayDeliveries: 0,
-        todayCompleted: 0,
-        cashCollected: 0,
-        pendingDeposit: 0,
+        id: 'ORD-2024-004',
+        product: 'Letterheads - 200 pcs',
+        productType: 'Print',
+        dealer: 'Office Supplies Ltd',
+        dealerEmail: 'office@supplies.com',
+        partnerType: 'dealer',
+        amount: 1200,
+        status: 'returned',
+        date: '2024-12-21',
+        quantity: '200 pcs',
+        route: 'east_side',
+        staff: 'Rajan Kumar',
+        progress: 100,
+        timeline: [
+            { id: '1', stage: 'Order Placed', status: 'completed', date: '2024-12-21', time: '11:00 AM', role: 'Dealer', person: 'Office Supplies', action: 'Uploaded order' },
+            { id: '2', stage: 'Manager Review', status: 'completed', date: '2024-12-21', time: '12:00 PM', role: 'Manager', person: 'Admin', action: 'Approved' },
+            { id: '3', stage: 'Designer Assigned', status: 'completed', date: '2024-12-21', time: '01:00 PM', role: 'Designer', person: 'Arun K', action: 'Assigned' },
+            { id: '4', stage: 'Design Completed', status: 'completed', date: '2024-12-21', time: '03:00 PM', role: 'Designer', person: 'Arun K', action: 'Design approved' },
+            { id: '5', stage: 'Printing', status: 'completed', date: '2024-12-22', time: '09:00 AM', role: 'Printer', person: 'Ram P', action: 'Printed' },
+            { id: '6', stage: 'Ready for Delivery', status: 'completed', date: '2024-12-22', time: '02:00 PM', role: 'Line Staff', person: 'Rajan Kumar', action: 'Returned - Quality issue' },
+        ] as TimelineStep[],
     },
 ];
 
-// Mock Deliveries for Admin View
-const MOCK_ADMIN_DELIVERIES = [
-    { id: 'DEL-001', customer: 'Rajesh Kumar', staff: 'Rajan Kumar', route: 'north_route', status: 'in-transit', amount: 1500, time: '10:30 AM' },
-    { id: 'DEL-002', customer: 'Priya Sharma', staff: 'Suresh Menon', route: 'city_center', status: 'delivered', amount: 3200, time: '11:15 AM' },
-    { id: 'DEL-003', customer: 'Mohammed Ali', staff: 'Vijay Nair', route: 'south_zone', status: 'pending', amount: 850, time: '09:45 AM' },
-    { id: 'DEL-004', customer: 'Sunita Patel', staff: 'Rajan Kumar', route: 'north_route', status: 'delivered', amount: 2800, time: '12:00 PM' },
-    { id: 'DEL-005', customer: 'Amit Verma', staff: 'Suresh Menon', route: 'city_center', status: 'returned', amount: 1200, time: '01:30 PM' },
-    { id: 'DEL-006', customer: 'Arjun Traders', staff: 'Rajan Kumar', route: 'north_route', status: 'pending', amount: 2200, time: '02:00 PM' },
-];
+// Mock Cash Records with enhanced data including expense breakdown
+interface ExpenseItem {
+    type: 'salary' | 'fuel' | 'food' | 'travel' | 'other';
+    amount: number;
+    description: string;
+}
 
-// Mock Cash Records
-const MOCK_CASH_RECORDS = [
-    { id: 'CASH-001', date: '2024-12-25', staff: 'Rajan Kumar', collected: 15600, deposited: 12000, expenses: 850, pending: 2750, verified: true },
-    { id: 'CASH-002', date: '2024-12-25', staff: 'Suresh Menon', collected: 8500, deposited: 7500, expenses: 500, pending: 500, verified: false },
-    { id: 'CASH-003', date: '2024-12-25', staff: 'Vijay Nair', collected: 6200, deposited: 5000, expenses: 400, pending: 800, verified: false },
-    { id: 'CASH-004', date: '2024-12-24', staff: 'Rajan Kumar', collected: 12000, deposited: 12000, expenses: 700, pending: 0, verified: true },
-];
+interface DeliveryRecord {
+    orderId: string;
+    customer: string;
+    toCollect: number;
+    received: number;
+    credit: number;
+    pending: number;
+    paymentMode: 'cash' | 'credit' | 'online';
+    status: 'collected' | 'pending' | 'failed';
+}
 
-// Mock Activity Data
-const MOCK_ACTIVITY = [
-    { id: '1', action: 'Delivery Completed', staff: 'Rajan Kumar', details: 'Delivered to Sunita Patel • ₹2,800 collected', time: '30 min ago' },
-    { id: '2', action: 'Cash Deposited', staff: 'Suresh Menon', details: 'Deposited ₹7,500 at main counter', time: '1h ago' },
-    { id: '3', action: 'Sales Return', staff: 'Suresh Menon', details: 'Return from Amit Verma - Quality issue', time: '2h ago' },
-    { id: '4', action: 'Route Changed', staff: 'Vijay Nair', details: 'Assigned to South Zone (was East Side)', time: '3h ago' },
-    { id: '5', action: 'Expense Added', staff: 'Rajan Kumar', details: 'Fuel expense ₹200', time: '4h ago' },
+interface CashRecord {
+    id: string;
+    date: string;
+    staffId: string;
+    staff: string;
+    toCollect: number;
+    received: number;
+    credits: number;
+    expenses: number;
+    pending: number;
+    verified: boolean;
+    expenseBreakdown: ExpenseItem[];
+    deliveries: DeliveryRecord[];
+}
+
+const MOCK_CASH_RECORDS: CashRecord[] = [
+    {
+        id: 'CASH-001',
+        date: '2024-12-25',
+        staffId: '1',
+        staff: 'Rajan Kumar',
+        toCollect: 18000,
+        received: 15600,
+        credits: 1200,
+        expenses: 850,
+        pending: 350,
+        verified: true,
+        expenseBreakdown: [
+            { type: 'salary', amount: 500, description: 'Salary advance' },
+            { type: 'fuel', amount: 200, description: 'Petrol' },
+            { type: 'food', amount: 100, description: 'Lunch' },
+            { type: 'other', amount: 50, description: 'Parking' },
+        ],
+        deliveries: [
+            { orderId: 'ORD-2024-010', customer: 'Sunita Patel', toCollect: 2800, received: 2800, credit: 0, pending: 0, paymentMode: 'cash', status: 'collected' },
+            { orderId: 'ORD-2024-011', customer: 'Rajesh Kumar', toCollect: 1500, received: 1500, credit: 0, pending: 0, paymentMode: 'cash', status: 'collected' },
+            { orderId: 'ORD-2024-012', customer: 'Amit Singh', toCollect: 3200, received: 3000, credit: 0, pending: 200, paymentMode: 'cash', status: 'collected' },
+            { orderId: 'ORD-2024-013', customer: 'Priya Traders', toCollect: 4500, received: 3300, credit: 1200, pending: 0, paymentMode: 'credit', status: 'collected' },
+            { orderId: 'ORD-2024-014', customer: 'NK Graphics', toCollect: 3600, received: 3450, credit: 0, pending: 150, paymentMode: 'cash', status: 'collected' },
+        ],
+    },
+    {
+        id: 'CASH-002',
+        date: '2024-12-25',
+        staffId: '2',
+        staff: 'Suresh Menon',
+        toCollect: 12000,
+        received: 8500,
+        credits: 2500,
+        expenses: 500,
+        pending: 1000,
+        verified: false,
+        expenseBreakdown: [
+            { type: 'salary', amount: 300, description: 'Salary advance' },
+            { type: 'fuel', amount: 150, description: 'Petrol' },
+            { type: 'food', amount: 50, description: 'Tea & snacks' },
+        ],
+        deliveries: [
+            { orderId: 'ORD-2024-015', customer: 'City Prints', toCollect: 2200, received: 2200, credit: 0, pending: 0, paymentMode: 'cash', status: 'collected' },
+            { orderId: 'ORD-2024-016', customer: 'Metro Signs', toCollect: 3800, received: 3300, credit: 0, pending: 500, paymentMode: 'cash', status: 'collected' },
+            { orderId: 'ORD-2024-017', customer: 'Quick Copy', toCollect: 3500, received: 1000, credit: 2500, pending: 0, paymentMode: 'credit', status: 'collected' },
+        ],
+    },
+    {
+        id: 'CASH-003',
+        date: '2024-12-25',
+        staffId: '3',
+        staff: 'Vijay Nair',
+        toCollect: 9500,
+        received: 6200,
+        credits: 1800,
+        expenses: 400,
+        pending: 1100,
+        verified: false,
+        expenseBreakdown: [
+            { type: 'fuel', amount: 250, description: 'Petrol' },
+            { type: 'food', amount: 80, description: 'Lunch' },
+            { type: 'travel', amount: 70, description: 'Toll charges' },
+        ],
+        deliveries: [
+            { orderId: 'ORD-2024-018', customer: 'South Prints', toCollect: 1800, received: 1800, credit: 0, pending: 0, paymentMode: 'cash', status: 'collected' },
+            { orderId: 'ORD-2024-019', customer: 'Green Graphics', toCollect: 2400, received: 600, credit: 1800, pending: 0, paymentMode: 'credit', status: 'collected' },
+            { orderId: 'ORD-2024-020', customer: 'Digital Hub', toCollect: 2000, received: 2000, credit: 0, pending: 0, paymentMode: 'online', status: 'collected' },
+            { orderId: 'ORD-2024-021', customer: 'Sri Traders', toCollect: 1800, received: 700, credit: 0, pending: 1100, paymentMode: 'cash', status: 'pending' },
+        ],
+    },
+    {
+        id: 'CASH-004',
+        date: '2024-12-24',
+        staffId: '1',
+        staff: 'Rajan Kumar',
+        toCollect: 15000,
+        received: 12000,
+        credits: 2300,
+        expenses: 700,
+        pending: 0,
+        verified: true,
+        expenseBreakdown: [
+            { type: 'salary', amount: 400, description: 'Salary advance' },
+            { type: 'fuel', amount: 180, description: 'Petrol' },
+            { type: 'food', amount: 120, description: 'Meals' },
+        ],
+        deliveries: [
+            { orderId: 'ORD-2024-005', customer: 'ABC Traders', toCollect: 4000, received: 4000, credit: 0, pending: 0, paymentMode: 'cash', status: 'collected' },
+            { orderId: 'ORD-2024-006', customer: 'XYZ Prints', toCollect: 5000, received: 4700, credit: 0, pending: 0, paymentMode: 'cash', status: 'collected' },
+            { orderId: 'ORD-2024-007', customer: 'PQR Solutions', toCollect: 3000, received: 700, credit: 2300, pending: 0, paymentMode: 'credit', status: 'collected' },
+        ],
+    },
+    {
+        id: 'CASH-005',
+        date: '2024-12-24',
+        staffId: '2',
+        staff: 'Suresh Menon',
+        toCollect: 10000,
+        received: 8800,
+        credits: 800,
+        expenses: 400,
+        pending: 0,
+        verified: true,
+        expenseBreakdown: [
+            { type: 'salary', amount: 250, description: 'Salary advance' },
+            { type: 'fuel', amount: 150, description: 'Petrol' },
+        ],
+        deliveries: [
+            { orderId: 'ORD-2024-008', customer: 'City Center Ads', toCollect: 4800, received: 4800, credit: 0, pending: 0, paymentMode: 'cash', status: 'collected' },
+            { orderId: 'ORD-2024-009', customer: 'Metro Graphics', toCollect: 4000, received: 3200, credit: 800, pending: 0, paymentMode: 'credit', status: 'collected' },
+        ],
+    },
 ];
 
 const SalesManagement: React.FC = () => {
     const [searchQuery, setSearchQuery] = useState('');
-    const [routeFilter, setRouteFilter] = useState<string>('all');
-    const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-    const [selectedRoute, setSelectedRoute] = useState('north_route');
+    const [statusFilter, setStatusFilter] = useState<string>('all');
+    const [selectedDelivery, setSelectedDelivery] = useState<typeof MOCK_DELIVERIES[0] | null>(null);
+    const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+    const [isAddCashOpen, setIsAddCashOpen] = useState(false);
+    const [expandedStaff, setExpandedStaff] = useState<string | null>(null);
 
-    // Settings state
-    const [settings, setSettings] = useState({
-        salaryAdvanceLimit: 500,
-        fuelAllowance: 200,
-        cashDepositDeadline: 6, // PM
-        deliveryCommission: 10, // per delivery
-        enableGPS: true,
-        autoAssignRoute: false,
+    const [dateRange, setDateRange] = useState<DateRange | undefined>({
+        from: new Date(2024, 11, 23), // Dec 23, 2024
+        to: new Date(2024, 11, 25), // Dec 25, 2024
     });
 
-    // Filter staff
-    const filteredStaff = MOCK_SALES_STAFF.filter(s => {
-        const matchesSearch = s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-            s.email.toLowerCase().includes(searchQuery.toLowerCase());
-        const matchesRoute = routeFilter === 'all' || s.assignedRoute === routeFilter;
-        return matchesSearch && matchesRoute;
+    // New cash record form state
+    const [newCashRecord, setNewCashRecord] = useState({
+        staff: '',
+        toCollect: '',
+        received: '',
+        credits: '',
+        expenses: '',
     });
 
     // Stats
-    const totalStaff = MOCK_SALES_STAFF.length;
-    const activeStaff = MOCK_SALES_STAFF.filter(s => s.status === 'active').length;
-    const totalDeliveriesToday = MOCK_SALES_STAFF.reduce((sum, s) => sum + s.todayDeliveries, 0);
-    const totalCompletedToday = MOCK_SALES_STAFF.reduce((sum, s) => sum + s.todayCompleted, 0);
-    const totalCashCollected = MOCK_SALES_STAFF.reduce((sum, s) => sum + s.cashCollected, 0);
-    const totalPendingDeposit = MOCK_SALES_STAFF.reduce((sum, s) => sum + s.pendingDeposit, 0);
-    const pendingDeliveries = MOCK_ADMIN_DELIVERIES.filter(d => d.status === 'pending').length;
-    const returns = MOCK_ADMIN_DELIVERIES.filter(d => d.status === 'returned').length;
+    const pendingDeliveries = MOCK_DELIVERIES.filter(d => d.status === 'pending').length;
+    const inTransitDeliveries = MOCK_DELIVERIES.filter(d => d.status === 'in-transit').length;
+    const deliveredCount = MOCK_DELIVERIES.filter(d => d.status === 'delivered').length;
+    const returnedCount = MOCK_DELIVERIES.filter(d => d.status === 'returned').length;
+
+    // Cash stats
+    // Cash stats - filtered by date range
+    const cashRecords = MOCK_CASH_RECORDS.filter(r => {
+        if (!dateRange?.from) return true;
+        const recordDate = parseISO(r.date);
+        const start = startOfDay(dateRange.from);
+        const end = endOfDay(dateRange.to || dateRange.from);
+        return isWithinInterval(recordDate, { start, end });
+    });
+
+    const totalToCollect = cashRecords.reduce((sum, r) => sum + r.toCollect, 0);
+    const totalReceived = cashRecords.reduce((sum, r) => sum + r.received, 0);
+    const totalCredits = cashRecords.reduce((sum, r) => sum + r.credits, 0);
+    const totalExpenses = cashRecords.reduce((sum, r) => sum + r.expenses, 0);
+    const totalPending = cashRecords.reduce((sum, r) => sum + r.pending, 0);
+
+
+    // Filter deliveries
+    const filteredDeliveries = MOCK_DELIVERIES.filter(d => {
+        const matchesSearch = d.id.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            d.dealer.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            d.product.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'all' || d.status === statusFilter;
+
+        let matchesDate = true;
+        if (dateRange?.from) {
+            const deliveryDate = parseISO(d.date);
+            const start = startOfDay(dateRange.from);
+            const end = endOfDay(dateRange.to || dateRange.from);
+            matchesDate = isWithinInterval(deliveryDate, { start, end });
+        }
+
+        return matchesSearch && matchesStatus && matchesDate;
+    });
 
     const getRouteBadge = (routeId: string) => {
         const route = ROUTES.find(r => r.id === routeId);
@@ -208,8 +409,37 @@ const SalesManagement: React.FC = () => {
         }
     };
 
-    const handleSaveSettings = () => {
-        toast.success('Sales settings saved successfully');
+    const getRoleIcon = (role: string) => {
+        switch (role.toLowerCase()) {
+            case 'dealer':
+            case 'customer':
+                return <ShoppingCart className="h-4 w-4" />;
+            case 'manager':
+                return <User className="h-4 w-4" />;
+            case 'designer':
+                return <Palette className="h-4 w-4" />;
+            case 'printer':
+                return <Printer className="h-4 w-4" />;
+            case 'line staff':
+                return <Truck className="h-4 w-4" />;
+            default:
+                return <User className="h-4 w-4" />;
+        }
+    };
+
+    const handleViewDetails = (delivery: typeof MOCK_DELIVERIES[0]) => {
+        setSelectedDelivery(delivery);
+        setIsDetailsOpen(true);
+    };
+
+    const handleAddCashRecord = () => {
+        if (!newCashRecord.staff || !newCashRecord.toCollect) {
+            toast.error('Please fill required fields');
+            return;
+        }
+        toast.success('Cash record added successfully');
+        setIsAddCashOpen(false);
+        setNewCashRecord({ staff: '', toCollect: '', received: '', credits: '', expenses: '' });
     };
 
     return (
@@ -222,511 +452,631 @@ const SalesManagement: React.FC = () => {
                     </div>
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Sales Management</h1>
-                        <p className="text-muted-foreground">Manage line staff, routes, and deliveries</p>
+                        <p className="text-muted-foreground">Manage deliveries and cash collections</p>
                     </div>
                 </div>
-                <Dialog open={isAddModalOpen} onOpenChange={setIsAddModalOpen}>
-                    <DialogTrigger asChild>
-                        <Button>
-                            <Plus className="h-4 w-4 mr-2" />
-                            Add Staff
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Add Line Staff</DialogTitle>
-                            <DialogDescription>Create a new sales/line staff account</DialogDescription>
-                        </DialogHeader>
-                        <div className="grid gap-4 py-4">
-                            <div className="space-y-2">
-                                <Label>Full Name</Label>
-                                <Input placeholder="Enter full name" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Email</Label>
-                                <Input type="email" placeholder="Enter email" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Phone</Label>
-                                <Input placeholder="+91 98765 43210" />
-                            </div>
-                            <div className="space-y-2">
-                                <Label>Assign Route</Label>
-                                <Select value={selectedRoute} onValueChange={setSelectedRoute}>
-                                    <SelectTrigger>
-                                        <SelectValue />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {ROUTES.map(route => (
-                                            <SelectItem key={route.id} value={route.id}>
-                                                <div className="flex items-center gap-2">
-                                                    <MapPin className="h-4 w-4" />
-                                                    {route.label}
-                                                </div>
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-                        </div>
-                        <DialogFooter>
-                            <Button variant="outline" onClick={() => setIsAddModalOpen(false)}>Cancel</Button>
-                            <Button onClick={() => { toast.success('Staff created'); setIsAddModalOpen(false); }}>
-                                Create Staff
-                            </Button>
-                        </DialogFooter>
-                    </DialogContent>
-                </Dialog>
             </div>
 
-            {/* Stats Grid */}
-            <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
-                <Card>
-                    <CardContent className="pt-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <div className="text-2xl font-bold">{activeStaff}/{totalStaff}</div>
-                                <p className="text-xs text-muted-foreground">Active Staff</p>
-                            </div>
-                            <Users className="h-8 w-8 text-muted-foreground opacity-50" />
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="pt-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <div className="text-2xl font-bold text-green-600">{totalCompletedToday}/{totalDeliveriesToday}</div>
-                                <p className="text-xs text-muted-foreground">Deliveries Today</p>
-                            </div>
-                            <Package className="h-8 w-8 text-muted-foreground opacity-50" />
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="pt-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <div className="text-2xl font-bold">₹{totalCashCollected.toLocaleString()}</div>
-                                <p className="text-xs text-muted-foreground">Cash Collected</p>
-                            </div>
-                            <Wallet className="h-8 w-8 text-muted-foreground opacity-50" />
-                        </div>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="pt-4">
-                        <div className="flex items-center justify-between">
-                            <div>
-                                <div className="text-2xl font-bold text-orange-600">₹{totalPendingDeposit.toLocaleString()}</div>
-                                <p className="text-xs text-muted-foreground">Pending Deposit</p>
-                            </div>
-                            <Clock className="h-8 w-8 text-muted-foreground opacity-50" />
-                        </div>
-                    </CardContent>
-                </Card>
-            </div>
-
-            {/* Main Tabs */}
-            <Tabs defaultValue="members" className="space-y-6">
-                <TabsList className="grid w-full grid-cols-5 h-14 p-1">
-                    <TabsTrigger value="members" className="h-12 text-sm gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        <Users className="h-4 w-4" />
-                        <span className="hidden sm:inline">Staff</span>
-                    </TabsTrigger>
+            {/* Main Tabs - Only 2 tabs now */}
+            <Tabs defaultValue="deliveries" className="space-y-6">
+                <TabsList className="grid w-full grid-cols-2 h-14 p-1">
                     <TabsTrigger value="deliveries" className="h-12 text-sm gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                         <Truck className="h-4 w-4" />
-                        <span className="hidden sm:inline">Deliveries</span>
+                        <span>Deliveries</span>
                     </TabsTrigger>
                     <TabsTrigger value="cash" className="h-12 text-sm gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
                         <Wallet className="h-4 w-4" />
-                        <span className="hidden sm:inline">Cash</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="settings" className="h-12 text-sm gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        <Settings className="h-4 w-4" />
-                        <span className="hidden sm:inline">Settings</span>
-                    </TabsTrigger>
-                    <TabsTrigger value="activity" className="h-12 text-sm gap-1.5 data-[state=active]:bg-primary data-[state=active]:text-primary-foreground">
-                        <Activity className="h-4 w-4" />
-                        <span className="hidden sm:inline">Activity</span>
+                        <span>Cash</span>
                     </TabsTrigger>
                 </TabsList>
 
-                {/* Staff Tab */}
-                <TabsContent value="members" className="space-y-4">
+                {/* ========== DELIVERIES TAB ========== */}
+                <TabsContent value="deliveries" className="space-y-4">
+                    {/* Stats */}
+                    <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+                        <Card>
+                            <CardContent className="pt-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-2xl font-bold text-amber-600">{pendingDeliveries}</div>
+                                        <p className="text-xs text-muted-foreground">Pending</p>
+                                    </div>
+                                    <Clock className="h-8 w-8 text-muted-foreground opacity-50" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent className="pt-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-2xl font-bold text-blue-600">{inTransitDeliveries}</div>
+                                        <p className="text-xs text-muted-foreground">In Transit</p>
+                                    </div>
+                                    <Truck className="h-8 w-8 text-muted-foreground opacity-50" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent className="pt-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-2xl font-bold text-green-600">{deliveredCount}</div>
+                                        <p className="text-xs text-muted-foreground">Delivered</p>
+                                    </div>
+                                    <CheckCircle className="h-8 w-8 text-muted-foreground opacity-50" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent className="pt-4">
+                                <div className="flex items-center justify-between">
+                                    <div>
+                                        <div className="text-2xl font-bold text-red-600">{returnedCount}</div>
+                                        <p className="text-xs text-muted-foreground">Returns</p>
+                                    </div>
+                                    <AlertTriangle className="h-8 w-8 text-muted-foreground opacity-50" />
+                                </div>
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Filters */}
                     <div className="flex flex-col sm:flex-row gap-4">
-                        <div className="relative flex-1">
+                        <div className="relative w-full sm:w-[250px]">
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                             <Input
-                                placeholder="Search staff..."
+                                placeholder="Search orders..."
                                 className="pl-9"
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                             />
                         </div>
+                        <div className="flex items-center gap-2">
+                            <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                        </div>
                         <div className="flex gap-2 flex-wrap">
                             <Button
-                                variant={routeFilter === 'all' ? 'default' : 'outline'}
+                                variant={statusFilter === 'all' ? 'default' : 'outline'}
                                 size="sm"
-                                onClick={() => setRouteFilter('all')}
+                                onClick={() => setStatusFilter('all')}
                             >
-                                All ({totalStaff})
+                                All
                             </Button>
-                            {ROUTES.map(route => (
-                                <Button
-                                    key={route.id}
-                                    variant={routeFilter === route.id ? 'default' : 'outline'}
-                                    size="sm"
-                                    onClick={() => setRouteFilter(route.id)}
-                                >
-                                    <MapPin className="h-3 w-3 mr-1" />
-                                    {route.label}
-                                </Button>
-                            ))}
+                            <Button
+                                variant={statusFilter === 'pending' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setStatusFilter('pending')}
+                            >
+                                Pending
+                            </Button>
+                            <Button
+                                variant={statusFilter === 'in-transit' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setStatusFilter('in-transit')}
+                            >
+                                In Transit
+                            </Button>
+                            <Button
+                                variant={statusFilter === 'delivered' ? 'default' : 'outline'}
+                                size="sm"
+                                onClick={() => setStatusFilter('delivered')}
+                            >
+                                Delivered
+                            </Button>
                         </div>
                     </div>
 
-                    <div className="space-y-3">
-                        {filteredStaff.map((staff) => (
-                            <Card key={staff.id} className="hover:bg-muted/50 transition-colors">
-                                <CardContent className="p-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-4">
-                                            <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                                                <Truck className="h-6 w-6 text-primary" />
-                                            </div>
-                                            <div>
-                                                <div className="flex items-center gap-2 flex-wrap">
-                                                    <p className="font-semibold">{staff.name}</p>
-                                                    {getRouteBadge(staff.assignedRoute)}
-                                                    {staff.status === 'active' ? (
-                                                        <Badge variant="outline" className="text-green-600 border-green-300 text-xs">Active</Badge>
-                                                    ) : (
-                                                        <Badge variant="outline" className="text-orange-500 border-orange-300 text-xs">Inactive</Badge>
-                                                    )}
-                                                </div>
-                                                <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground flex-wrap">
-                                                    <span className="flex items-center gap-1">
-                                                        <Mail className="h-3 w-3" />
-                                                        {staff.email}
-                                                    </span>
-                                                    <span className="hidden sm:flex items-center gap-1">
-                                                        <Phone className="h-3 w-3" />
-                                                        {staff.phone}
-                                                    </span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div className="flex items-center gap-4">
-                                            <div className="text-right hidden md:block">
-                                                <p className="text-sm font-semibold flex items-center justify-end gap-1">
-                                                    <CheckCircle className="h-4 w-4 text-green-600" />
-                                                    {staff.todayCompleted}/{staff.todayDeliveries} today
-                                                </p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    ₹{staff.cashCollected.toLocaleString()} collected
-                                                </p>
-                                            </div>
-                                            <DropdownMenu>
-                                                <DropdownMenuTrigger asChild>
-                                                    <Button variant="ghost" size="icon">
-                                                        <MoreVertical className="h-4 w-4" />
-                                                    </Button>
-                                                </DropdownMenuTrigger>
-                                                <DropdownMenuContent align="end">
-                                                    <DropdownMenuItem>
-                                                        <Eye className="h-4 w-4 mr-2" />
-                                                        View Details
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <Edit className="h-4 w-4 mr-2" />
-                                                        Edit
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuItem>
-                                                        <Route className="h-4 w-4 mr-2" />
-                                                        Change Route
-                                                    </DropdownMenuItem>
-                                                    <DropdownMenuSeparator />
-                                                    {staff.status === 'active' ? (
-                                                        <DropdownMenuItem className="text-orange-600">
-                                                            <UserX className="h-4 w-4 mr-2" />
-                                                            Deactivate
-                                                        </DropdownMenuItem>
-                                                    ) : (
-                                                        <DropdownMenuItem className="text-green-600">
-                                                            <UserCheck className="h-4 w-4 mr-2" />
-                                                            Activate
-                                                        </DropdownMenuItem>
-                                                    )}
-                                                </DropdownMenuContent>
-                                            </DropdownMenu>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
-                    </div>
-                </TabsContent>
-
-                {/* Deliveries Tab */}
-                <TabsContent value="deliveries" className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <h3 className="text-lg font-semibold">Today's Deliveries</h3>
-                            <p className="text-sm text-muted-foreground">
-                                {MOCK_ADMIN_DELIVERIES.length} total • {pendingDeliveries} pending • {returns} returns
-                            </p>
-                        </div>
-                        <Button variant="outline">
-                            <Filter className="h-4 w-4 mr-2" />
-                            Filter
-                        </Button>
-                    </div>
-                    <div className="space-y-3">
-                        {MOCK_ADMIN_DELIVERIES.map((delivery) => (
-                            <Card key={delivery.id} className={delivery.status === 'returned' ? 'border-red-200 bg-red-50/50' : ''}>
-                                <CardContent className="p-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="flex items-center gap-3">
-                                            <div>
-                                                <div className="flex items-center gap-2">
-                                                    <span className="font-semibold">{delivery.id}</span>
+                    {/* Delivery Cards with Timeline Preview */}
+                    <div className="space-y-4">
+                        {filteredDeliveries.length === 0 ? (
+                            <div className="flex flex-col items-center justify-center py-12 text-center border-2 border-dashed rounded-lg border-muted-foreground/25">
+                                <div className="p-4 mb-4 rounded-full bg-muted">
+                                    <Truck className="w-8 h-8 text-muted-foreground" />
+                                </div>
+                                <h3 className="text-lg font-medium">No deliveries found</h3>
+                                <p className="text-sm text-muted-foreground mt-1">
+                                    No deliveries match your current filters and date range.
+                                </p>
+                            </div>
+                        ) : (
+                            filteredDeliveries.map((delivery) => (
+                                <Card key={delivery.id} className={`hover:shadow-md transition-shadow ${delivery.status === 'returned' ? 'border-red-200 bg-red-50/30' : ''
+                                    }`}>
+                                    <CardContent className="p-5">
+                                        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+                                            {/* Left Section: Order Info */}
+                                            <div className="flex-1">
+                                                <div className="flex items-center gap-2 flex-wrap mb-2">
+                                                    <span className="font-bold text-lg">{delivery.id}</span>
                                                     {getStatusBadge(delivery.status)}
                                                     {getRouteBadge(delivery.route)}
                                                 </div>
-                                                <p className="text-sm text-muted-foreground mt-1">
-                                                    {delivery.customer} • <span className="font-medium">{delivery.staff}</span>
+                                                <div className="flex items-center gap-2 mb-1">
+                                                    <Badge variant="outline" className="text-xs">{delivery.productType}</Badge>
+                                                    <span className="text-sm font-medium">{delivery.product}</span>
+                                                </div>
+                                                <div className="text-sm text-muted-foreground mt-2">
+                                                    <span className="font-medium">{delivery.partnerType === 'dealer' ? 'Dealer' : 'Customer'}:</span> {delivery.dealer}
+                                                </div>
+                                            </div>
+
+                                            {/* Middle Section: Progress */}
+                                            <div className="lg:w-64">
+                                                <div className="flex items-center justify-between mb-1">
+                                                    <span className="text-xs text-muted-foreground">Order Progress</span>
+                                                    <span className="text-sm font-semibold">{delivery.progress}%</span>
+                                                </div>
+                                                <Progress value={delivery.progress} className="h-2" />
+                                                <p className="text-xs text-muted-foreground mt-1">
+                                                    Staff: <span className="font-medium">{delivery.staff}</span>
                                                 </p>
                                             </div>
-                                        </div>
-                                        <div className="flex items-center gap-3">
-                                            <div className="text-right">
-                                                <p className="font-semibold">₹{delivery.amount.toLocaleString()}</p>
-                                                <p className="text-xs text-muted-foreground">{delivery.time}</p>
+
+                                            {/* Right Section: Amount & Actions */}
+                                            <div className="flex items-center gap-4">
+                                                <div className="text-right">
+                                                    <p className="text-xl font-bold">₹{delivery.amount.toLocaleString()}</p>
+                                                    <p className="text-xs text-muted-foreground">{delivery.date}</p>
+                                                </div>
+                                                <Button variant="outline" size="sm" onClick={() => handleViewDetails(delivery)}>
+                                                    <Eye className="h-4 w-4 mr-1" />
+                                                    View Details
+                                                </Button>
                                             </div>
-                                            <Button variant="ghost" size="icon">
-                                                <Eye className="h-4 w-4" />
-                                            </Button>
                                         </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ))}
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
                     </div>
                 </TabsContent>
 
-                {/* Cash Tab */}
+                {/* ========== CASH TAB ========== */}
                 <TabsContent value="cash" className="space-y-4">
-                    <div className="grid gap-4 grid-cols-3">
+                    {/* Date Filter & Add Record */}
+                    <div className="flex items-center justify-between flex-wrap gap-4">
+                        <div className="flex items-center gap-2">
+                            <Label>Date Range:</Label>
+                            <DatePickerWithRange date={dateRange} setDate={setDateRange} />
+                        </div>
+                        <div className="flex gap-2">
+                            <Button onClick={() => setIsAddCashOpen(true)}>
+                                <Plus className="h-4 w-4 mr-2" />
+                                Add Record
+                            </Button>
+                            <Button variant="outline">
+                                <Download className="h-4 w-4 mr-2" />
+                                Export
+                            </Button>
+                        </div>
+                    </div>
+
+                    {/* Cash Summary Cards */}
+                    <div className="grid gap-4 grid-cols-2 lg:grid-cols-5">
                         <Card>
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium">Total Collected</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-green-600">₹{totalCashCollected.toLocaleString()}</div>
-                                <p className="text-xs text-muted-foreground">From {activeStaff} active staff</p>
+                            <CardContent className="pt-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <DollarSign className="h-4 w-4 text-muted-foreground" />
+                                    <span className="text-xs text-muted-foreground">
+                                        To Collect
+                                    </span>
+                                </div>
+                                <div className="text-xl font-bold">₹{totalToCollect.toLocaleString()}</div>
                             </CardContent>
                         </Card>
                         <Card>
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium">Pending Deposit</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold text-orange-600">₹{totalPendingDeposit.toLocaleString()}</div>
-                                <p className="text-xs text-muted-foreground">To be verified</p>
+                            <CardContent className="pt-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <TrendingUp className="h-4 w-4 text-green-600" />
+                                    <span className="text-xs text-muted-foreground">
+                                        Received
+                                    </span>
+                                </div>
+                                <div className="text-xl font-bold text-green-600">₹{totalReceived.toLocaleString()}</div>
                             </CardContent>
                         </Card>
-                        <Card className="bg-primary/5">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-sm font-medium">Total Deposited</CardTitle>
-                            </CardHeader>
-                            <CardContent>
-                                <div className="text-2xl font-bold">₹{(totalCashCollected - totalPendingDeposit).toLocaleString()}</div>
-                                <p className="text-xs text-muted-foreground">Verified by finance</p>
+                        <Card>
+                            <CardContent className="pt-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <CreditCard className="h-4 w-4 text-blue-600" />
+                                    <span className="text-xs text-muted-foreground">Credits</span>
+                                </div>
+                                <div className="text-xl font-bold text-blue-600">₹{totalCredits.toLocaleString()}</div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent className="pt-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <Receipt className="h-4 w-4 text-orange-600" />
+                                    <span className="text-xs text-muted-foreground">Expenses</span>
+                                </div>
+                                <div className="text-xl font-bold text-orange-600">₹{totalExpenses.toLocaleString()}</div>
+                            </CardContent>
+                        </Card>
+                        <Card>
+                            <CardContent className="pt-4">
+                                <div className="flex items-center gap-2 mb-1">
+                                    <TrendingDown className="h-4 w-4 text-red-600" />
+                                    <span className="text-xs text-muted-foreground">Pending</span>
+                                </div>
+                                <div className="text-xl font-bold text-red-600">₹{totalPending.toLocaleString()}</div>
                             </CardContent>
                         </Card>
                     </div>
 
+                    {/* Cash Records Table */}
                     <Card>
                         <CardHeader>
-                            <div className="flex items-center justify-between">
-                                <CardTitle>Cash Records</CardTitle>
-                                <Button variant="outline" size="sm">
-                                    <Download className="h-3.5 w-3.5 mr-1" />
-                                    Export
-                                </Button>
-                            </div>
+                            <CardTitle>Cash Records</CardTitle>
                         </CardHeader>
                         <CardContent>
                             <Table>
                                 <TableHeader>
                                     <TableRow>
-                                        <TableHead>Date</TableHead>
                                         <TableHead>Staff</TableHead>
-                                        <TableHead>Collected</TableHead>
-                                        <TableHead>Expenses</TableHead>
-                                        <TableHead>Deposited</TableHead>
+                                        <TableHead className="text-right">To Collect</TableHead>
+                                        <TableHead className="text-right">Received</TableHead>
+                                        <TableHead className="text-right">Credits</TableHead>
+                                        <TableHead className="text-right">Expenses</TableHead>
+                                        <TableHead className="text-right">Pending</TableHead>
                                         <TableHead>Status</TableHead>
+                                        <TableHead></TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {MOCK_CASH_RECORDS.map((record) => (
-                                        <TableRow key={record.id}>
-                                            <TableCell>{record.date}</TableCell>
-                                            <TableCell className="font-medium">{record.staff}</TableCell>
-                                            <TableCell className="text-green-600">₹{record.collected.toLocaleString()}</TableCell>
-                                            <TableCell className="text-orange-600">₹{record.expenses.toLocaleString()}</TableCell>
-                                            <TableCell>₹{record.deposited.toLocaleString()}</TableCell>
-                                            <TableCell>
-                                                {record.verified ? (
-                                                    <Badge className="bg-green-100 text-green-700">
-                                                        <CheckCircle className="h-3 w-3 mr-1" />
-                                                        Verified
-                                                    </Badge>
-                                                ) : (
-                                                    <Badge className="bg-amber-100 text-amber-700">
-                                                        <Clock className="h-3 w-3 mr-1" />
-                                                        Pending
-                                                    </Badge>
-                                                )}
+                                    {cashRecords.length === 0 ? (
+                                        <TableRow>
+                                            <TableCell colSpan={8} className="h-32 text-center">
+                                                <div className="flex flex-col items-center justify-center text-muted-foreground">
+                                                    <Wallet className="h-8 w-8 mb-2 opacity-20" />
+                                                    <p>No cash records found for this period</p>
+                                                </div>
                                             </TableCell>
                                         </TableRow>
-                                    ))}
+                                    ) : (
+                                        cashRecords.map((record) => (
+                                            <React.Fragment key={record.id}>
+                                                <TableRow
+                                                    className="cursor-pointer hover:bg-muted/50"
+                                                    onClick={() => setExpandedStaff(expandedStaff === record.id ? null : record.id)}
+                                                >
+                                                    <TableCell className="font-medium">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                                                <User className="h-4 w-4 text-primary" />
+                                                            </div>
+                                                            {record.staff}
+                                                        </div>
+                                                    </TableCell>
+                                                    <TableCell className="text-right">₹{record.toCollect.toLocaleString()}</TableCell>
+                                                    <TableCell className="text-right text-green-600 font-medium">₹{record.received.toLocaleString()}</TableCell>
+                                                    <TableCell className="text-right text-blue-600">₹{record.credits.toLocaleString()}</TableCell>
+                                                    <TableCell className="text-right text-orange-600">₹{record.expenses.toLocaleString()}</TableCell>
+                                                    <TableCell className="text-right text-red-600 font-medium">₹{record.pending.toLocaleString()}</TableCell>
+                                                    <TableCell>
+                                                        {record.verified ? (
+                                                            <Badge className="bg-green-100 text-green-700">
+                                                                <CheckCircle className="h-3 w-3 mr-1" />
+                                                                Verified
+                                                            </Badge>
+                                                        ) : (
+                                                            <Badge className="bg-amber-100 text-amber-700">
+                                                                <Clock className="h-3 w-3 mr-1" />
+                                                                Pending
+                                                            </Badge>
+                                                        )}
+                                                    </TableCell>
+                                                    <TableCell>
+                                                        <Button variant="ghost" size="icon">
+                                                            {expandedStaff === record.id ? (
+                                                                <ChevronUp className="h-4 w-4" />
+                                                            ) : (
+                                                                <ChevronDown className="h-4 w-4" />
+                                                            )}
+                                                        </Button>
+                                                    </TableCell>
+                                                </TableRow>
+
+                                                {/* Expanded Delivery Details */}
+                                                {expandedStaff === record.id && (
+                                                    <TableRow>
+                                                        <TableCell colSpan={8} className="bg-muted/30 p-4">
+                                                            <div className="space-y-4">
+                                                                {/* Expense Breakdown */}
+                                                                <div>
+                                                                    <h4 className="font-semibold text-sm mb-3">Expense Breakdown</h4>
+                                                                    <div className="flex flex-wrap gap-3">
+                                                                        {record.expenseBreakdown.map((exp, idx) => (
+                                                                            <div key={idx} className="flex items-center gap-2 px-3 py-2 bg-orange-50 border border-orange-200 rounded-lg">
+                                                                                <Badge className={
+                                                                                    exp.type === 'salary' ? 'bg-purple-100 text-purple-700' :
+                                                                                        exp.type === 'fuel' ? 'bg-amber-100 text-amber-700' :
+                                                                                            exp.type === 'food' ? 'bg-green-100 text-green-700' :
+                                                                                                exp.type === 'travel' ? 'bg-blue-100 text-blue-700' :
+                                                                                                    'bg-gray-100 text-gray-700'
+                                                                                }>
+                                                                                    {exp.type}
+                                                                                </Badge>
+                                                                                <span className="text-sm">{exp.description}</span>
+                                                                                <span className="font-bold text-orange-700">₹{exp.amount}</span>
+                                                                            </div>
+                                                                        ))}
+                                                                        <div className="flex items-center gap-2 px-3 py-2 bg-orange-100 border border-orange-300 rounded-lg">
+                                                                            <span className="text-sm font-medium">Total Expenses:</span>
+                                                                            <span className="font-bold text-orange-700">₹{record.expenses.toLocaleString()}</span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+
+                                                                {/* Delivery Details Table */}
+                                                                <div>
+                                                                    <h4 className="font-semibold text-sm mb-3">Delivery Details for {record.staff}</h4>
+                                                                    <div className="bg-background rounded-lg border overflow-hidden">
+                                                                        <table className="w-full text-sm">
+                                                                            <thead className="bg-muted">
+                                                                                <tr>
+                                                                                    <th className="text-left p-3 font-medium">Order</th>
+                                                                                    <th className="text-left p-3 font-medium">Customer</th>
+                                                                                    <th className="text-right p-3 font-medium">To Collect</th>
+                                                                                    <th className="text-right p-3 font-medium">Received</th>
+                                                                                    <th className="text-right p-3 font-medium">Credit</th>
+                                                                                    <th className="text-right p-3 font-medium">Pending</th>
+                                                                                    <th className="text-center p-3 font-medium">Mode</th>
+                                                                                    <th className="text-center p-3 font-medium">Status</th>
+                                                                                </tr>
+                                                                            </thead>
+                                                                            <tbody>
+                                                                                {record.deliveries.map((delivery, idx) => (
+                                                                                    <tr key={delivery.orderId} className={idx % 2 === 0 ? '' : 'bg-muted/30'}>
+                                                                                        <td className="p-3">
+                                                                                            <Badge variant="outline">{delivery.orderId}</Badge>
+                                                                                        </td>
+                                                                                        <td className="p-3 font-medium">{delivery.customer}</td>
+                                                                                        <td className="p-3 text-right">₹{delivery.toCollect.toLocaleString()}</td>
+                                                                                        <td className="p-3 text-right text-green-600 font-medium">₹{delivery.received.toLocaleString()}</td>
+                                                                                        <td className="p-3 text-right text-blue-600">{delivery.credit > 0 ? `₹${delivery.credit.toLocaleString()}` : '-'}</td>
+                                                                                        <td className="p-3 text-right text-red-600 font-medium">{delivery.pending > 0 ? `₹${delivery.pending.toLocaleString()}` : '-'}</td>
+                                                                                        <td className="p-3 text-center">
+                                                                                            <Badge className={
+                                                                                                delivery.paymentMode === 'cash' ? 'bg-green-100 text-green-700' :
+                                                                                                    delivery.paymentMode === 'credit' ? 'bg-blue-100 text-blue-700' :
+                                                                                                        'bg-purple-100 text-purple-700'
+                                                                                            }>
+                                                                                                {delivery.paymentMode}
+                                                                                            </Badge>
+                                                                                        </td>
+                                                                                        <td className="p-3 text-center">
+                                                                                            {delivery.status === 'collected' ? (
+                                                                                                <CheckCircle className="h-4 w-4 text-green-600 mx-auto" />
+                                                                                            ) : delivery.status === 'failed' ? (
+                                                                                                <X className="h-4 w-4 text-red-600 mx-auto" />
+                                                                                            ) : (
+                                                                                                <Clock className="h-4 w-4 text-amber-600 mx-auto" />
+                                                                                            )}
+                                                                                        </td>
+                                                                                    </tr>
+                                                                                ))}
+                                                                            </tbody>
+                                                                        </table>
+                                                                    </div>
+                                                                </div>
+                                                            </div>
+                                                        </TableCell>
+                                                    </TableRow>
+                                                )}
+                                            </React.Fragment>
+                                        ))
+                                    )}
                                 </TableBody>
                             </Table>
                         </CardContent>
                     </Card>
-                </TabsContent>
+                </TabsContent >
+            </Tabs >
 
-                {/* Settings Tab */}
-                <TabsContent value="settings" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Sales Settings</CardTitle>
-                        </CardHeader>
-                        <CardContent className="space-y-6">
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div className="space-y-2">
-                                    <Label>Daily Salary Advance Limit (₹)</Label>
-                                    <Input
-                                        type="number"
-                                        value={settings.salaryAdvanceLimit}
-                                        onChange={(e) => setSettings({ ...settings, salaryAdvanceLimit: parseInt(e.target.value) })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Daily Fuel Allowance (₹)</Label>
-                                    <Input
-                                        type="number"
-                                        value={settings.fuelAllowance}
-                                        onChange={(e) => setSettings({ ...settings, fuelAllowance: parseInt(e.target.value) })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Cash Deposit Deadline (PM)</Label>
-                                    <Input
-                                        type="number"
-                                        value={settings.cashDepositDeadline}
-                                        onChange={(e) => setSettings({ ...settings, cashDepositDeadline: parseInt(e.target.value) })}
-                                    />
-                                </div>
-                                <div className="space-y-2">
-                                    <Label>Delivery Commission (₹)</Label>
-                                    <Input
-                                        type="number"
-                                        value={settings.deliveryCommission}
-                                        onChange={(e) => setSettings({ ...settings, deliveryCommission: parseInt(e.target.value) })}
-                                    />
-                                </div>
-                            </div>
-                            <div className="space-y-3">
-                                <div className="flex items-center justify-between p-3 rounded-lg border">
+            {/* ========== ORDER DETAILS POPUP ========== */}
+            < Dialog open={isDetailsOpen} onOpenChange={setIsDetailsOpen} >
+                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+                    {selectedDelivery && (
+                        <>
+                            <DialogHeader>
+                                <DialogTitle className="flex items-center gap-2">
+                                    {selectedDelivery.id}
+                                    {getStatusBadge(selectedDelivery.status)}
+                                </DialogTitle>
+                                <DialogDescription>
+                                    Order details and timeline
+                                </DialogDescription>
+                            </DialogHeader>
+
+                            <div className="space-y-6 py-4">
+                                {/* Order Info */}
+                                <div className="grid grid-cols-2 gap-4">
                                     <div>
-                                        <Label>Enable GPS Tracking</Label>
-                                        <p className="text-xs text-muted-foreground">Track staff location during deliveries</p>
+                                        <Label className="text-xs text-muted-foreground">Product</Label>
+                                        <p className="font-medium">{selectedDelivery.product}</p>
                                     </div>
-                                    <Switch
-                                        checked={settings.enableGPS}
-                                        onCheckedChange={(checked) => setSettings({ ...settings, enableGPS: checked })}
-                                    />
-                                </div>
-                                <div className="flex items-center justify-between p-3 rounded-lg border">
                                     <div>
-                                        <Label>Auto-Assign Routes</Label>
-                                        <p className="text-xs text-muted-foreground">Automatically assign orders to nearest staff</p>
+                                        <Label className="text-xs text-muted-foreground">Quantity</Label>
+                                        <p className="font-medium">{selectedDelivery.quantity}</p>
                                     </div>
-                                    <Switch
-                                        checked={settings.autoAssignRoute}
-                                        onCheckedChange={(checked) => setSettings({ ...settings, autoAssignRoute: checked })}
-                                    />
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">{selectedDelivery.partnerType === 'dealer' ? 'Dealer' : 'Customer'}</Label>
+                                        <p className="font-medium">{selectedDelivery.dealer}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Email</Label>
+                                        <p className="font-medium">{selectedDelivery.dealerEmail}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Amount</Label>
+                                        <p className="font-bold text-lg">₹{selectedDelivery.amount.toLocaleString()}</p>
+                                    </div>
+                                    <div>
+                                        <Label className="text-xs text-muted-foreground">Order Date</Label>
+                                        <p className="font-medium">{selectedDelivery.date}</p>
+                                    </div>
                                 </div>
-                            </div>
-                            <Button onClick={handleSaveSettings}>
-                                <Save className="h-4 w-4 mr-2" />
-                                Save Settings
-                            </Button>
-                        </CardContent>
-                    </Card>
 
-                    {/* Route Management */}
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Route Management</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-                                {ROUTES.map(route => {
-                                    const staffCount = MOCK_SALES_STAFF.filter(s => s.assignedRoute === route.id).length;
-                                    return (
-                                        <Card key={route.id} className="text-center">
-                                            <CardContent className="pt-4 pb-3">
-                                                <Badge className={`mb-2 ${route.color}`}>{route.label}</Badge>
-                                                <p className="text-2xl font-bold">{staffCount}</p>
-                                                <p className="text-xs text-muted-foreground">Staff assigned</p>
-                                            </CardContent>
-                                        </Card>
-                                    );
-                                })}
-                            </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
+                                {/* Progress */}
+                                <div>
+                                    <div className="flex items-center justify-between mb-2">
+                                        <span className="text-sm font-medium">Order Progress</span>
+                                        <span className="text-sm font-bold">{selectedDelivery.progress}%</span>
+                                    </div>
+                                    <Progress value={selectedDelivery.progress} className="h-3" />
+                                </div>
 
-                {/* Activity Tab */}
-                <TabsContent value="activity" className="space-y-4">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>Recent Activity</CardTitle>
-                        </CardHeader>
-                        <CardContent>
-                            <div className="space-y-4">
-                                {MOCK_ACTIVITY.map((activity) => (
-                                    <div key={activity.id} className="flex items-start gap-4 p-3 rounded-lg border">
-                                        <div className={`p-2 rounded-full ${activity.action.includes('Completed') ? 'bg-green-100' :
-                                                activity.action.includes('Return') ? 'bg-red-100' :
-                                                    activity.action.includes('Deposited') ? 'bg-blue-100' :
-                                                        'bg-muted'
-                                            }`}>
-                                            {activity.action.includes('Completed') ? <CheckCircle className="h-4 w-4 text-green-600" /> :
-                                                activity.action.includes('Return') ? <Undo2 className="h-4 w-4 text-red-600" /> :
-                                                    activity.action.includes('Deposited') ? <Wallet className="h-4 w-4 text-blue-600" /> :
-                                                        <Activity className="h-4 w-4" />}
-                                        </div>
-                                        <div className="flex-1">
-                                            <div className="flex items-center justify-between">
-                                                <p className="font-medium">{activity.action}</p>
-                                                <span className="text-xs text-muted-foreground">{activity.time}</span>
+                                {/* Timeline */}
+                                <div>
+                                    <h4 className="font-semibold mb-4">Order Timeline</h4>
+                                    <div className="space-y-4">
+                                        {selectedDelivery.timeline.map((step, index) => (
+                                            <div key={step.id} className="flex gap-4">
+                                                {/* Timeline connector */}
+                                                <div className="flex flex-col items-center">
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${step.status === 'completed' ? 'bg-green-100 text-green-700' :
+                                                        step.status === 'in-progress' ? 'bg-blue-100 text-blue-700' :
+                                                            'bg-muted text-muted-foreground'
+                                                        }`}>
+                                                        {getRoleIcon(step.role)}
+                                                    </div>
+                                                    {index < selectedDelivery.timeline.length - 1 && (
+                                                        <div className={`w-0.5 flex-1 min-h-[24px] ${step.status === 'completed' ? 'bg-green-300' : 'bg-muted'
+                                                            }`} />
+                                                    )}
+                                                </div>
+
+                                                {/* Content */}
+                                                <div className="flex-1 pb-4">
+                                                    <div className="flex items-center gap-2 mb-1">
+                                                        <span className="font-semibold">{step.stage}</span>
+                                                        {step.status === 'completed' && (
+                                                            <CheckCircle className="h-4 w-4 text-green-600" />
+                                                        )}
+                                                        {step.status === 'in-progress' && (
+                                                            <Badge className="bg-blue-100 text-blue-700 text-xs">In Progress</Badge>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-sm text-muted-foreground">
+                                                        <span className="font-medium">{step.role}</span>
+                                                        {step.person && <span> — {step.person}</span>}
+                                                        {step.action && <span> — {step.action}</span>}
+                                                    </div>
+                                                    {step.date && (
+                                                        <div className="text-xs text-muted-foreground mt-1">
+                                                            {step.date} {step.time}
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </div>
-                                            <p className="text-sm text-muted-foreground">{activity.staff} • {activity.details}</p>
-                                        </div>
+                                        ))}
                                     </div>
-                                ))}
+                                </div>
                             </div>
-                        </CardContent>
-                    </Card>
-                </TabsContent>
-            </Tabs>
-        </div>
+
+                            <DialogFooter>
+                                <Button variant="outline" onClick={() => setIsDetailsOpen(false)}>
+                                    Close
+                                </Button>
+                            </DialogFooter>
+                        </>
+                    )}
+                </DialogContent>
+            </Dialog >
+
+            {/* ========== ADD CASH RECORD POPUP ========== */}
+            < Dialog open={isAddCashOpen} onOpenChange={setIsAddCashOpen} >
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Add Cash Record</DialogTitle>
+                        <DialogDescription>
+                            Enter cash collection details for a staff member
+                        </DialogDescription>
+                    </DialogHeader>
+
+                    <div className="grid gap-4 py-4">
+                        <div className="space-y-2">
+                            <Label>Staff Member *</Label>
+                            <Select
+                                value={newCashRecord.staff}
+                                onValueChange={(v) => setNewCashRecord({ ...newCashRecord, staff: v })}
+                            >
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select staff" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="rajan">Rajan Kumar</SelectItem>
+                                    <SelectItem value="suresh">Suresh Menon</SelectItem>
+                                    <SelectItem value="vijay">Vijay Nair</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>To Collect (₹) *</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="Expected amount"
+                                    value={newCashRecord.toCollect}
+                                    onChange={(e) => setNewCashRecord({ ...newCashRecord, toCollect: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Received (₹)</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="Actual received"
+                                    value={newCashRecord.received}
+                                    onChange={(e) => setNewCashRecord({ ...newCashRecord, received: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                                <Label>Credits (₹)</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="Credit amount"
+                                    value={newCashRecord.credits}
+                                    onChange={(e) => setNewCashRecord({ ...newCashRecord, credits: e.target.value })}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label>Expenses (₹)</Label>
+                                <Input
+                                    type="number"
+                                    placeholder="Expense amount"
+                                    value={newCashRecord.expenses}
+                                    onChange={(e) => setNewCashRecord({ ...newCashRecord, expenses: e.target.value })}
+                                />
+                            </div>
+                        </div>
+                        <div className="p-3 bg-muted rounded-lg">
+                            <div className="flex justify-between text-sm">
+                                <span className="text-muted-foreground">Balance (Pending):</span>
+                                <span className="font-bold">
+                                    ₹{(
+                                        (parseFloat(newCashRecord.toCollect) || 0) -
+                                        (parseFloat(newCashRecord.received) || 0) -
+                                        (parseFloat(newCashRecord.credits) || 0)
+                                    ).toLocaleString()}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsAddCashOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button onClick={handleAddCashRecord}>
+                            Add Record
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog >
+        </div >
     );
 };
 
